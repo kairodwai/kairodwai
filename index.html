@@ -65,6 +65,7 @@ header p{margin:0;font-size:14px}
 .card p{margin:0;color:var(--ink-2)}
 .err{background:var(--err-soft);color:var(--err);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 input[type=file]{display:none}
+.ghost{height:48px;padding:0 24px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}.ph .spin::after{animation:none}}
 </style>
 </head>
@@ -91,7 +92,8 @@ input[type=file]{display:none}
 <div id="doneView" hidden><div class="wrap screen"><div class="card">
   <div class="big"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h2>ส่งรูปครบแล้ว</h2>
-  <p>ทีมได้รับรูปแล้ว จะประเมินราคาแล้วตอบกลับในแชทไลน์ ปิดหน้านี้เพื่อกลับไปที่แชทได้เลย</p>
+  <p>ทีมได้รับรูปแล้ว จะประเมินราคาแล้วตอบกลับในแชทไลน์</p>
+  <button class="ghost" id="closeBtn" type="button">กลับไปที่แชท</button>
 </div></div></div>
 
 <div id="badView" hidden><div class="wrap screen"><div class="card">
@@ -104,7 +106,9 @@ input[type=file]{display:none}
 
 <input type="file" id="picker" accept="image/*">
 
+<script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
+const LIFF_ID = '2012318037-jsPlMLnr';
 const API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
 const SLOTS = [
   {lbl:'ด้านหน้ารถ (เฉียง)', hint:'ยืนมุมหน้ารถ ให้เห็นหน้า+ข้าง'},
@@ -118,7 +122,7 @@ const SLOTS = [
 const G = [[460.66,19.05,23.00,2.235],[474.94,80.69,23.00,2.168],[337.75,15.85,45.42,3.019],[522.77,79.96,45.42,1.950],[421.68,18.24,67.41,2.517],[542.41,79.71,67.55,1.917],[538.09,20.24,89.89,1.933]];
 SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัวอย่างแต่ละมุมในรูปไกด์
 const REQ = SLOTS.filter(s => !s.opt).length;
-const token = new URLSearchParams(location.search).get('t') || '';
+let token = new URLSearchParams(location.search).get('t') || '';
 const st = SLOTS.map(() => ({ preview:null, state:'empty' })); // empty | up | done | fail
 const data = SLOTS.map(() => null);
 let current = -1;
@@ -195,6 +199,8 @@ $('picker').onchange = async () => {
   if (next >= 0) setTimeout(() => $('slot' + (next + 1)).scrollIntoView({ behavior:'smooth', block:'center' }), 50);
 };
 
+$('closeBtn').onclick = () => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); else history.back(); } catch (e) {} };
+
 $('sendBtn').onclick = async () => {
   const btn = $('sendBtn'); btn.disabled = true; btn.textContent = 'กำลังส่ง...'; $('sendErr').hidden = true;
   try {
@@ -209,6 +215,15 @@ $('sendBtn').onclick = async () => {
 };
 
 (async () => {
+  // เปิดจากปุ่มเมนูในไลน์: ยืนยันตัวลูกค้าผ่าน LINE แล้วขอลิงก์ส่งรูปของคนนี้
+  if (!token && window.liff) {
+    try {
+      await liff.init({ liffId: LIFF_ID });
+      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+      const r = await post({ type:'start', idToken: liff.getIDToken() });
+      if (r && r.ok) token = r.t;
+    } catch (e) {}
+  }
   if (!/^[a-f0-9]{20}$/.test(token)) { show('badView'); return; }
   try {
     const r = await fetch(API + '?t=' + token).then(x => x.json());
