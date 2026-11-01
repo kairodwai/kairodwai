@@ -48,7 +48,7 @@ header p{margin:0;font-size:14px}
 .slot.done .hint{color:var(--green-d);font-weight:500}
 .slot.fail{border:1.5px solid var(--err)}
 .slot.fail .hint{color:var(--err);font-weight:500}
-.send{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.send{position:fixed;z-index:10;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 .send .wrap{padding-block:12px;display:grid;gap:6px}
 .send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer}
 .send button:disabled{background:#c9d2cd;cursor:not-allowed}
