@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex">
 <title>ส่งรูปรถ · ขายรถไว</title>
+<link rel="preconnect" href="https://script.google.com">
+<link rel="preconnect" href="https://script.googleusercontent.com">
+<link rel="preconnect" href="https://lh3.googleusercontent.com">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap">
 <style>
@@ -100,6 +103,7 @@ input[type=file]{display:none}
   <div class="big warn"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M12 7v6M12 17h.01"/></svg></div>
   <h2>ลิงก์นี้ใช้ไม่ได้</h2>
   <p>กลับไปที่แชทไลน์ ขายรถไว แล้วกดปุ่ม "ส่งรูปรถ" ในเมนูอีกครั้ง จะได้ลิงก์ใหม่</p>
+  <p id="badCode" style="font-size:11px;color:#9aa39e;word-break:break-all"></p>
 </div></div></div>
 
 <div id="loadView"><div class="wrap screen"><div class="card"><p>กำลังเปิด...</p></div></div></div>
@@ -183,7 +187,7 @@ let chain = Promise.resolve();
 function upload(i){
   st[i].state = 'up'; render();
   const b64 = data[i].split(',')[1];
-  chain = chain.then(() => post({ type:'photo', t:token, slot:i, data:b64 }))
+  chain = chain.then(() => tokenReady).then(() => post({ type:'photo', t:token, slot:i, data:b64 }))
     .then(r => { st[i].state = r && r.ok ? 'done' : 'fail'; if (r && r.err === 'link') show('badView'); })
     .catch(() => { st[i].state = 'fail'; })
     .then(render);
@@ -204,6 +208,7 @@ $('closeBtn').onclick = () => { try { if (window.liff && liff.isInClient()) liff
 $('sendBtn').onclick = async () => {
   const btn = $('sendBtn'); btn.disabled = true; btn.textContent = 'กำลังส่ง...'; $('sendErr').hidden = true;
   try {
+    await tokenReady;
     const r = await post({ type:'done', t:token });
     if (r && r.ok) { show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
@@ -214,23 +219,20 @@ $('sendBtn').onclick = async () => {
   }
 };
 
-(async () => {
-  // เปิดจากปุ่มเมนูในไลน์: ยืนยันตัวลูกค้าผ่าน LINE แล้วขอลิงก์ส่งรูปของคนนี้
-  if (!token && window.liff) {
-    try {
-      await liff.init({ liffId: LIFF_ID });
-      if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
-      const r = await post({ type:'start', idToken: liff.getIDToken() });
-      if (r && r.ok) token = r.t;
-    } catch (e) {}
-  }
-  if (!/^[a-f0-9]{20}$/.test(token)) { show('badView'); return; }
-  try {
-    const r = await fetch(API + '?t=' + token).then(x => x.json());
-    if (!r.ok) { show('badView'); return; }
-  } catch (e) { /* เปิดหน้าได้ก่อน ถ้าเน็ตช้า */ }
-  render(); show('app');
+// เปิดหน้าให้เห็นทันที แล้วค่อยยืนยันตัวลูกค้ากับ LINE อยู่เบื้องหลัง
+const tokenReady = (async () => {
+  if (token) return token;
+  if (!window.liff) throw new Error('nosdk');
+  await liff.init({ liffId: LIFF_ID });
+  if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); await new Promise(() => {}); }
+  const idt = liff.getIDToken();
+  if (!idt) throw new Error('noid');
+  const r = await post({ type:'start', idToken: idt });
+  if (!r || !r.ok) throw new Error('start ' + (r ? r.err + ' ' + (r.why || '') : 'null'));
+  return (token = r.t);
 })();
+tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
+render(); show('app');
 </script>
 </body>
 </html>
