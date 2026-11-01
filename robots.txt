@@ -1,0 +1,3 @@
+User-agent: *
+Disallow: /line/
+Sitemap: https://kairodwai.com/sitemap.xml
