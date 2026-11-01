@@ -39,7 +39,7 @@ header p{margin:0;font-size:14px}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ph svg{width:34px;height:34px}
 .ph.ex-on{background:#fff}
-.ex{width:84%;background-image:url(https://lh3.googleusercontent.com/d/1kvXI9UwoO6ejoNTjbwfWGEXXVojg6ivo);background-repeat:no-repeat}
+.ex{width:84%;background-image:url(https://lh3.googleusercontent.com/d/170Tdv5nW4v5skYLuCn9JyJC7p_MzUJaN);background-repeat:no-repeat}
 .tap{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center}
 .ph .tap svg{width:17px;height:17px}
 .ph .spin{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.55)}
@@ -75,20 +75,20 @@ input[type=file]{display:none}
 <body>
 <div id="app" hidden>
   <header><div class="wrap">
-    <h1>ถ่ายรูปรถ 7 มุม</h1>
+    <h1>ถ่ายรูปรถ 6 มุม</h1>
     <p>กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่ง ทีมประเมินราคาให้ฟรี</p>
   </div></header>
   <div class="wrap">
     <div class="prog">
-      <div class="prog-top"><b id="count">0/6 มุม</b><span id="left">เหลืออีก 6 มุม</span></div>
+      <div class="prog-top"><b id="count">0/5 มุม</b><span id="left">เหลืออีก 5 มุม</span></div>
       <div class="bar"><i id="barfill"></i></div>
     </div>
     <div class="err" id="sendErr" hidden></div>
     <div class="grid" id="grid"></div>
   </div>
   <div class="send"><div class="wrap">
-    <button id="sendBtn" disabled>ถ่ายให้ครบ 6 มุมก่อน</button>
-    <small>รูปที่ 7 รอย/ตำหนิ ไม่บังคับ ถ้าไม่มีข้ามได้เลย</small>
+    <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
+    <small>รูปที่ 6 รอย/ตำหนิ ไม่บังคับ ถ้าไม่มีข้ามได้เลย</small>
   </div></div>
 </div>
 
@@ -117,13 +117,12 @@ const API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-T
 const SLOTS = [
   {lbl:'ด้านหน้ารถ (เฉียง)', hint:'ยืนมุมหน้ารถ ให้เห็นหน้า+ข้าง'},
   {lbl:'ด้านหลังรถ (เฉียง)', hint:'ยืนมุมท้ายรถ ให้เห็นท้าย+ข้าง'},
-  {lbl:'ด้านข้าง ซ้าย-ขวา', hint:'ถ่ายตรงๆ ให้เห็นทั้งคัน'},
   {lbl:'ภายใน เบาะหน้า+คอนโซล', hint:'ถ่ายจากเบาะหลังมาข้างหน้า'},
   {lbl:'หน้าปัดเลขไมล์', hint:'ติดเครื่องก่อน ให้เห็นเลขชัด'},
   {lbl:'ห้องเครื่อง', hint:'เปิดฝากระโปรง ถ่ายจากด้านหน้า'},
   {lbl:'รอย/ตำหนิ', hint:'ถ้ามี ถ่ายใกล้ๆ ให้เห็นชัด', opt:true}
 ];
-const G = [[460.66,19.05,23.00,2.235],[474.94,80.69,23.00,2.168],[337.75,15.85,45.42,3.019],[522.77,79.96,45.42,1.950],[421.68,18.24,67.41,2.517],[542.41,79.71,67.55,1.917],[538.09,20.24,89.89,1.933]];
+const G = [[321.34,2.08,15.73,1.745],[325.42,49.81,16.53,1.723],[325.42,98.12,10.53,1.249],[326.81,1.88,89.74,1.119],[320,50,97.36,0.972],[326.81,97.94,89.58,1.146]];
 SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัวอย่างแต่ละมุมในรูปไกด์
 const REQ = SLOTS.filter(s => !s.opt).length;
 let token = new URLSearchParams(location.search).get('t') || '';
@@ -144,7 +143,7 @@ function render(){
     b.className = 'slot' + (x.state === 'done' ? ' done' : x.state === 'fail' ? ' fail' : '');
     const hint = x.state === 'done' ? 'ส่งแล้ว · กดเพื่อเปลี่ยนรูป' : x.state === 'up' ? 'กำลังส่งรูป...' : x.state === 'fail' ? 'ส่งไม่สำเร็จ · กดเพื่อลองใหม่' : s.hint;
     b.setAttribute('aria-label', (i+1) + ' ' + s.lbl + ' ' + hint);
-    b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
+    b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="width:' + Math.min(88, 82 * 0.75 * s.g[3]).toFixed(1) + '%;aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
       + '<div class="meta"><div class="lbl">' + s.lbl + '</div><div class="hint">' + hint + '</div></div>'
       + '<span class="num">' + (i+1) + '</span>' + (s.opt ? '<span class="opt">ถ้ามี</span>' : '');
     b.onclick = () => {
