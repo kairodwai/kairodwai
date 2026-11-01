@@ -143,7 +143,7 @@ function render(){
     b.className = 'slot' + (x.state === 'done' ? ' done' : x.state === 'fail' ? ' fail' : '');
     const hint = x.state === 'done' ? 'ส่งแล้ว · กดเพื่อเปลี่ยนรูป' : x.state === 'up' ? 'กำลังส่งรูป...' : x.state === 'fail' ? 'ส่งไม่สำเร็จ · กดเพื่อลองใหม่' : s.hint;
     b.setAttribute('aria-label', (i+1) + ' ' + s.lbl + ' ' + hint);
-    b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="width:' + Math.min(88, 82 * 0.75 * s.g[3]).toFixed(1) + '%;aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
+    b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="width:' + Math.min(80, 70 * 0.75 * s.g[3]).toFixed(1) + '%;aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
       + '<div class="meta"><div class="lbl">' + s.lbl + '</div><div class="hint">' + hint + '</div></div>'
       + '<span class="num">' + (i+1) + '</span>' + (s.opt ? '<span class="opt">ถ้ามี</span>' : '');
     b.onclick = () => {
