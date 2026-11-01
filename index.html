@@ -35,6 +35,10 @@ header p{margin:0;font-size:14px}
 .ph{position:relative;aspect-ratio:4/3;background:var(--green-soft);display:grid;place-items:center;color:var(--green-d)}
 .ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ph svg{width:34px;height:34px}
+.ph.ex-on{background:#fff}
+.ex{width:84%;background-image:url(https://lh3.googleusercontent.com/d/1kvXI9UwoO6ejoNTjbwfWGEXXVojg6ivo);background-repeat:no-repeat}
+.tap{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center}
+.ph .tap svg{width:17px;height:17px}
 .ph .spin{position:absolute;inset:0;display:grid;place-items:center;background:rgba(255,255,255,.55)}
 .ph .spin::after{content:"";width:28px;height:28px;border-radius:50%;border:3px solid var(--green);border-right-color:transparent;animation:r .8s linear infinite}
 @keyframes r{to{transform:rotate(360deg)}}
@@ -111,6 +115,8 @@ const SLOTS = [
   {lbl:'ห้องเครื่อง', hint:'เปิดฝากระโปรง ถ่ายจากด้านหน้า'},
   {lbl:'รอย/ตำหนิ', hint:'ถ้ามี ถ่ายใกล้ๆ ให้เห็นชัด', opt:true}
 ];
+const G = [[460.66,19.05,23.00,2.235],[474.94,80.69,23.00,2.168],[337.75,15.85,45.42,3.019],[522.77,79.96,45.42,1.950],[421.68,18.24,67.41,2.517],[542.41,79.71,67.55,1.917],[538.09,20.24,89.89,1.933]];
+SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัวอย่างแต่ละมุมในรูปไกด์
 const REQ = SLOTS.filter(s => !s.opt).length;
 const token = new URLSearchParams(location.search).get('t') || '';
 const st = SLOTS.map(() => ({ preview:null, state:'empty' })); // empty | up | done | fail
@@ -130,7 +136,7 @@ function render(){
     b.className = 'slot' + (x.state === 'done' ? ' done' : x.state === 'fail' ? ' fail' : '');
     const hint = x.state === 'done' ? 'ส่งแล้ว · กดเพื่อเปลี่ยนรูป' : x.state === 'up' ? 'กำลังส่งรูป...' : x.state === 'fail' ? 'ส่งไม่สำเร็จ · กดเพื่อลองใหม่' : s.hint;
     b.setAttribute('aria-label', (i+1) + ' ' + s.lbl + ' ' + hint);
-    b.innerHTML = '<div class="ph">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : cam) + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
+    b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
       + '<div class="meta"><div class="lbl">' + s.lbl + '</div><div class="hint">' + hint + '</div></div>'
       + '<span class="num">' + (i+1) + '</span>' + (s.opt ? '<span class="opt">ถ้ามี</span>' : '');
     b.onclick = () => {
