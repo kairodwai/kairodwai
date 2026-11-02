@@ -75,8 +75,8 @@ input[type=file]{display:none}
 <body>
 <div id="app" hidden>
   <header><div class="wrap">
-    <h1>ถ่ายรูปรถ 6 มุม</h1>
-    <p>กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่ง ทีมประเมินราคาให้ฟรี</p>
+    <h1 id="hdTitle">ถ่ายรูปรถ 6 มุม</h1>
+    <p id="hdSub">กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่ง ทีมประเมินราคาให้ฟรี</p>
   </div></header>
   <div class="wrap">
     <div class="prog">
@@ -126,6 +126,8 @@ const G = [[321.34,2.08,15.73,1.745],[325.42,49.81,16.53,1.723],[325.42,98.12,10
 SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัวอย่างแต่ละมุมในรูปไกด์
 const REQ = SLOTS.filter(s => !s.opt).length;
 let token = new URLSearchParams(location.search).get('t') || '';
+const REF = new URLSearchParams(location.search).get('ref') || '';   // มาจากเว็บ: หลังส่งครบพาไปคุยต่อในไลน์ทันที
+const LINE_URL = 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent('ส่งข้อมูลจากเว็บแล้ว รหัส ' + REF);
 const st = SLOTS.map(() => ({ preview:null, state:'empty' })); // empty | up | done | fail
 const data = SLOTS.map(() => null);
 let current = -1;
@@ -160,7 +162,7 @@ function render(){
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
   btn.disabled = got < REQ || busy;
-  btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
+  btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : (REF ? 'ส่งทั้งหมด แล้วคุยต่อในไลน์' : 'ส่งรูปให้ทีมประเมิน');
 }
 
 // ย่อรูปให้ด้านยาวไม่เกิน 1600px ส่งผ่านเน็ตมือถือได้เร็ว
@@ -209,7 +211,7 @@ $('sendBtn').onclick = async () => {
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
-    if (r && r.ok) { show('doneView'); return; }
+    if (r && r.ok) { if (REF) { btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
@@ -231,6 +233,11 @@ const tokenReady = (async () => {
   return (token = r.t);
 })();
 tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
+if (REF) {
+  $('hdTitle').textContent = 'ขั้นสุดท้าย เลือกรูปรถ 6 มุม';
+  $('hdSub').textContent = 'กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่งทีเดียว ระบบส่งข้อมูลรถ+รูปให้ทีม แล้วพาไปคุยต่อในไลน์';
+  const bad = document.querySelector('#badView p'); if (bad) bad.innerHTML = 'ลิงก์หมดอายุแล้ว <a href="/">กลับไปกรอกข้อมูลรถอีกครั้ง</a> หรือโทร <a href="tel:0914922662">091-492-2662</a>';
+}
 render(); show('app');
 </script>
 </body>

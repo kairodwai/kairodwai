@@ -218,18 +218,6 @@ def main():
 
 def build_line():
     s = open(os.path.join(SRC, 'line-page/index.html'), encoding='utf-8').read()
-    add = r'''
-// มาจากเว็บ (มีรหัส KR): หลังส่งครบ พาไปคุยต่อในไลน์แทนการปิดหน้า
-const REF = new URLSearchParams(location.search).get('ref') || '';
-if (REF) {
-  document.querySelector('#doneView p').textContent = 'ทีมได้รับรูปแล้ว จะโทรกลับพร้อมราคาภายใน 5 นาที (8:00–20:00) อยากคุยต่อในไลน์ก็กดด้านล่างได้เลย';
-  const b = $('closeBtn'); b.textContent = 'คุยต่อในไลน์'; b.style.borderColor = '#06C755'; b.style.color = '#05A647';
-  b.onclick = () => { location.href = 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent('ส่งข้อมูลจากเว็บแล้ว รหัส ' + REF); };
-  const bad = document.querySelector('#badView p'); if (bad) bad.innerHTML = 'ลิงก์หมดอายุแล้ว <a href="/">กลับไปกรอกข้อมูลรถอีกครั้ง</a> หรือโทร <a href="tel:0914922662">091-492-2662</a>';
-}
-'''
-    i = s.rindex('</script>')
-    s = s[:i] + add + s[i:]
     os.makedirs(os.path.join(OUT, 'line'), exist_ok=True)
     open(os.path.join(OUT, 'line/index.html'), 'w', encoding='utf-8').write(s)
 
