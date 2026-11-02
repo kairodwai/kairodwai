@@ -29,8 +29,9 @@ flow: gate "พร้อมขายรถตอนนี้ไหม?" → ฟ�
 events (site.js `track()`): ReadyToSell / NotReady (trackCustom), Lead เฉพาะกรอกฟอร์มจบ; fbq สำหรับชื่อมาตรฐาน (Lead, Contact, ViewContent, CompleteRegistration, SubmitApplication) ใช้ `track` ที่เหลือ `trackCustom`
 
 ## หลังบ้าน
-Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app v9) — URL อยู่ใน site.js
-saveLead คืน {ok,t,ref}; sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token); linkWebLead จับข้อความ "KR-" ใน LINE; finishPhotos ข้าม push สำหรับ lead จากเว็บ; saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้
+Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v10** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
+flow แจ้งทีม: saveLead เก็บเงียบ (ไม่แจ้ง) → รูปครบ (type done) แจ้งทีม 1 ข้อความแบบ "Kairodwai Lead : KR-xxxx / Details / Status / Call / Source / Photos" + สถานะชีท "รูปครบ รอโทร" → ลูกค้าส่ง "KR-xxxx" ในไลน์ (linkWebLead) → ตอบการ์ดสรุปให้ลูกค้า + แจ้งทีม "แอดไลน์แล้ว ชื่อไลน์ …"
+sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token); saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้; งานถัดไป: followUp() ตามลีดที่ค้างรูป (SMS 2 ชม. + วันถัดไป, แจ้งทีมโทรตาม)
 
 ## บั๊กที่รู้แล้ว
 site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
