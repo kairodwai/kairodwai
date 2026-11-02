@@ -28,7 +28,7 @@ LINE_SHEET = '''<sc-if value="{{ lineSheet }}" hint-placeholder-val="{{ false }}
 <div style="display: flex; align-items: center; gap: 12px; color: #06C755;">__SVG36__<h2 id="kr-sheet-t" style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.3; color: #141414;">แอดไลน์ได้หลังกรอกข้อมูลรถ</h2></div>
 <p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">กรอกข้อมูลรถ 3 ขั้นตอน ใช้เวลาไม่ถึง 1 นาที แล้วไลน์จะเปิดให้คุยกับทีมได้ทันที ทีมตอบราคาได้เลยไม่ต้องถามซ้ำ</p>
 <div style="display: flex; flex-direction: column; gap: 8px;">
-<button type="button" onClick="{{ sheetGo }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 17px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">กรอกข้อมูลรถ ใช้เวลา 1 นาที</button>
+<button type="button" onClick="{{ sheetGo }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 17px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">กรอกข้อมูลรถง่ายๆ เพียง 3 ขั้นตอน</button>
 <button type="button" onClick="{{ sheetClose }}" style="height: 44px; border: 0; background: transparent; font-family: inherit; font-size: 15px; font-weight: 500; color: #55534E; cursor: pointer;">ไว้ก่อน</button>
 </div>
 </div>
