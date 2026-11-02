@@ -18,8 +18,8 @@ body{margin:0;width:390px;background:#8CABD9;font-family:'Noto Sans Thai',Loma,s
 <div class="row"><div class="av"><img src="${logo}"></div><div class="bub">
   <div class="body"><div>คุณ mOs ต้องการจะขาย <b>Hyundai Kona Electric SEL ปี 2022 ไมล์ 50,000 – 60,000 กม.</b></div>
   <div class="sum">${sum}</div>
-  <div>อัพโหลดรูปรถของคุณ เพื่อให้ Admin ประเมินราคา</div></div>
-  <div class="foot"><div class="btn">อัพโหลดรูปรถของคุณ</div></div>
+  </div>
+  <div class="foot"><div class="btn">อัพโหลดรูปรถของคุณ เพื่อประเมินราคา</div></div>
 </div></div>
 <p class="t">การ์ดตอนรูปครบ</p>
 <div class="row"><div class="av"><img src="${logo}"></div><div class="bub">
