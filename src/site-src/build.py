@@ -269,6 +269,7 @@ def extras():
     shutil.copy(os.path.join(HERE, 'logo.png'), os.path.join(OUT, 'img/logo.png'))
     shutil.copy(os.path.join(HERE, 'logo-light.png'), os.path.join(OUT, 'img/logo-light.png'))
     shutil.copy(os.path.join(HERE, 'richmenu-wait.png'), os.path.join(OUT, 'img/richmenu-wait.png'))
+    shutil.copy(os.path.join(HERE, 'richmenu-lead.png'), os.path.join(OUT, 'img/richmenu-lead.png'))   # เมนูล่าง "รอรูปรถของคุณ | โทรหาเรา" (กรอกฟอร์มแล้ว ยังไม่ส่งรูป — setupLeadMenu)
     os.makedirs(os.path.join(OUT, 'go'), exist_ok=True)
     open(os.path.join(OUT, 'go/index.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'go.html'), encoding='utf-8').read().replace('__LIFF_WEB_ID__', LIFF_WEB_ID))   # ลิงก์โฆษณา kairodwai.com/go → เด้งเข้า LIFF (มือถือ) / เว็บธรรมดา (คอม)  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
