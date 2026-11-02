@@ -125,7 +125,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
 def common(body):
     body = body.replace('รูปรถ 4 มุม เลขไมล์ หน้าเล่มทะเบียน ทีมแจ้งช่วงราคาภายใน [กี่ชั่วโมง]', 'ถ่ายรูปรถ 6 มุมผ่านเว็บ ทีมโทรกลับพร้อมราคาภายใน 5 นาที (8:00–20:00)')
     body = re.sub(r'<span[^>]*>ตัวอย่าง · รอรูปจริง</span>', '', body)
-    body = body.replace('ส่งรูปทางไลน์ได้ 24 ชม.', 'ส่งข้อมูลผ่านเว็บได้ 24 ชม.')
+    body = body.replace('ส่งรูปทางไลน์ได้ 24 ชม.', 'ส่งข้อมูลผ่านไลน์ได้ 24 ชม.')
     # โลโก้ตัวจริงแทนตัวหนังสือ หัวเว็บ + ท้ายเว็บ
     assert HDR_OLD in body and FTR_OLD in body, 'logo anchor missing'
     body = body.replace(HDR_OLD, HDR_NEW).replace(FTR_OLD, FTR_NEW)
