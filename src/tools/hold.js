@@ -1,4 +1,4 @@
-// ทดสอบ gate: แตะ/กดสั้นไม่หลุด, กดค้าง 1 วิ → หน้าแดง, reload ยังแดง, ?kr=reset ล้าง — node src/tools/hold.js
+// ทดสอบ gate: แตะ/กดสั้นไม่หลุด, กดค้าง 0.7 วิ → หน้าแดง, reload ยังแดง, ?kr=reset ล้าง — node src/tools/hold.js
 const { chromium } = require('playwright');
 const http = require('http'), fs = require('fs'), path = require('path');
 const ROOT = path.join(__dirname, '..', '..');  // repo root = built site
@@ -19,14 +19,14 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   console.log('tap → dialog:', await dlg(), '| hint shown:', await f.locator('[aria-live]').count());
   // 2) short hold 0.8s
   const bb = await hold.boundingBox(); const cx = bb.x + bb.width / 2, cy = bb.y + bb.height / 2;
-  await p.mouse.move(cx, cy); await p.mouse.down(); await p.waitForTimeout(400);
+  await p.mouse.move(cx, cy); await p.mouse.down(); await p.waitForTimeout(300);
   await f.screenshot({ path: 'shots/hold-1-holding.png' });
   await p.mouse.up(); await p.waitForTimeout(200);
-  console.log('0.4s hold → dialog:', await dlg(), '| hint shown:', await f.locator('[aria-live]').count());
+  console.log('0.3s hold → dialog:', await dlg(), '| hint shown:', await f.locator('[aria-live]').count());
   await f.screenshot({ path: 'shots/hold-2-hint.png' });
   // 3) full hold 2.2s
-  await p.mouse.move(cx, cy); await p.mouse.down(); await p.waitForTimeout(1200); await p.mouse.up(); await p.waitForTimeout(300);
-  console.log('1.2s hold → dialog:', await dlg(), '| fbq:', JSON.stringify(await p.evaluate(() => (window.__fb || []).map(a => a[1]))));
+  await p.mouse.move(cx, cy); await p.mouse.down(); await p.waitForTimeout(900); await p.mouse.up(); await p.waitForTimeout(300);
+  console.log('0.9s hold → dialog:', await dlg(), '| fbq:', JSON.stringify(await p.evaluate(() => (window.__fb || []).map(a => a[1]))));
   await p.screenshot({ path: 'shots/hold-3-red-m.png' });
   const d = p.locator('[role=dialog]');
   console.log('red text has phone/line?', /09\d|ไลน์|LINE|เปลี่ยนใจ/.test(await d.innerText()), '| scroll/client:', await d.evaluate(e => [e.scrollHeight, e.clientHeight]));
