@@ -136,7 +136,7 @@ def js_safe(t):
 
 
 # แผ่นเงื่อนไขเมื่อกดปุ่มไลน์: bottom sheet บนมือถือ, กล่องกลางจอบนคอม (เด้งทันทีที่กด ให้รู้ว่ามาจากปุ่มนั้น)
-LIFF_WEB_ID = ''   # LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairodwai.com/) — ว่าง = ยังไม่เปิดโหมดเปิดในไลน์
+LIFF_WEB_ID = '2012318037-06TwYIml'   # LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairodwai.com/) — ว่าง = ยังไม่เปิดโหมดเปิดในไลน์
 SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:9990;animation:krFade .2s}'
     '.kr-sheet{position:fixed;left:0;right:0;bottom:0;z-index:9991;background:#FFFFFF;color:#141414;border-radius:24px 24px 0 0;'
     'padding:12px 24px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto;'
