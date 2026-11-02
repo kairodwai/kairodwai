@@ -22,15 +22,14 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   await p.goto('http://localhost:8095/', { waitUntil: 'load' });
   await p.waitForSelector('html.dc-ready'); await p.waitForTimeout(300);
   const f = p.locator('form');
-  await f.getByRole('button', { name: 'พร้อมขายแล้ว เริ่มเลย' }).click(); await p.waitForTimeout(150);
+  await f.getByRole('button', { name: /รถพร้อมขายทันที/ }).click(); await p.waitForTimeout(150);
   const sels = p.locator('form select');
   await sels.nth(0).selectOption('2020'); await sels.nth(1).selectOption({ index: 3 });
   await sels.nth(2).selectOption('Toyota'); await sels.nth(3).selectOption('Yaris ATIV');
   await p.waitForTimeout(100);
   if (await sels.count() > 4) await sels.nth(4).selectOption({ index: 1 });
   await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
-  await f.getByRole('button', { name: 'ตอนนี้' }).click();
-  await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
+    await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
   await p.locator('form input').last().fill('0812345678');
   const txt = async () => (await f.innerText()).replace(/\s+/g, ' ');
   // 1) network failure
@@ -45,10 +44,10 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   console.log('ok:false → message:', t2.includes('ส่งไม่สำเร็จ'), '| not sent:', !t2.includes('รหัสอ้างอิง'));
   // 3) retry succeeds
   mode = 'ok';
-  await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(700);
-  await f.screenshot({ path: 'shots/fail-3-retry-ok.png' });
-  const t3 = await txt();
-  console.log('retry ok → ref shown:', t3.includes('KR-2481'), '| photo link:', await p.locator('a[href^="/line/"]').getAttribute('href'), '| no fail msg:', !t3.includes('ส่งไม่สำเร็จ'));
-  console.log('API calls:', calls, '| fbq Lead count:', await p.evaluate(() => (window.__fb || []).filter(a => a[1] === 'Lead').length), '| errors:', errs);
+  await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(150);
+  const leadCalls = p.evaluate(() => (window.__fb || []).filter(a => a[1] === 'Lead').length);
+  await p.waitForURL(/\/line\//, { timeout: 5000 });
+  console.log('retry ok → went to photos:', new URL(p.url()).pathname + new URL(p.url()).search);
+  console.log('API calls:', calls, '| fbq Lead count before redirect:', await leadCalls, '| errors:', errs);
   await b.close(); srv.close();
 })();

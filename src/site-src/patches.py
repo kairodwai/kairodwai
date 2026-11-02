@@ -111,7 +111,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
-      readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); focusCard(); },
+      readyYes: () => { this.setState({ ready: true, missing: false, sell: 'ready' }); trk('ReadyToSell'); focusCard(); },
       readyNo: quit,
       dot1: DOT + (st.step > 1 ? DONE : ACTIVE), dot1Txt: st.step > 1 ? '\\u2713' : '1',
       dot2: DOT + (st.step > 2 ? DONE : st.step === 2 ? ACTIVE : TODO), dot2Txt: st.step > 2 ? '\\u2713' : '2',
@@ -170,6 +170,9 @@ def apply(name, body, logic):
     anchor = '<sc-if value="{{ formOn }}" hint-placeholder-val="{{ true }}">'
     assert body.count(anchor) == 1, (name, 'formOn anchor')
     body = body.replace(anchor, note + GATE + anchor)
+    # ขั้น 2: ตัดคำถาม "จะขายเมื่อไหร่" ออก (หน้า gate ถามไปแล้วว่าพร้อมขายใน 1-7 วัน)
+    body, n = re.subn(r'<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">\s*<span style="font-size: 15px; font-weight: 600;">จะขายเมื่อไหร่</span>.*?</sc-for>\s*</div>', '', body, count=1, flags=re.S)
+    assert n == 1, (name, 'sell-when block')
     assert body.count(SEG_OLD) == 1, (name, 'segment anchor')
     body = body.replace(SEG_OLD, SEG_NEW)
 
@@ -187,12 +190,12 @@ def apply(name, body, logic):
     rep("lineLocked: !(st.brand && st.year && st.mile) || blocked,", "lineLocked: true,")
     rep("[['7d', 'ภายใน 7 วัน'], ['month', 'ภายในเดือนนี้'], ['price', 'แค่อยากรู้ราคา']]",
         "[['now', 'ตอนนี้'], ['7d', 'ภายใน 7 วัน'], ['month', 'ภายในเดือนนี้']]")
-    # ส่งเข้าระบบ: สำเร็จ -> หน้าขอบคุณ + ปุ่มถ่ายรูป; ล้มเหลว (เน็ตหลุด/หมดเวลา 20 วิ) -> อยู่หน้าเดิม บอกให้กดใหม่
+    # ส่งเข้าระบบ: สำเร็จ -> ไปหน้าเลือกรูป /line/ ทันที (ไม่มีหน้าขอบคุณคั่น); ล้มเหลว (เน็ตหลุด/หมดเวลา 20 วิ) -> อยู่หน้าเดิม บอกให้กดใหม่
     rep("else this.setState({ sent: true, missing: false });",
         "else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); "
         "window.KR.lead(st, MILES).then((r) => { "
-        "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', "
-        "photoHref: r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' }); "
+        "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || ''); setTimeout(() => { location.href = h; }, 350); return; } "
+        "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); "
         "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
     rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'ขอราคา'))")
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ?")

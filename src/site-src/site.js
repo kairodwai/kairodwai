@@ -30,7 +30,7 @@
       st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : ''].filter(Boolean).join(' ');
     var fin = st.financed ? ['ยังผ่อนอยู่', st.price ? 'ราคาซื้อ ' + st.price : '', st.term ? 'สัญญา ' + st.term : '',
       st.paid ? 'ผ่อนแล้ว ' + st.paid + ' งวด' : '', st.monthly ? 'งวดละ ' + st.monthly : ''].filter(Boolean).join(' · ') : 'ไม่ติดไฟแนนซ์';
-    var when = { now: 'ตอนนี้', '7d': 'ภายใน 7 วัน', month: 'ภายในเดือนนี้' }[st.sell] || '';
+    var when = { ready: 'พร้อมขายทันที (1-7 วัน)', now: 'ตอนนี้', '7d': 'ภายใน 7 วัน', month: 'ภายในเดือนนี้' }[st.sell] || '';
     var s = null; try { s = JSON.parse(store('kr_src') || 'null'); } catch (e) {}
     var body = { type: 'lead', car: car, year: st.year, mile: mile, finance: fin, when: when, phone: st.phone,
       page: location.pathname, src: s ? JSON.stringify(s) : '' };
