@@ -37,7 +37,7 @@ GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 6px;">
 <span style="font-size: 14px; font-weight: 500; color: #55534E;">ขายง่ายๆ ใน 3 ขั้นตอน · ใช้เวลาไม่ถึง 1 นาที</span>
 <h2 style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 26px; line-height: 1.3;">พร้อมขายรถตอนนี้ไหม?</h2>
-<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้าน ประเมินฟรี ตรวจเสร็จโอนเงินทันที</p>
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้าน ประเมินเสร็จรับเงินทันที</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px;">
 <button type="button" onClick="{{ readyYes }}" style="height: 56px; padding: 0 12px; border: 0; border-radius: 28px; white-space: nowrap; font-family: 'Kanit', sans-serif; font-size: 16px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">รถพร้อมขายทันที (ภายใน 1-7 วันนี้)</button>
