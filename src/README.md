@@ -29,7 +29,7 @@ flow: gate "พร้อมขายรถตอนนี้ไหม?" → ฟ�
 events (site.js `track()`): ReadyToSell / NotReady (trackCustom), Lead เฉพาะกรอกฟอร์มจบ; fbq สำหรับชื่อมาตรฐาน (Lead, Contact, ViewContent, CompleteRegistration, SubmitApplication) ใช้ `track` ที่เหลือ `trackCustom`
 
 ## หลังบ้าน
-Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v12** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
+Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v13** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
 flow แจ้งทีม: saveLead เก็บเงียบ (ไม่แจ้ง) → รูปครบ (type done) แจ้งทีม 1 ข้อความแบบ "Kairodwai Lead : KR-xxxx / Details / Status / Call / Source / Photos" + สถานะชีท "รูปครบ รอโทร" → ลูกค้าส่ง "KR-xxxx" ในไลน์ (linkWebLead) → ตอบการ์ด "ได้รับข้อมูลและรูปครบแล้ว กำลังประเมินราคา" (รูปกดไม่ได้) + เปลี่ยนเมนูล่างของคนนั้นเป็น "รอประเมินราคา" (rich menu รายคน, ไม่มีปุ่ม — รูป /img/richmenu-wait.png สร้างด้วย src/tools/richmenu.js, ตั้งครั้งแรกด้วย setupWaitMenu() → WAIT_MENU_ID) + แจ้งทีม "แอดไลน์แล้ว ชื่อไลน์ …" → จากนั้นบอทเงียบ ทีมพิมพ์ตอบเองในแชท (OA อยู่โหมด chat ตรวจด้วย botInfo())
 ปุ่ม "เก็บลิงก์ไว้ในไลน์" (แผง "ยังไม่สะดวกถ่ายตอนนี้") = oaMessage ส่งลิงก์ /line/?t=… เข้าแชท OA → บอท keepLink ผูก userId กับ token (ไม่แจ้งทีม) → followUp เตือนทางไลน์ (push) แทน SMS; SMS เฉพาะคนไม่มีไลน์กับเรา (v12)
 ทดสอบจริงครบสาย 2 พ.ย. 2026 (KR-1009) ผ่าน; ข้อความทักทายเพื่อนใหม่ตั้งใน LINE OA Manager (ใช้ {Nickname}) แยก 2 ทาง: กรอกจากเว็บแล้ว → กดส่งข้อความที่เตรียมไว้ / ยังไม่เคย → ปุ่ม "ส่งรูปรถ"
@@ -38,7 +38,15 @@ sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, ห
 SMS: Thaibulksm API v2 (`sendSms()` ใน Code.gs) — บัญชี Thaibulksm ของทีม, API Key ชื่อแอป "Kairodwai" (ช่องทาง SMS/LON) — ค่าอยู่ใน Script properties `SMS_KEY`, `SMS_SECRET`, `SMS_TEST_TO` (เบอร์ทดสอบ), `SMS_SENDER` (ยังไม่ตั้ง = ใช้ "Demo"); ทดสอบด้วย `testSms()` ผ่านแล้ว 2 พ.ย. 2026
   ค้าง: เติมเครดิต (ทดลองได้ 10 เครดิต ส่งเข้าเบอร์ตัวเองเท่านั้น) + ขอชื่อผู้ส่ง KAIRODWAI แล้วใส่ `SMS_SENDER`
 
+## เปิดเว็บในไลน์ (LIFF) — ทางหลักสำหรับคนจากโฆษณา
+LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairodwai.com/, scope profile+openid, bot link = Aggressive) — LIFF ID ใส่ที่ `LIFF_WEB_ID` ใน build.py (ลงทั้งหน้าเว็บ /line/ และ /go) และ Script property `LIFF_WEB_ID` (ปุ่ม "ถ่ายรูปต่อ" ใน followUp)
+ลิงก์โฆษณา = `https://kairodwai.com/go?utm_…` → มือถือ: เด้งไป `liff.line.me/<ID>?via=liff&utm_…` (เปิดเว็บในแอปไลน์) / คอม: เว็บธรรมดา
+โหมด `?via=liff`: site.js โหลด LIFF SDK → getProfile → ซ่อนปุ่มแอดไลน์ (`.via-liff .kr-line`) → เลื่อนไปกล่อง "พร้อมขายรถตอนนี้ไหม?" → lead ส่ง uid/lname → saveLead ผูก userId กับ token ตั้งแต่แรก → /line/?…&via=liff → รูปครบ: finishPhotos ส่งการ์ด "ได้รับข้อมูลและรูปครบแล้ว" (กดไม่ได้) + เมนูรอประเมิน + ทีมได้ Kairodwai Lead พร้อม "LINE : ชื่อ" → หน้าเว็บโชว์ "กลับไปที่แชท" แล้ว liff.closeWindow()
+คนค้าง: followUp เห็น userId → push ปุ่ม "ถ่ายรูปต่อ" (ลิงก์ LIFF) แทน SMS · เว็บธรรมดา (Google/คอม) ยังใช้ flow รหัส KR + Add LINE เหมือนเดิม
+ทดสอบจำลอง: `node src/tools/liff.js` · storyboard: `node src/tools/storyboard.js`
+
 ## บั๊กที่รู้แล้ว
+- gate.js: ขั้น goBack หลัง redirect ไป /line/ รอ html.dc-ready ไม่ทัน (TimeoutError) — ของเดิมก่อน LIFF, ขั้นก่อนหน้าผ่านครบ
 site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
 
 ## ค้างอยู่

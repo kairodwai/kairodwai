@@ -136,6 +136,7 @@ def js_safe(t):
 
 
 # แผ่นเงื่อนไขเมื่อกดปุ่มไลน์: bottom sheet บนมือถือ, กล่องกลางจอบนคอม (เด้งทันทีที่กด ให้รู้ว่ามาจากปุ่มนั้น)
+LIFF_WEB_ID = ''   # LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairodwai.com/) — ว่าง = ยังไม่เปิดโหมดเปิดในไลน์
 SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:9990;animation:krFade .2s}'
     '.kr-sheet{position:fixed;left:0;right:0;bottom:0;z-index:9991;background:#FFFFFF;color:#141414;border-radius:24px 24px 0 0;'
     'padding:12px 24px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto;'
@@ -146,7 +147,8 @@ SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-inde
     '@keyframes krUp{from{transform:translateY(32px);opacity:0}to{transform:none;opacity:1}}'
     '@keyframes krPop{from{transform:translate(-50%,-50%) scale(.96);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}'
     '@keyframes krFade{from{opacity:0}}'
-    '@media(prefers-reduced-motion:reduce){.kr-ov,.kr-sheet{animation:none}}')
+    '@media(prefers-reduced-motion:reduce){.kr-ov,.kr-sheet{animation:none}}'
+    '.via-liff .kr-line{display:none!important}')   # เปิดในไลน์ (LIFF): เป็นเพื่อนกันแล้ว ไม่ต้องมีปุ่มแอดไลน์
 
 
 def page_html(name, helmet, tree, logic, prerender=''):
@@ -174,6 +176,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {helmet.strip()}
 <style>{SHEET_CSS}</style>
+<script>window.KR_LIFF_ID='{LIFF_WEB_ID}';</script>
 <script src="/assets/preact.min.js" defer></script>
 <script src="/assets/site.js" defer></script>
 <script src="/assets/dc.js" defer></script>
@@ -219,7 +222,7 @@ def main():
 def build_line():
     s = open(os.path.join(SRC, 'line-page/index.html'), encoding='utf-8').read()
     os.makedirs(os.path.join(OUT, 'line'), exist_ok=True)
-    open(os.path.join(OUT, 'line/index.html'), 'w', encoding='utf-8').write(s)
+    open(os.path.join(OUT, 'line/index.html'), 'w', encoding='utf-8').write(s.replace('__LIFF_WEB_ID__', LIFF_WEB_ID))
 
 
 def extras():
@@ -227,7 +230,9 @@ def extras():
     shutil.copy(os.path.join(HERE, 'og.jpg'), os.path.join(OUT, 'img/og.jpg'))
     shutil.copy(os.path.join(HERE, 'logo.png'), os.path.join(OUT, 'img/logo.png'))
     shutil.copy(os.path.join(HERE, 'logo-light.png'), os.path.join(OUT, 'img/logo-light.png'))
-    shutil.copy(os.path.join(HERE, 'richmenu-wait.png'), os.path.join(OUT, 'img/richmenu-wait.png'))  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
+    shutil.copy(os.path.join(HERE, 'richmenu-wait.png'), os.path.join(OUT, 'img/richmenu-wait.png'))
+    os.makedirs(os.path.join(OUT, 'go'), exist_ok=True)
+    open(os.path.join(OUT, 'go/index.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'go.html'), encoding='utf-8').read().replace('__LIFF_WEB_ID__', LIFF_WEB_ID))   # ลิงก์โฆษณา kairodwai.com/go → เด้งเข้า LIFF (มือถือ) / เว็บธรรมดา (คอม)  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))

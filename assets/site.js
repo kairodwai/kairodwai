@@ -4,6 +4,23 @@
   if ((location.pathname === '/' || location.pathname === '/index.html') && /[?&](v=|liff\.state=|t=)/.test(location.search)) { location.replace('/line/' + location.search); return; }
   var API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
   var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid'];
+  // เปิดในไลน์ผ่าน LIFF app "kairodwai-web" (endpoint = https://kairodwai.com/) → รู้ตัวตนไลน์ตั้งแต่จอแรก ไม่ต้อง Add LINE/ส่งรหัสทีหลัง
+  var LIFF_WEB_ID = window.KR_LIFF_ID || '';   // ค่าจริงใส่ใน build.py (KR_LIFF_ID) — ว่าง = โหมดเว็บธรรมดา
+  var VIA_LIFF = /[?&]via=liff(&|$)/.test(location.search) && !!LIFF_WEB_ID;
+  var LINE_ME = null;   // { uid, name } หลัง liff.getProfile()
+  if (VIA_LIFF) {
+    document.documentElement.classList.add('via-liff');
+    var sdk = document.createElement('script'); sdk.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
+    sdk.onload = function () {
+      liff.init({ liffId: LIFF_WEB_ID }).then(function () {
+        if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+        return liff.getProfile().then(function (p) { LINE_ME = { uid: p.userId, name: p.displayName || '' }; store('kr_line', JSON.stringify(LINE_ME)); });
+      }).catch(function (e) { try { console.warn('liff', e); } catch (x) {} });
+    };
+    document.head.appendChild(sdk);
+    // คนจากโฆษณารู้แล้วว่าเรารับซื้อรถ → เปิดมาให้เห็นกล่องคำถาม "พร้อมขายรถตอนนี้ไหม?" เลย
+    window.addEventListener('load', function () { setTimeout(function () { var f = document.querySelector('form'); if (f) window.scrollTo({ top: f.getBoundingClientRect().top + window.scrollY - 16 }); }, 500); });
+  }
 
   function store(k, v) { try { if (v == null) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
@@ -11,7 +28,7 @@
   var q = new URLSearchParams(location.search), src = {};
   KEYS.forEach(function (k) { if (q.get(k)) src[k] = q.get(k).slice(0, 200); });
   if (Object.keys(src).length) {
-    src.landing = location.pathname; src.ref = document.referrer.slice(0, 200); src.at = Date.now();
+    src.landing = location.pathname; src.ref = document.referrer.slice(0, 200); src.at = Date.now(); if (VIA_LIFF) src.via = 'liff';
     var old = null; try { old = JSON.parse(store('kr_src') || 'null'); } catch (e) {}
     if (!old || Date.now() - old.at > 30 * 864e5) store('kr_src', JSON.stringify(src));
   } else if (!store('kr_src') && document.referrer && document.referrer.indexOf(location.host) < 0) {
@@ -34,6 +51,7 @@
     var s = null; try { s = JSON.parse(store('kr_src') || 'null'); } catch (e) {}
     var body = { type: 'lead', car: car, year: st.year, mile: mile, finance: fin, when: when, phone: st.phone,
       page: location.pathname, src: s ? JSON.stringify(s) : '' };
+    if (LINE_ME && LINE_ME.uid) { body.uid = LINE_ME.uid; body.lname = LINE_ME.name; }   // เปิดในไลน์: ผูกลีดกับไลน์เค้าตั้งแต่กรอกฟอร์ม
     var ctl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
@@ -42,5 +60,5 @@
       .catch(function () { clearTimeout(timer); return null; });
   }
 
-  window.KR = { lead: lead, track: track };
+  window.KR = { lead: lead, track: track, viaLiff: VIA_LIFF };
 })();

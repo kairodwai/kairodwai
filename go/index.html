@@ -1,0 +1,16 @@
+<!doctype html>
+<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ขายรถไว</title><meta name="robots" content="noindex">
+<style>html,body{margin:0;height:100%;background:#F5F4F0;font-family:system-ui,sans-serif;color:#16201a}main{height:100%;display:grid;place-items:center;text-align:center;font-size:15px}</style>
+</head><body><main><p>กำลังเปิด ขายรถไว…</p></main>
+<script>
+// ลิงก์โฆษณา: kairodwai.com/go?utm_… → มือถือ+มี LIFF → เปิดเว็บในแอปไลน์ (รู้ตัวตนตั้งแต่แรก) / อย่างอื่น → เว็บธรรมดา  (พารามิเตอร์ utm/fbclid ส่งต่อครบ)
+(function () {
+  var ID = '';
+  var q = new URLSearchParams(location.search); q.delete('via');
+  var qs = q.toString();
+  var mobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (ID && mobile) { q.set('via', 'liff'); location.replace('https://liff.line.me/' + ID + '?' + q.toString()); }
+  else location.replace('/' + (qs ? '?' + qs : ''));
+})();
+</script></body></html>

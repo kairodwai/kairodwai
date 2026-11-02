@@ -187,7 +187,9 @@ input[type=file]{display:none}
 
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-const LIFF_ID = '2012318037-jsPlMLnr';
+const LIFF_ID = '2012318037-jsPlMLnr';                       // ปุ่มเมนู "ส่งรูปรถ" (endpoint = /line/)
+const LIFF_WEB_ID = '__LIFF_WEB_ID__';                       // เว็บเปิดในไลน์ (endpoint = /) — build.py แทนค่าให้
+const VIA_LIFF = /[?&]via=liff(&|$)/.test(location.search) && LIFF_WEB_ID.indexOf('__') < 0;   // มาจากเว็บที่เปิดในไลน์: จบแล้วกลับแชท ไม่ต้อง Add LINE
 const API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
 const SLOTS = [
   {lbl:'ด้านหน้ารถ', hint:'ยืนมุมหน้ารถ ให้เห็นหน้า+ข้าง'},
@@ -253,7 +255,7 @@ function render(){
     $('demoMsg').textContent = LINE_MSG;
     $('laterBtn').hidden = ready;
     if (ready) postDone();   // รูปครบ = แจ้งทีมทันที ไม่ต้องรอกดแอดไลน์
-    if (ready && !editing && $('app').hidden === false) show('readyView'); }
+    if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) { show('doneView'); setTimeout(() => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); } catch (e) {} }, 2500); } else show('readyView'); } }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
@@ -303,7 +305,7 @@ async function sendAll(btn, errEl){
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
-    if (r && r.ok) { doneSent = true; forget(); if (REF) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } show('doneView'); return; }
+    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
@@ -328,6 +330,7 @@ const tokenReady = (async () => {
   return (token = r.t);
 })();
 tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
+if (VIA_LIFF && window.liff) { liff.init({ liffId: LIFF_WEB_ID }).catch(() => {}); }   // ให้ liff.closeWindow() ใช้ได้ตอนจบ
 let leaving = false, panelShown = false, armed = false, doneSent = false, doneSending = false;
 const allIn = () => st.slice(0, REQ).filter(x => x.state === 'done').length >= REQ && !st.some(x => x.state === 'up');
 const arm = () => { if (!REF || armed) return; try { history.pushState({ kr: 1 }, ''); armed = true; } catch (e) {} };
@@ -339,6 +342,12 @@ if (navigator.share) { $('shareBtn').hidden = false; $('shareBtn').onclick = () 
 async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
 $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterClose').onclick = closeLater;
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };
+if (REF && VIA_LIFF) {
+  document.querySelector('#doneView h2').textContent = 'ส่งข้อมูลและรูปครบแล้ว';
+  document.querySelector('#doneView p').innerHTML = 'กลับไปที่แชทไลน์ได้เลย <b class="ok">การ์ดประเมินราคารออยู่แล้ว</b><br>ทีมงานจะตอบในแชทภายใน 5 นาที (8:00–20:00)';
+  document.querySelector('#laterPanel p + p').innerHTML = 'ถ้ายังไม่ครบ <b class="ok">เราจะทักเตือนในแชทไลน์ให้เอง</b> กดปุ่มในแชทแล้วถ่ายต่อได้ทุกเมื่อ';
+  ['keepBtn', 'shareBtn', 'copyBtn'].forEach(id => { const el = $(id); if (el) el.hidden = true; });
+}
 if (REF) {
   remember(); arm();
   // ส่งลิงก์เข้าแชท OA ของเรา (ไม่ใช่ Keep): ลิงก์อยู่ในแชทลูกค้า + บอทจับ t= แล้วผูกไลน์กับลีด → เตือนทางไลน์แทน SMS

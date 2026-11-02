@@ -235,7 +235,7 @@ def apply(name, body, logic):
     rep("else this.setState({ sent: true, missing: false });",
         "else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); "
         "window.KR.lead(st, MILES).then((r) => { "
-        "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || ''); setTimeout(() => { location.href = h; }, 350); return; } "
+        "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') + (window.KR && KR.viaLiff ? '&via=liff' : ''); setTimeout(() => { location.href = h; }, 350); return; } "
         "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); "
         "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
     rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังไปหน้าเลือกรูปรถของคุณ…' : 'ยืนยัน'))")
@@ -256,4 +256,7 @@ def apply(name, body, logic):
         "      sheetClose: () => sheetShut(),")
     rep("      prev: () => this.setState({ step: st.step - 1, missing: false }),\n", "")
     rep("if (st.step < 3) this.setState({ step: st.step + 1, missing: false });", "if (st.step < 3) { this.setState({ step: st.step + 1, missing: false }); focusCard(); }")
+    # ปุ่มแอดไลน์ทั้งสองปุ่ม (หัวเว็บ + เซกชัน) ติดคลาสไว้ให้ซ่อนได้ตอนเปิดในไลน์ (LIFF)
+    body = body.replace('onClick="{{ goForm }}"', 'class="kr-line" onClick="{{ goForm }}"')
+    body = body.replace('<a href="{{ lineHref }}"', '<a class="kr-line" href="{{ lineHref }}"')   # หน้า Brand/Province ใช้ลิงก์ไลน์ตรง
     return body, logic
