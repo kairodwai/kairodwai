@@ -106,6 +106,8 @@ header p{margin:0;font-size:14px}
 input[type=file]{display:none}
 .ghost{height:48px;padding:0 24px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
 .ho [hidden]{display:none!important}
+.noline .journey{display:none!important}
+.ho-alt{font-size:13px;color:var(--ink-2);text-decoration:underline;background:none;border:0;font:inherit;font-size:13px;cursor:pointer;padding:8px}
 .ho{gap:16px;width:100%}
 .ho-logo{width:120px;height:auto}
 .ho .cta{text-decoration:none}
@@ -115,6 +117,7 @@ input[type=file]{display:none}
 .ho-qr b{font-family:var(--f-display);font-weight:600;font-size:16px;margin-top:6px}
 .ho-qr span{font-size:13px;color:var(--ink-2)}
 .ho-note{font-size:13px}
+.going[hidden]{display:none!important}
 .going{width:100%;display:grid;gap:8px;justify-items:center;margin-top:4px}
 .going .lead{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:16px}
 .going .track{width:160px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
@@ -206,7 +209,7 @@ input[type=file]{display:none}
   <p>ขั้นต่อไป ส่งรูปรถ 5 มุมในแอป LINE<br>ทีมงานประเมินราคาให้ในแชทภายใน 5 นาที</p>
   <a class="cta" id="hoBtn" href="#" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:24px;height:24px;flex:none"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg><span>ส่งรูปในแอป LINE</span></a>
   <div class="ho-qr" id="hoQr" hidden><div id="hoQrBox" aria-label="QR สำหรับเปิดในแอป LINE"></div><b>สแกนด้วยกล้องมือถือ</b><span>เปิดในแอป LINE แล้วส่งรูปได้เลย</span></div>
-  <p class="ho-note">ไม่ใช้ LINE?<br>ทีมงานจะโทรหาคุณที่เบอร์ที่กรอกไว้ (8:00–20:00)</p>
+  <a class="ho-alt" id="hoAlt" href="#">ไม่มี LINE? ส่งรูปบนเว็บนี้แทน</a>
 </div></div></div>
 
 <input type="file" id="picker" accept="image/*">
@@ -215,7 +218,8 @@ input[type=file]{display:none}
 <script>
 const LIFF_ID = '2012318037-jsPlMLnr';                       // ปุ่มเมนู "ส่งรูปรถ" (endpoint = /line/)
 const LIFF_WEB_ID = '2012318037-06TwYIml';                       // เว็บเปิดในไลน์ (endpoint = /) — build.py แทนค่าให้
-const VIA_LIFF = /[?&]via=liff(&|$)/.test(location.search) && LIFF_WEB_ID.indexOf('__') < 0;   // มาจากเว็บที่เปิดในไลน์: จบแล้วกลับแชท ไม่ต้อง Add LINE
+const VIA_LIFF = /[?&]via=liff(&|$)/.test(location.search) && LIFF_WEB_ID.indexOf('__') < 0;
+const NOLINE = /[?&]noline=1(&|$)/.test(location.search);   // ไม่มี LINE: ส่งรูปบนเบราว์เซอร์ จบแล้วทีมโทรแจ้งราคา (ไม่มีขั้นแอดไลน์)   // มาจากเว็บที่เปิดในไลน์: จบแล้วกลับแชท ไม่ต้อง Add LINE
 const API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
 const SLOTS = [
   {lbl:'ด้านหน้ารถ', hint:'ยืนมุมหน้ารถ ให้เห็นหน้า+ข้าง'},
@@ -276,12 +280,12 @@ function render(){
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
   btn.disabled = done < REQ || busy;
-  if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = (VIA_LIFF ? '' : LINE_ICO) + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม' + (VIA_LIFF ? ' แล้วส่งให้ทีมงาน' : ' แล้วแอดไลน์ได้เลย') : !ready ? 'กำลังโหลดรูป กรุณารอสักครู่' : VIA_LIFF ? 'ส่งให้ทีมงานแล้ว ✓' : 'Add LINE : <span class="at">@</span>KAIRODWAI') + '</span>'; $('doneNote').hidden = !ready;
+  if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = (VIA_LIFF || NOLINE ? '' : LINE_ICO) + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม' + (VIA_LIFF || NOLINE ? ' แล้วส่งให้ทีมงาน' : ' แล้วแอดไลน์ได้เลย') : !ready ? 'กำลังโหลดรูป กรุณารอสักครู่' : VIA_LIFF || NOLINE ? 'ส่งให้ทีมงานแล้ว ✓' : 'Add LINE : <span class="at">@</span>KAIRODWAI') + '</span>'; $('doneNote').hidden = !ready;
     $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @KAIRODWAI</span>';
     $('demoMsg').textContent = LINE_MSG;
-    $('laterBtn').hidden = ready || VIA_LIFF;   // เปิดในไลน์: ไม่มีทางเลือกให้คิด ออกได้เลย เดี๋ยวบอททักเอง
+    $('laterBtn').hidden = ready || VIA_LIFF || NOLINE;   // เปิดในไลน์: ไม่มีทางเลือกให้คิด ออกได้เลย เดี๋ยวบอททักเอง
     if (ready) postDone();   // รูปครบ = แจ้งทีมทันที ไม่ต้องรอกดแอดไลน์
-    if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) liffDone(); else show('readyView'); } }
+    if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) liffDone(); else if (NOLINE) show('doneView'); else show('readyView'); } }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
@@ -331,7 +335,7 @@ async function sendAll(btn, errEl){
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
-    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } if (REF && VIA_LIFF) liffDone(); else show('doneView'); return; }
+    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF && !NOLINE) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } if (REF && VIA_LIFF) liffDone(); else show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
@@ -390,11 +394,19 @@ if (REF) {
   $('hdTitle').textContent = 'ขั้นที่ 3 จาก 4 เลือกรูปรถ';
   $('hdSub').textContent = 'ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบ 5 มุมกดส่งทีเดียว แล้วไปคุยต่อในไลน์';
   if (VIA_LIFF) $('hdSub').textContent = 'ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบ 5 มุมส่งทีเดียว ทีมงานประเมินราคาให้ในแชท';
+  if (NOLINE) {
+    document.body.classList.add('noline');
+    $('hdTitle').textContent = 'ส่งรูปรถ 5 มุม';
+    $('hdSub').textContent = 'ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบ 5 มุมส่งทีเดียว ทีมงานจะโทรแจ้งราคา';
+    document.querySelector('#doneView h2').textContent = 'ได้รับข้อมูลและรูปครบแล้ว';
+    document.querySelector('#doneView p').innerHTML = 'ทีมงานกำลังประเมินราคา<br><b class="ok">จะโทรแจ้งราคาที่เบอร์ที่กรอกไว้</b> (8:00–20:00)';
+    $('closeBtn').hidden = true;
+  }
   const bad = document.querySelector('#badView p'); if (bad) bad.innerHTML = 'ลิงก์หมดอายุแล้ว <a href="/">กลับไปกรอกข้อมูลรถอีกครั้ง</a> หรือโทร <a href="tel:0914922662">091-492-2662</a>';
 }
 render();
 // เปิดในเบราว์เซอร์ (ไม่ใช่ในแอป LINE) พร้อมรหัสลีด → ไม่ส่งรูปบนเบราว์เซอร์ พาไปส่งในแอป LINE แทน (ทุกคนจบทางเดียวกัน)
-const HANDOFF = REF && token && !VIA_LIFF && LIFF_WEB_ID.indexOf('__') < 0;
+const HANDOFF = REF && token && !VIA_LIFF && !NOLINE && LIFF_WEB_ID.indexOf('__') < 0;
 if (HANDOFF) {
   const ua = navigator.userAgent, android = /Android/i.test(ua), mobile = android || /iPhone|iPad|iPod/i.test(ua);
   const q = 'via=liff&t=' + encodeURIComponent(token) + '&ref=' + encodeURIComponent(REF);
@@ -406,6 +418,7 @@ if (HANDOFF) {
     s.onload = () => { try { const qr = qrcode(0, 'M'); qr.addData(liffUrl); qr.make(); $('hoQrBox').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) {} };
     document.head.appendChild(s);
   }
+  $('hoAlt').href = location.pathname + location.search + '&noline=1';
   remember(); show('handoffView');
 } else show('app');
 </script>
