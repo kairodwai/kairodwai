@@ -59,7 +59,7 @@ header p{margin:0;font-size:14px}
 .send .wrap{padding-block:12px;display:grid;gap:6px}
 .send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
 .send button:disabled{background:#c9d2cd;cursor:not-allowed}
-.send small{text-align:center;color:var(--ink-2);font-size:12px}
+.send small{text-align:center;color:var(--ink-2);font-size:13px;line-height:1.5;padding:0 8px}
 .journey{display:none;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
 .journey span{display:grid;justify-items:center;gap:4px;font-size:11px;line-height:1.2;color:rgba(255,255,255,.75);text-align:center}
 .journey i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:600;font-size:12px;background:rgba(255,255,255,.25);color:#fff}
@@ -94,6 +94,7 @@ input[type=file]{display:none}
   </div>
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
+    <small id="doneNote" hidden>ข้อมูลและรูปทั้งหมดส่งถึงทีมเรียบร้อยแล้ว กด Add LINE ด้านบน เพื่อประเมินราคากับเจ้าหน้าที่ได้เลย</small>
   </div></div>
 </div>
 
@@ -168,7 +169,7 @@ function render(){
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
   btn.disabled = got < REQ || busy;
-  if (REF) btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งทั้งหมด แล้วแอดไลน์') + '</span>';
+  if (REF) { const ready = got >= REQ && !busy; btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'Add LINE : @kairodwai') + '</span>'; $('doneNote').hidden = !ready; }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
