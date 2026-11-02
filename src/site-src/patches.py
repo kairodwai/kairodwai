@@ -126,11 +126,15 @@ def apply(name, body, logic):
     rep("lineLocked: !(st.brand && st.year && st.mile) || blocked,", "lineLocked: true,")
     rep("[['7d', 'ภายใน 7 วัน'], ['month', 'ภายในเดือนนี้'], ['price', 'แค่อยากรู้ราคา']]",
         "[['now', 'ตอนนี้'], ['7d', 'ภายใน 7 วัน'], ['month', 'ภายในเดือนนี้']]")
+    # ส่งเข้าระบบ: สำเร็จ -> หน้าขอบคุณ + ปุ่มถ่ายรูป; ล้มเหลว (เน็ตหลุด/หมดเวลา 20 วิ) -> อยู่หน้าเดิม บอกให้กดใหม่
     rep("else this.setState({ sent: true, missing: false });",
-        "else if (!st.sending) { this.setState({ sending: true, missing: false }); "
-        "window.KR.lead(st, MILES).then((r) => this.setState({ sending: false, sent: true, refNo: (r && r.ref) || '', "
-        "photoHref: r && r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' })); }")
+        "else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); "
+        "window.KR.lead(st, MILES).then((r) => { "
+        "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', "
+        "photoHref: r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' }); "
+        "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
     rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'ขอราคา'))")
+    rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
     return body, logic

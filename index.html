@@ -178,10 +178,10 @@ class Component extends DCLogic {
         if (blocked) return;
         const ok = st.step === 1 ? (st.brand && st.year && st.mile) : st.step === 3 ? st.phone.replace(/\D/g, '').length >= 9 : !!st.sell;
         if (!ok) { this.setState({ missing: true }); return; }
-        if (st.step < 3) this.setState({ step: st.step + 1, missing: false }); else if (!st.sending) { this.setState({ sending: true, missing: false }); window.KR.lead(st, MILES).then((r) => this.setState({ sending: false, sent: true, refNo: (r && r.ref) || '', photoHref: r && r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' })); }
+        if (st.step < 3) this.setState({ step: st.step + 1, missing: false }); else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); window.KR.lead(st, MILES).then((r) => { if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' }); else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }
       },
       showMissing: st.missing,
-      missingText: st.step === 1 ? 'กรุณาเลือกข้อมูลรถของคุณก่อน' : st.step === 2 ? 'กรุณาเลือกว่าจะขายเมื่อไหร่' : 'ใส่เบอร์โทรให้ครบก่อนนะครับ',
+      missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ? 'กรุณาเลือกข้อมูลรถของคุณก่อน' : st.step === 2 ? 'กรุณาเลือกว่าจะขายเมื่อไหร่' : 'ใส่เบอร์โทรให้ครบก่อนนะครับ',
       summary: [st.brand === 'ยี่ห้ออื่น' ? (st.other || 'ยี่ห้ออื่น') : st.brand, st.model === 'รุ่นอื่น' ? st.other : st.model, st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : '', st.year].filter(Boolean).join(' · '),
       yearVal: st.year,
       mileVal: st.mile || '',
