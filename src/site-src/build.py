@@ -227,6 +227,7 @@ def extras():
     shutil.copy(os.path.join(HERE, 'og.jpg'), os.path.join(OUT, 'img/og.jpg'))
     shutil.copy(os.path.join(HERE, 'logo.png'), os.path.join(OUT, 'img/logo.png'))
     shutil.copy(os.path.join(HERE, 'logo-light.png'), os.path.join(OUT, 'img/logo-light.png'))
+    shutil.copy(os.path.join(HERE, 'richmenu-wait.png'), os.path.join(OUT, 'img/richmenu-wait.png'))  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))

@@ -71,6 +71,7 @@ header p{margin:0;font-size:14px}
 .card .cta:disabled{background:#c9d2cd;cursor:not-allowed}
 .card .link{height:44px;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:underline;cursor:pointer}
 .card .err{margin-top:0;width:100%}
+.card .hint{font-size:13px;line-height:1.5;color:var(--ink-2);max-width:300px;margin-top:-4px}.card .hint b{color:#0B7A36}
 .ok{color:#0B7A36;font-weight:600}
 .send .later{display:none;height:44px;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
 .web .send .later:not([hidden]){display:block}
@@ -143,6 +144,7 @@ input[type=file]{display:none}
     <h2>ส่งข้อมูลและรูปครบแล้ว</h2>
     <p>ข้อมูลและรูป <b class="ok">ส่งเข้าไลน์ถึงทีมงานเรียบร้อยแล้ว</b><br>กด Add LINE ด้านล่างเพื่อประเมินราคากับทีมงาน</p>
     <button class="cta" id="readyBtn" type="button"></button>
+    <small class="hint">เข้าไลน์แล้ว กดส่ง <b>➤</b> ข้อความที่เตรียมไว้ให้ 1 ครั้ง ทีมงานจะเริ่มประเมินราคาทันที</small>
     <div class="err" id="readyErr" hidden></div>
     <button class="link" id="editBtn" type="button">แก้ไขรูป</button>
   </div></div>
