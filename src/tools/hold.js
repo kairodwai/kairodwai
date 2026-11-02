@@ -38,7 +38,7 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   console.log('/toyota/ → dialog:', await dlg());
   // 6) reset
   await p.goto('http://localhost:8094/?kr=reset', { waitUntil: 'load' }); await p.waitForSelector('html.dc-ready'); await p.waitForTimeout(300);
-  console.log('?kr=reset → dialog:', await dlg(), '| gate visible:', await f.getByRole('button', { name: 'รถพร้อมขายใน 1-7 วันนี้' }).count());
+  console.log('?kr=reset → dialog:', await dlg(), '| gate visible:', await f.getByRole('button', { name: 'รถพร้อมขายทันที (ภายใน 1-7 วันนี้)' }).count());
   await ctx.close();
   // desktop red
   const p2 = await (await b.newContext({ viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1 })).newPage();
