@@ -35,6 +35,42 @@ WHOLE = re.compile(r'^\s*\{\{\s*([^}]*?)\s*\}\}\s*$')
 
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
 
+# รูปประกอบหน้าเว็บ: jpg ต้นฉบับอยู่ <repo>/img → build ทำ .webp (เบากว่า ~3 เท่า ภาพเท่าเดิม) + ตัวย่อ 800px สำหรับมือถือ แล้วใส่ srcset/lazy ให้ทุก <img>
+IMG_SIZES = {}                                            # hash → ความกว้างต้นฉบับ (เติมตอน make_webp)
+def make_webp():
+    try: from PIL import Image
+    except ImportError: print('no PIL: skip webp'); return
+    d = os.path.join(OUT, 'img'); src_d = os.path.join(ROOT, 'img')
+    os.makedirs(d, exist_ok=True)
+    for f in os.listdir(src_d):
+        if not re.match(r'^[0-9a-f]{32}\.jpg$', f): continue
+        h = f[:-4]; im = Image.open(os.path.join(src_d, f)).convert('RGB'); IMG_SIZES[h] = im.width
+        full = os.path.join(d, h + '.webp'); small = os.path.join(d, h + '-800.webp')
+        if not os.path.exists(full): im.save(full, 'WEBP', quality=78, method=6)
+        if im.width > 800 and not os.path.exists(small):
+            s = im.copy(); s.thumbnail((800, 800 * im.height // im.width)); s.save(small, 'WEBP', quality=76, method=6)
+        mid = os.path.join(d, h + '-1200.webp')                                 # จอมือถือ 3x เลือกตัวนี้ (คมพอ ไม่ต้องโหลด 1600)
+        if im.width > 1200 and not os.path.exists(mid):
+            s = im.copy(); s.thumbnail((1200, 1200 * im.height // im.width)); s.save(mid, 'WEBP', quality=76, method=6)
+        elif im.width <= 800: IMG_SIZES[h] = -im.width                   # ติดลบ = ไม่มีตัวย่อ
+
+def img_attrs(attrs):
+    cls = next((a.get('v', '') for a in attrs if a['n'] == 'class'), '')
+    for a in attrs:
+        if a['n'] == 'src' and 'v' in a:
+            m = re.match(r'^/img/([0-9a-f]{32})\.jpg$', a['v'])
+            if m and m.group(1) in IMG_SIZES:
+                h, w = m.group(1), IMG_SIZES[m.group(1)]
+                a['v'] = '/img/' + h + '.webp'
+                if w > 800:
+                    ss = '/img/%s-800.webp 800w, ' % h + ('/img/%s-1200.webp 1200w, ' % h if w > 1200 else '') + '/img/%s.webp %dw' % (h, w)
+                    attrs.append({'n': 'srcset', 'v': ss})
+                    attrs.append({'n': 'sizes', 'v': '(max-width: 760px) 100vw, 600px'})
+    src = next((a.get('v', '') for a in attrs if a['n'] == 'src'), '')
+    attrs.append({'n': 'decoding', 'v': 'async'})
+    if 'hero' in cls: attrs.append({'n': 'fetchpriority', 'v': 'high'})   # รูปแรกบนจอ = LCP โหลดก่อน
+    elif 'logo' not in src: attrs.append({'n': 'loading', 'v': 'lazy'})  # รูปอื่นโหลดเมื่อเลื่อนถึง (โลโก้บนหัวไม่ lazy)
+
 
 def fix_val(v):
     v = LINKS.get(v, v)
@@ -80,6 +116,7 @@ class Compiler(HTMLParser):
             p = next((a.get('p') or a.get('v') for a in attrs if a['n'] == 'list'), '')
             a_ = next((a.get('v') for a in attrs if a['n'] == 'as'), 'item')
             return {'k': 'for', 'p': p, 'as': a_, 'kids': []}
+        if tag == 'img': img_attrs(attrs)
         return {'k': 'e', 'tag': tag, 'attrs': attrs, 'kids': []}
 
     def handle_starttag(self, tag, attrs):
@@ -196,6 +233,7 @@ def main():
     if '--prerender' in sys.argv and os.path.exists(pre_file):
         pre = json.load(open(pre_file, encoding='utf-8'))
     os.makedirs(OUT, exist_ok=True)
+    make_webp()
     patches = __import__('patches')
     for name in PAGES:
         helmet, body, logic = split_page(os.path.join(DESIGN, 'project', name + '.dc.html'))
