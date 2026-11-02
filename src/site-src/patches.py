@@ -97,6 +97,8 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
     const LN_ON = 'background: #06C755;', LN_OFF = 'background: #DEDBD3;';
     const trk = (n) => { try { window.KR.track(n); } catch (e) {} };
     const quit = () => { this._hold = null; this.setState({ holding: false, ready: false, missing: false }); trk('NotReady'); try { localStorage.setItem('kr_noready', String(Date.now())); } catch (e) {} };
+    const focusCard = () => setTimeout(() => { const f = document.querySelector('form'); if (!f) return; const r = f.getBoundingClientRect();
+      if (r.height > innerHeight * 0.8) scrollTo({ top: r.top + scrollY - 16, behavior: 'smooth' }); else f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
     const sheetShut = () => { this.setState({ lineSheet: false }); document.body.style.overflow = ''; if (this._esc) { removeEventListener('keydown', this._esc); this._esc = null; } };
     const sheetOpen = () => { this.setState({ lineSheet: true }); document.body.style.overflow = 'hidden'; this._esc = (e) => { if (e.key === 'Escape') sheetShut(); }; addEventListener('keydown', this._esc); };
     const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 700); this.setState({ holding: true }); };
@@ -109,7 +111,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
-      readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); },
+      readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); focusCard(); },
       readyNo: quit,
       dot1: DOT + (st.step > 1 ? DONE : ACTIVE), dot1Txt: st.step > 1 ? '\\u2713' : '1',
       dot2: DOT + (st.step > 2 ? DONE : st.step === 2 ? ACTIVE : TODO), dot2Txt: st.step > 2 ? '\\u2713' : '2',
@@ -197,7 +199,9 @@ def apply(name, body, logic):
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
     rep("goForm: () => { if (!blocked) this.setState({ missing: true }); const f = document.querySelector('form'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); },",
         "goForm: () => { trk('LineTap'); if (st.sent && st.photoHref) { location.href = st.photoHref; return; } sheetOpen(); },\n"
-        "      sheetGo: () => { sheetShut(); this.setState({ missing: st.ready === true && !blocked }); setTimeout(() => { const f = document.querySelector('form'); if (!f) return; "
-        "const tall = f.getBoundingClientRect().height > innerHeight * 0.8; f.scrollIntoView({ behavior: 'smooth', block: tall ? 'start' : 'center' }); }, 60); },\n"
+        "      sheetGo: () => { sheetShut(); this.setState({ missing: st.ready === true && !blocked }); focusCard(); },\n"
+        "      prev: () => { this.setState({ step: st.step - 1, missing: false }); focusCard(); },\n"
         "      sheetClose: () => sheetShut(),")
+    rep("      prev: () => this.setState({ step: st.step - 1, missing: false }),\n", "")
+    rep("if (st.step < 3) this.setState({ step: st.step + 1, missing: false });", "if (st.step < 3) { this.setState({ step: st.step + 1, missing: false }); focusCard(); }")
     return body, logic

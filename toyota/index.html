@@ -81,6 +81,8 @@ class Component extends DCLogic {
     const LN_ON = 'background: #06C755;', LN_OFF = 'background: #DEDBD3;';
     const trk = (n) => { try { window.KR.track(n); } catch (e) {} };
     const quit = () => { this._hold = null; this.setState({ holding: false, ready: false, missing: false }); trk('NotReady'); try { localStorage.setItem('kr_noready', String(Date.now())); } catch (e) {} };
+    const focusCard = () => setTimeout(() => { const f = document.querySelector('form'); if (!f) return; const r = f.getBoundingClientRect();
+      if (r.height > innerHeight * 0.8) scrollTo({ top: r.top + scrollY - 16, behavior: 'smooth' }); else f.scrollIntoView({ behavior: 'smooth', block: 'center' }); }, 60);
     const sheetShut = () => { this.setState({ lineSheet: false }); document.body.style.overflow = ''; if (this._esc) { removeEventListener('keydown', this._esc); this._esc = null; } };
     const sheetOpen = () => { this.setState({ lineSheet: true }); document.body.style.overflow = 'hidden'; this._esc = (e) => { if (e.key === 'Escape') sheetShut(); }; addEventListener('keydown', this._esc); };
     const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 700); this.setState({ holding: true }); };
@@ -93,7 +95,7 @@ class Component extends DCLogic {
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
-      readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); },
+      readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); focusCard(); },
       readyNo: quit,
       dot1: DOT + (st.step > 1 ? DONE : ACTIVE), dot1Txt: st.step > 1 ? '\u2713' : '1',
       dot2: DOT + (st.step > 2 ? DONE : st.step === 2 ? ACTIVE : TODO), dot2Txt: st.step > 2 ? '\u2713' : '2',
@@ -175,7 +177,8 @@ class Component extends DCLogic {
       lineReady: false,
       lineLocked: true,
       goForm: () => { trk('LineTap'); if (st.sent && st.photoHref) { location.href = st.photoHref; return; } sheetOpen(); },
-      sheetGo: () => { sheetShut(); this.setState({ missing: st.ready === true && !blocked }); setTimeout(() => { const f = document.querySelector('form'); if (!f) return; const tall = f.getBoundingClientRect().height > innerHeight * 0.8; f.scrollIntoView({ behavior: 'smooth', block: tall ? 'start' : 'center' }); }, 60); },
+      sheetGo: () => { sheetShut(); this.setState({ missing: st.ready === true && !blocked }); focusCard(); },
+      prev: () => { this.setState({ step: st.step - 1, missing: false }); focusCard(); },
       sheetClose: () => sheetShut(),
       lineHref: 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent('สนใจขายรถ: ' + [st.brand === 'ยี่ห้ออื่น' ? (st.other || 'ยี่ห้ออื่น') : st.brand, st.model === 'รุ่นอื่น' ? st.other : st.model, st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : ''].filter(Boolean).join(' ') + (st.year ? ' ปี ' + st.year : '') + (st.mile ? ' ไมล์ ' + ((MILES.find((m) => m[0] === st.mile) || [0, ''])[1]) + ' กม.' : '') + (st.financed ? ' (ยังผ่อนอยู่)' : '') + (st.sell === '7d' ? ' · จะขายภายใน 7 วัน' : st.sell === 'month' ? ' · จะขายภายในเดือนนี้' : st.sell === 'price' ? ' · อยากรู้ราคาก่อน' : '')),
       formOn: !st.sent && !blocked && st.ready === true,
@@ -184,12 +187,11 @@ class Component extends DCLogic {
       rejectReason: yearOld && mileHigh ? 'เรารับรถปี 2016 ขึ้นไป และไมล์ไม่เกิน 150,000 กม. เท่านั้น' : (yearOld ? 'เรารับรถปี 2016 ขึ้นไปเท่านั้น' : 'เรารับรถไมล์ไม่เกิน 150,000 กม. เท่านั้น'),
       startOver: () => this.setState({ sell: '', step: 1, missing: false, financed: false, sent: false, brand: null, model: null, trim: null, year: '', mile: null, other: '', price: '', term: '', paid: '', monthly: '', phone: '' }),
       fixBlocked: () => this.setState({ year: yearOld ? '' : st.year, mile: mileHigh ? null : st.mile, missing: false }),
-      prev: () => this.setState({ step: st.step - 1, missing: false }),
       next: () => {
         if (blocked) return;
         const ok = st.step === 1 ? (st.brand && st.year && st.mile) : st.step === 3 ? st.phone.replace(/\D/g, '').length >= 9 : !!st.sell;
         if (!ok) { this.setState({ missing: true }); return; }
-        if (st.step < 3) this.setState({ step: st.step + 1, missing: false }); else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); window.KR.lead(st, MILES).then((r) => { if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' }); else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }
+        if (st.step < 3) { this.setState({ step: st.step + 1, missing: false }); focusCard(); } else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); window.KR.lead(st, MILES).then((r) => { if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: r.t ? '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') : '' }); else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }
       },
       showMissing: st.missing,
       missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ? 'กรุณาเลือกข้อมูลรถของคุณก่อน' : st.step === 2 ? 'กรุณาเลือกว่าจะขายเมื่อไหร่' : 'ใส่เบอร์โทรให้ครบก่อนนะครับ',
