@@ -22,7 +22,7 @@
 html,body{margin:0;background:var(--bg);color:var(--ink)}
 body{font-family:var(--f-body);font-size:15px;line-height:1.5;-webkit-tap-highlight-color:transparent}
 .wrap{max-width:520px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-header{background:var(--green);color:#fff;padding-top:env(safe-area-inset-top,0px)}
+header{background:var(--green);color:#0B1A10;padding-top:env(safe-area-inset-top,0px)}
 header .wrap{padding-block:20px 18px;display:grid;gap:4px}
 header h1{font-family:var(--f-display);font-weight:600;font-size:26px;line-height:1.2;margin:0}
 header p{margin:0;font-size:14px}
@@ -32,7 +32,7 @@ header p{margin:0;font-size:14px}
 .prog-top span{color:var(--ink-2);font-size:13px}
 .bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:999px;transition:width .3s ease}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:14px 132px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:16px 16px}
 .slot{position:relative;display:grid;grid-template-rows:auto 1fr;background:var(--card);border:1.5px dashed #b9c4be;border-radius:14px;padding:0;overflow:hidden;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .slot:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 .ph{position:relative;aspect-ratio:4/3;background:var(--green-soft);display:grid;place-items:center;color:var(--green-d)}
@@ -55,17 +55,22 @@ header p{margin:0;font-size:14px}
 .slot.done .hint{color:var(--green-d);font-weight:500}
 .slot.fail{border:1.5px solid var(--err)}
 .slot.fail .hint{color:var(--err);font-weight:500}
-.send{position:fixed;z-index:10;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.send{position:sticky;z-index:10;bottom:0;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 .send .wrap{padding-block:12px;display:grid;gap:6px}
 .send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
 .send button:disabled{background:#c9d2cd;cursor:not-allowed}
 .send small{text-align:center;color:var(--ink-2);font-size:13px;line-height:1.5;padding:0 8px}
 .journey{display:none;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
-.journey span{display:grid;justify-items:center;gap:4px;font-size:11px;line-height:1.2;color:rgba(255,255,255,.75);text-align:center}
-.journey i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:600;font-size:12px;background:rgba(255,255,255,.25);color:#fff}
-.journey .done i{background:#fff;color:var(--green)}.journey .now{color:#fff}.journey .now i{background:#141414;color:#fff}
+.journey span{display:grid;justify-items:center;gap:4px;font-size:11px;line-height:1.2;color:rgba(11,26,16,.75);text-align:center}
+.journey i{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:600;font-size:12px;background:rgba(11,26,16,.12);color:#0B1A10}
+.journey .done i{background:#0B1A10;color:#fff}.journey .now{color:#0B1A10;font-weight:600}.journey .now i{background:#fff;color:#0B1A10;box-shadow:0 0 0 2px #0B1A10}
 .web .journey{display:grid}
 .screen{min-height:100vh;display:grid;place-items:center;padding-block:48px}
+.screen.ready{min-height:calc(100vh - 150px);padding-block:40px}
+.card .cta{width:100%;max-width:360px;height:56px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:8px}
+.card .cta:disabled{background:#c9d2cd;cursor:not-allowed}
+.card .link{height:44px;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:underline;cursor:pointer}
+.card .err{margin-top:0;width:100%}
 .card{display:grid;gap:12px;justify-items:center;text-align:center;max-width:360px}
 .big{width:72px;height:72px;border-radius:50%;background:var(--green);display:grid;place-items:center}
 .big.warn{background:var(--err)}
@@ -95,6 +100,22 @@ input[type=file]{display:none}
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
     <small id="doneNote" hidden>ข้อมูลและรูปทั้งหมดส่งถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านบนเพื่อประเมินราคากับทีมงาน</small>
+  </div></div>
+</div>
+
+<div id="readyView" hidden>
+  <header><div class="wrap">
+    <h1>ขั้นที่ 4 จาก 4 คุยในไลน์</h1>
+    <p>ข้อมูลรถและรูปครบแล้ว เหลือแค่แอดไลน์</p>
+    <div class="journey" aria-label="ขั้นตอน"><span class="done"><i>✓</i>ข้อมูลรถ</span><span class="done"><i>✓</i>เบอร์โทร</span><span class="done"><i>✓</i>รูปรถ</span><span class="now"><i>4</i>คุยในไลน์</span></div>
+  </div></header>
+  <div class="wrap screen ready"><div class="card">
+    <div class="big"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+    <h2>ส่งข้อมูลและรูปครบแล้ว</h2>
+    <p>ข้อมูลและรูปทั้งหมดส่งถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านล่างเพื่อประเมินราคากับทีมงาน</p>
+    <button class="cta" id="readyBtn" type="button"></button>
+    <div class="err" id="readyErr" hidden></div>
+    <button class="link" id="editBtn" type="button">แก้ไขรูป</button>
   </div></div>
 </div>
 
@@ -141,7 +162,8 @@ let current = -1;
 const $ = id => document.getElementById(id);
 const cam = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>';
 
-function show(id){ ['app','doneView','badView','loadView'].forEach(v => $(v).hidden = v !== id); window.scrollTo(0,0); }
+function show(id){ ['app','readyView','doneView','badView','loadView'].forEach(v => $(v).hidden = v !== id); window.scrollTo(0,0); }
+let editing = false;   // กด "แก้ไขรูป" แล้ว ไม่เด้งหน้า ready ซ้ำจนกว่าจะเปลี่ยนรูปใหม่
 
 function render(){
   const g = $('grid'); g.innerHTML = '';
@@ -162,14 +184,17 @@ function render(){
     };
     g.appendChild(b);
   });
-  const got = st.slice(0, REQ).filter(x => x.state === 'done').length;
+  const got = st.slice(0, REQ).filter(x => x.state === 'done' || x.state === 'up').length;   // นับตั้งแต่เลือก (ส่งอยู่เบื้องหลัง)
+  const done = st.slice(0, REQ).filter(x => x.state === 'done').length;
   const busy = st.some(x => x.state === 'up');
   $('count').textContent = got + '/' + REQ + ' มุม';
-  $('left').textContent = got >= REQ ? (busy ? 'กำลังส่งรูปที่เหลือ...' : 'ครบแล้ว กดส่งได้เลย') : 'เหลืออีก ' + (REQ - got) + ' มุม';
+  $('left').textContent = got >= REQ ? (busy ? 'กำลังส่งรูป...' : 'ครบแล้ว') : 'เหลืออีก ' + (REQ - got) + ' มุม';
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
-  btn.disabled = got < REQ || busy;
-  if (REF) { const ready = got >= REQ && !busy; btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'Add LINE : @kairodwai') + '</span>'; $('doneNote').hidden = !ready; }
+  btn.disabled = done < REQ || busy;
+  if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : !ready ? 'รอรูปส่งเสร็จ...' : 'Add LINE : @kairodwai') + '</span>'; $('doneNote').hidden = !ready;
+    $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @kairodwai</span>';
+    if (ready && !editing && $('app').hidden === false) show('readyView'); }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
@@ -197,7 +222,7 @@ function upload(i){
   st[i].state = 'up'; render();
   const b64 = data[i].split(',')[1];
   chain = chain.then(() => tokenReady).then(() => post({ type:'photo', t:token, slot:i, data:b64 }))
-    .then(r => { st[i].state = r && r.ok ? 'done' : 'fail'; if (r && r.err === 'link') show('badView'); })
+    .then(r => { st[i].state = r && r.ok ? 'done' : 'fail'; editing = false; if (r && r.err === 'link') show('badView'); })
     .catch(() => { st[i].state = 'fail'; })
     .then(render);
 }
@@ -214,8 +239,8 @@ $('picker').onchange = async () => {
 
 $('closeBtn').onclick = () => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); else history.back(); } catch (e) {} };
 
-$('sendBtn').onclick = async () => {
-  const btn = $('sendBtn'); btn.disabled = true; btn.textContent = REF ? 'กำลังส่ง แล้วเปิดไลน์...' : 'กำลังส่ง...'; $('sendErr').hidden = true;
+async function sendAll(btn, errEl){
+  btn.disabled = true; btn.textContent = REF ? 'กำลังส่ง แล้วเปิดไลน์...' : 'กำลังส่ง...'; errEl.hidden = true;
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
@@ -223,10 +248,13 @@ $('sendBtn').onclick = async () => {
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
-    $('sendErr').textContent = 'ส่งไม่สำเร็จ เช็คเน็ตแล้วกดส่งอีกครั้ง';
-    $('sendErr').hidden = false; render();
+    errEl.textContent = 'ส่งไม่สำเร็จ เช็คเน็ตแล้วกดส่งอีกครั้ง';
+    errEl.hidden = false; btn.disabled = false; render(); if (REF) $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @kairodwai</span>';
   }
-};
+}
+$('sendBtn').onclick = () => sendAll($('sendBtn'), $('sendErr'));
+$('readyBtn').onclick = () => sendAll($('readyBtn'), $('readyErr'));
+$('editBtn').onclick = () => { editing = true; show('app'); };
 
 // เปิดหน้าให้เห็นทันที แล้วค่อยยืนยันตัวลูกค้ากับ LINE อยู่เบื้องหลัง
 const tokenReady = (async () => {
