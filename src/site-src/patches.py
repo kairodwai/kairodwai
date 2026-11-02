@@ -133,6 +133,9 @@ def common(body):
     badge_old = 'height: 32px; padding: 0 14px; border-radius: 16px; background: #141414; color: #F5F4F0; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>'
     body = body.replace(badge_old, 'height: 32px; padding: 0 14px; border-radius: 16px; background: #06C755; color: #0B1A10; font-family: \'Kanit\', sans-serif; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>')
     body = body.replace('ยังผ่อนไม่หมด ก็ขายได้ถูกกฎหมาย', 'ยังผ่อนไม่หมด ก็ขายได้ถูกต้องตามกฎหมาย 100%')
+    # เกณฑ์รับซื้อ: "ไมล์ไม่เกิน 150,000" (ติ๊กเขียว) -> "ไม่รับรถไมล์เกิน 150,000 กม." (กากบาทแดง)
+    body = body.replace('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E7A3C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M5 12l5 5L20 7"></path></svg><span>ไมล์ไม่เกิน <strong style="font-weight: 600;">150,000</strong> กม.</span>',
+                        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A33A16" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>ไม่รับรถ<strong style="font-weight: 600;">ไมล์เกิน 150,000 กม.</strong></span>')
     # ส่วนไฟแนนซ์: ไม่มีระบบเช็คราคาในเว็บ ปุ่ม "เช็คว่ารถคุณเหลือเงินเท่าไหร่" -> ลิงก์ไปคู่มือขายรถติดไฟแนนซ์แทน
     body = body.replace('<a href="#top" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">เช็คว่ารถคุณเหลือเงินเท่าไหร่',
                         '<a href="/finance/" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">ดูขั้นตอนขายรถติดไฟแนนซ์')
@@ -215,6 +218,8 @@ def apply(name, body, logic):
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
+    # ไมล์: ตัดตัวเลือก "มากกว่า 150,000" ออกจาก dropdown (เกณฑ์บอกไว้แล้วว่าไม่รับ)
+    rep("    MILES.push(['150up', 'มากกว่า 150,000']);\n", "")
     # รุ่นย่อยชื่อยาว (เช่น "A4 Avant 45 TFSI quattro S Line Black Edition"): ตัดชื่อรุ่นที่ซ้ำข้างหน้าออกตอนแสดง
     rep("trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']),", "trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']).map((t) => ({ v: t, l: st.model && t.indexOf(st.model + ' ') === 0 ? t.slice(st.model.length + 1) : t })),")
     rep("st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : ''", "st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? (st.model && st.trim.indexOf(st.model + ' ') === 0 ? st.trim.slice(st.model.length + 1) : st.trim) : ''")
