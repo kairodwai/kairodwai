@@ -144,7 +144,7 @@ class Component extends DCLogic {
       pickNo: () => this.setState({ financed: false }),
       pickYes: () => this.setState({ financed: true }),
       blocked: blocked,
-      sendLabel: blocked ? 'รถคันนี้ยังไม่อยู่ในเกณฑ์รับซื้อ' : (st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'เลือกรูปรถของคุณ')),
+      sendLabel: blocked ? 'รถคันนี้ยังไม่อยู่ในเกณฑ์รับซื้อ' : (st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังไปหน้าเลือกรูปรถของคุณ…' : 'ยืนยัน')),
       sendStyle: 'height: 56px; border: 0; border-radius: 28px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500; ' + (blocked ? 'background: #E4E1DA; color: #4A4843; cursor: not-allowed;' : 'background: #141414; color: #FFFFFF; cursor: pointer;'),
       sent: st.sent,
       stepNo: st.step,
@@ -194,7 +194,7 @@ class Component extends DCLogic {
         if (st.step < 3) { this.setState({ step: st.step + 1, missing: false }); focusCard(); } else if (!st.sending) { this.setState({ sending: true, missing: false, failed: false }); window.KR.lead(st, MILES).then((r) => { if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || ''); setTimeout(() => { location.href = h; }, 350); return; } if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }
       },
       showMissing: st.missing,
-      missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดเลือกรูปรถของคุณอีกครั้งได้เลย' : st.step === 1 ? 'กรุณาเลือกข้อมูลรถของคุณก่อน' : st.step === 2 ? 'กรุณาเลือกว่าจะขายเมื่อไหร่' : 'ใส่เบอร์โทรให้ครบก่อนนะครับ',
+      missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้งได้เลย' : st.step === 1 ? 'กรุณาเลือกข้อมูลรถของคุณก่อน' : st.step === 2 ? 'กรุณาเลือกว่าจะขายเมื่อไหร่' : 'ใส่เบอร์โทรให้ครบก่อนนะครับ',
       summary: [st.brand === 'ยี่ห้ออื่น' ? (st.other || 'ยี่ห้ออื่น') : st.brand, st.model === 'รุ่นอื่น' ? st.other : st.model, st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? (st.model && st.trim.indexOf(st.model + ' ') === 0 ? st.trim.slice(st.model.length + 1) : st.trim) : '', st.year].filter(Boolean).join(' · '),
       yearVal: st.year,
       mileVal: st.mile || '',

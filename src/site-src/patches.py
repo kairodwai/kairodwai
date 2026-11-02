@@ -211,8 +211,8 @@ def apply(name, body, logic):
         "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || ''); setTimeout(() => { location.href = h; }, 350); return; } "
         "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); "
         "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
-    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'เลือกรูปรถของคุณ'))")
-    rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดเลือกรูปรถของคุณอีกครั้งได้เลย' : st.step === 1 ?")
+    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังไปหน้าเลือกรูปรถของคุณ…' : 'ยืนยัน'))")
+    rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
     # รุ่นย่อยชื่อยาว (เช่น "A4 Avant 45 TFSI quattro S Line Black Edition"): ตัดชื่อรุ่นที่ซ้ำข้างหน้าออกตอนแสดง

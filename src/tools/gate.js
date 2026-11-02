@@ -37,7 +37,7 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
         await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
     await f.screenshot({ path: `shots/${tag}-5-step3.png` });
     await p.locator('form input').last().fill('0812345678');
-    await f.getByRole('button', { name: 'เลือกรูปรถของคุณ' }).click(); await p.waitForURL(/\/line\//, { timeout: 5000 }); await p.waitForTimeout(300);
+    await f.getByRole('button', { name: 'ยืนยัน' }).click(); await p.waitForURL(/\/line\//, { timeout: 5000 }); await p.waitForTimeout(300);
     await p.screenshot({ path: `shots/${tag}-6-photos.png` });
     console.log(tag, 'posted when:', posted && JSON.parse(posted).when, '| after ขอราคา → url:', new URL(p.url()).pathname + new URL(p.url()).search);
     await p.goBack(); await p.waitForSelector('html.dc-ready'); await p.waitForTimeout(300);

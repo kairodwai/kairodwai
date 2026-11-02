@@ -33,18 +33,18 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   await p.locator('form input').last().fill('0812345678');
   const txt = async () => (await f.innerText()).replace(/\s+/g, ' ');
   // 1) network failure
-  await f.getByRole('button', { name: 'เลือกรูปรถของคุณ' }).click(); await p.waitForTimeout(700);
+  await f.getByRole('button', { name: 'ยืนยัน' }).click(); await p.waitForTimeout(700);
   await f.screenshot({ path: 'shots/fail-1-network.png' });
   const t1 = await txt();
-  console.log('network fail → still on form:', t1.includes('เลือกรูปรถของคุณ') && !t1.includes('รหัสอ้างอิง'), '| message:', t1.includes('ส่งไม่สำเร็จ'), '| button enabled:', await f.getByRole('button', { name: 'เลือกรูปรถของคุณ' }).isEnabled());
+  console.log('network fail → still on form:', t1.includes('ยืนยัน') && !t1.includes('รหัสอ้างอิง'), '| message:', t1.includes('ส่งไม่สำเร็จ'), '| button enabled:', await f.getByRole('button', { name: 'ยืนยัน' }).isEnabled());
   // 2) backend says ok:false
   mode = 'bad';
-  await f.getByRole('button', { name: 'เลือกรูปรถของคุณ' }).click(); await p.waitForTimeout(700);
+  await f.getByRole('button', { name: 'ยืนยัน' }).click(); await p.waitForTimeout(700);
   const t2 = await txt();
   console.log('ok:false → message:', t2.includes('ส่งไม่สำเร็จ'), '| not sent:', !t2.includes('รหัสอ้างอิง'));
   // 3) retry succeeds
   mode = 'ok';
-  await f.getByRole('button', { name: 'เลือกรูปรถของคุณ' }).click(); await p.waitForTimeout(150);
+  await f.getByRole('button', { name: 'ยืนยัน' }).click(); await p.waitForTimeout(150);
   const leadCalls = p.evaluate(() => (window.__fb || []).filter(a => a[1] === 'Lead').length);
   await p.waitForURL(/\/line\//, { timeout: 5000 });
   console.log('retry ok → went to photos:', new URL(p.url()).pathname + new URL(p.url()).search);
