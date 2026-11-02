@@ -18,8 +18,9 @@
     store('kr_src', JSON.stringify({ ref: document.referrer.slice(0, 200), landing: location.pathname, at: Date.now() }));
   }
 
+  var STD = ['Lead', 'Contact', 'ViewContent', 'CompleteRegistration', 'SubmitApplication'];
   function track(name, data) {
-    try { if (window.fbq) window.fbq('track', name, data || {}); } catch (e) {}
+    try { if (window.fbq) window.fbq(STD.indexOf(name) >= 0 ? 'track' : 'trackCustom', name, data || {}); } catch (e) {}
     try { if (window.gtag) window.gtag('event', name, data || {}); } catch (e) {}
   }
 
