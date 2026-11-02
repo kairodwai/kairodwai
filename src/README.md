@@ -15,6 +15,7 @@ src/tools/       สคริปต์ทดสอบ Playwright (gate.js = e2e 
 ```
 
 ## build
+**ระหว่างยิงแอด ขึ้นเว็บด้วย `src/tools/release.sh "ข้อความ"` เท่านั้น** — ทดสอบทางแอด (/go→LIFF→ฟอร์ม→รูป→กลับแชท) + ทางเบราว์เซอร์ (ปุ่ม/QR/ไม่มีไลน์) + tracking ก่อน push ไม่ผ่าน = ไม่ขึ้น · ห้ามเปลี่ยน URL /go, ชื่อ event (Lead, ReadyToSell, NotReady, Disqualified, LineTap), ช่องในฟอร์ม · งานใหญ่ทำใน branch แยกก่อน
 ```
 python3 src/site-src/build.py                 # เขียนทับหน้าเว็บที่ root ของ repo ตรงๆ
 KR_OUT=/tmp/dry python3 src/site-src/build.py # build ลงที่อื่นเพื่อเทียบก่อน (diff -rq /tmp/dry . -x .git -x src)
