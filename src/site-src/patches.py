@@ -20,6 +20,15 @@ HDR_NEW = '''<img src="/img/logo.png" alt="ขายรถไว" width="444" he
 FTR_OLD = '''<span style="font-family: 'Kanit', sans-serif; font-size: 22px; font-weight: 600; color: #F5F4F0;">ขายรถไว</span>'''
 FTR_NEW = '''<img src="/img/logo-light.png" alt="ขายรถไว" width="444" height="120" style="display: block; height: 26px; width: auto; align-self: flex-start;">'''
 
+# ---- เงื่อนไขเมื่อกดปุ่มแอดไลน์: ขึ้นบนหัวการ์ดฟอร์ม ----
+LINE_NOTE = '''<sc-if value="{{ lineNote }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #E8F8EE; border: 1px solid #B9E8CB; color: #06C755;">__SVG__<div style="display: flex; flex-direction: column; gap: 2px;">
+<span style="font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 15px; color: #0B1A10;">แอดไลน์ได้หลังกรอกข้อมูลรถ</span>
+<span style="font-size: 14px; line-height: 1.5; color: #1F4D30;">ใช้เวลาไม่ถึง 1 นาที ทีมจะได้ตอบราคาในไลน์ได้ทันที ไม่ต้องถามซ้ำ</span>
+</div></div>
+</sc-if>
+'''
+
 # ---- หน้าคัดกรองก่อนเข้าฟอร์ม: พร้อมขายไหม (กดปุ่มเดียว ไม่ต้องกรอก) ----
 # "แค่มาเช็คราคา" ต้องกดค้าง 0.7 วิ (กันมือลั่น ไม่มีคำใบ้) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
 NUM = '''<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 14px; line-height: 1;">'''
@@ -88,6 +97,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       holdStart, holdEnd,
       holdKey: (e) => { if (e.key !== ' ' && e.key !== 'Enter') return; e.preventDefault(); if (e.type === 'keydown') { if (!e.repeat) holdStart(); } else holdEnd(); },
       noMenu: (e) => e.preventDefault(),
+      lineNote: !!st.lineNote && !st.sent && st.ready !== false,
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
@@ -118,6 +128,9 @@ def apply(name, body, logic):
     body = common(body)
     if name not in ('Main', 'Brand', 'Province'):
         return body, logic
+    m = re.search(r'(<svg[^>]*>(?:(?!</svg>).)*</svg>)\s*<span>แอดไลน์', body, re.S)   # โลโก้ LINE จากดีไซน์ (ก่อนตัดการ์ดขอบคุณ)
+    assert m, (name, 'line svg')
+    line_svg = m.group(1)
     # ---- หน้าจอหลังกดขอราคา: แทนกล่อง "ส่งทางไลน์" + ปุ่มไลน์ ด้วยปุ่มถ่ายรูป ----
     a = body.index('<div style="align-self: stretch; background: #F5F4F0; border: 1px solid #DEDBD3; border-radius: 16px; padding: 20px;')
     b = body.index('<a href="{{ lineHref }}" style="align-self: stretch', a)
@@ -127,15 +140,19 @@ def apply(name, body, logic):
     a = body.index('<div style="display: flex; align-items: center; gap: 12px; color: #55534E; font-size: 14px;" aria-hidden="true">')
     b = body.index('<p style="margin: 0; font-size: 13px; color: #55534E; text-align: center;">ข้อมูลใช้ติดต่อ', a)
     body = body[:a] + body[b:]
-    # ---- ปุ่มหัวเว็บ: เลื่อนไปฟอร์ม เขียนว่าขอราคา ----
+    # ---- ปุ่มไลน์: ให้ดูเป็นปุ่มแอดไลน์จริง (เขียว LINE) แต่กดแล้วเลื่อนไปฟอร์ม + ขึ้นเงื่อนไข "กรอกข้อมูลรถก่อน" ----
     body = re.sub(r'(<button type="button" onClick="\{\{ goForm \}\}" aria-label=")[^"]*("[^>]*>)\s*<svg.*?</svg>\s*<span>แอดไลน์</span>',
-                  lambda m: m.group(1) + 'ขอราคา' + m.group(2).replace('background: #E4E1DA;', 'background: #141414;').replace('color: #4A4843;', 'color: #FFFFFF;') + '<span>ขอราคา</span>', body, count=1, flags=re.S)
-    body = body.replace('ส่งรูปทางไลน์ รับราคา', 'กรอกข้อมูล ส่งรูป รับราคา')
-    body = body.replace('ส่งรูปมาทางไลน์ ทีมตอบกลับเร็วในเวลาทำการ', 'กรอกข้อมูลรถ ถ่ายรูป 6 มุม ทีมโทรกลับพร้อมราคา')
+                  lambda m: m.group(1) + 'แอดไลน์ (กรอกข้อมูลรถก่อน)' + m.group(2).replace('background: #E4E1DA;', 'background: #06C755;').replace('color: #4A4843;', 'color: #FFFFFF;') + line_svg + '<span>แอดไลน์</span>', body, count=1, flags=re.S)
+    sec_old = 'font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">กรอกข้อมูลรถก่อน</button>'
+    assert body.count(sec_old) == (1 if name == 'Main' else 0), (name, 'section line button')
+    body = body.replace(sec_old, 'gap: 10px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">' + line_svg.replace('width="20" height="20"', 'width="22" height="22"') + '<span>แอดไลน์ ขายรถไว</span></button>')
+    body = body.replace('ส่งรูปทางไลน์ รับราคา', 'กรอกข้อมูลรถ ส่งรูป คุยต่อในไลน์')
+    body = body.replace('ส่งรูปมาทางไลน์ ทีมตอบกลับเร็วในเวลาทำการ', 'คุยกับทีมทางไลน์ ตอบไวในเวลาทำการ')
+    note = LINE_NOTE.replace('__SVG__', line_svg.replace('width="20" height="20"', 'width="22" height="22"'))
     # ---- หน้าคัดกรอง "พร้อมขายไหม" ก่อนฟอร์ม + แถบขั้นตอนแบบเลข ----
     anchor = '<sc-if value="{{ formOn }}" hint-placeholder-val="{{ true }}">'
     assert body.count(anchor) == 1, (name, 'formOn anchor')
-    body = body.replace(anchor, GATE + anchor)
+    body = body.replace(anchor, note + GATE + anchor)
     assert body.count(SEG_OLD) == 1, (name, 'segment anchor')
     body = body.replace(SEG_OLD, SEG_NEW)
 
@@ -164,4 +181,5 @@ def apply(name, body, logic):
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
+    rep("goForm: () => { if (!blocked) this.setState({ missing: true });", "goForm: () => { trk('LineTap'); if (!blocked) this.setState({ missing: true, lineNote: true });")
     return body, logic
