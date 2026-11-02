@@ -1,22 +1,27 @@
 /* ขายรถไว — ส่งฟอร์มเข้าระบบ + เก็บที่มาของลูกค้า (แอดไหน) */
 (function () {
-  // ลิงก์เก่าจากปุ่มในไลน์ (index.html?v=9) ส่งไปหน้าถ่ายรูป
-  if ((location.pathname === '/' || location.pathname === '/index.html') && /[?&](v=|liff\.state=|t=)/.test(location.search)) { location.replace('/line/' + location.search); return; }
+  var isRoot = location.pathname === '/' || location.pathname === '/index.html';
+  var liffState = new URLSearchParams(location.search).get('liff.state');   // LIFF app "kairodwai-web" เปิดมาที่ root พร้อม liff.state → ให้ SDK แปลงเป็น URL จริง (/?via=liff&…) เอง ห้าม redirect แทรก
+  // ลิงก์เก่าจากปุ่มในไลน์ (index.html?v=9) และลิงก์ "ถ่ายรูปต่อ" (t=…) ส่งไปหน้าถ่ายรูป
+  if (isRoot && !liffState && /[?&](v=|t=)/.test(location.search)) { location.replace('/line/' + location.search); return; }
   var API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
   var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid'];
   // เปิดในไลน์ผ่าน LIFF app "kairodwai-web" (endpoint = https://kairodwai.com/) → รู้ตัวตนไลน์ตั้งแต่จอแรก ไม่ต้อง Add LINE/ส่งรหัสทีหลัง
   var LIFF_WEB_ID = window.KR_LIFF_ID || '';   // ค่าจริงใส่ใน build.py (KR_LIFF_ID) — ว่าง = โหมดเว็บธรรมดา
-  var VIA_LIFF = /[?&]via=liff(&|$)/.test(location.search) && !!LIFF_WEB_ID;
+  var VIA_LIFF = (/[?&]via=liff(&|$)/.test(location.search) || (isRoot && !!liffState)) && !!LIFF_WEB_ID;
   var LINE_ME = null;   // { uid, name } หลัง liff.getProfile()
+  var webMode = function () { VIA_LIFF = false; document.documentElement.classList.remove('via-liff'); };   // ไม่ได้อยู่ในแอปไลน์จริง → กลับเป็นเว็บธรรมดา (ไม่บังคับล็อกอิน)
   if (VIA_LIFF) {
     document.documentElement.classList.add('via-liff');
     var sdk = document.createElement('script'); sdk.src = 'https://static.line-scdn.net/liff/edge/2/sdk.js';
     sdk.onload = function () {
       liff.init({ liffId: LIFF_WEB_ID }).then(function () {
-        if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); return; }
+        if (liffState) return;                                   // SDK กำลังพาไป URL จริงจาก liff.state
+        if (!liff.isInClient() && !liff.isLoggedIn()) { webMode(); return; }
         return liff.getProfile().then(function (p) { LINE_ME = { uid: p.userId, name: p.displayName || '' }; store('kr_line', JSON.stringify(LINE_ME)); });
-      }).catch(function (e) { try { console.warn('liff', e); } catch (x) {} });
+      }).catch(function (e) { webMode(); try { console.warn('liff', e); } catch (x) {} });
     };
+    sdk.onerror = webMode;
     document.head.appendChild(sdk);
     // คนจากโฆษณารู้แล้วว่าเรารับซื้อรถ → เปิดมาให้เห็นกล่องคำถาม "พร้อมขายรถตอนนี้ไหม?" เลย
     window.addEventListener('load', function () { setTimeout(function () { var f = document.querySelector('form'); if (f) window.scrollTo({ top: f.getBoundingClientRect().top + window.scrollY - 16 }); }, 500); });
@@ -60,5 +65,5 @@
       .catch(function () { clearTimeout(timer); return null; });
   }
 
-  window.KR = { lead: lead, track: track, viaLiff: VIA_LIFF };
+  window.KR = { lead: lead, track: track, get viaLiff() { return VIA_LIFF; } };
 })();
