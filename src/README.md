@@ -29,8 +29,9 @@ flow: gate "พร้อมขายรถตอนนี้ไหม?" → ฟ�
 events (site.js `track()`): ReadyToSell / NotReady (trackCustom), Lead เฉพาะกรอกฟอร์มจบ; fbq สำหรับชื่อมาตรฐาน (Lead, Contact, ViewContent, CompleteRegistration, SubmitApplication) ใช้ `track` ที่เหลือ `trackCustom`
 
 ## หลังบ้าน
-Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v10** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
-flow แจ้งทีม: saveLead เก็บเงียบ (ไม่แจ้ง) → รูปครบ (type done) แจ้งทีม 1 ข้อความแบบ "Kairodwai Lead : KR-xxxx / Details / Status / Call / Source / Photos" + สถานะชีท "รูปครบ รอโทร" → ลูกค้าส่ง "KR-xxxx" ในไลน์ (linkWebLead) → ตอบการ์ดสรุปให้ลูกค้า + แจ้งทีม "แอดไลน์แล้ว ชื่อไลน์ …"
+Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v11** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
+flow แจ้งทีม: saveLead เก็บเงียบ (ไม่แจ้ง) → รูปครบ (type done) แจ้งทีม 1 ข้อความแบบ "Kairodwai Lead : KR-xxxx / Details / Status / Call / Source / Photos" + สถานะชีท "รูปครบ รอโทร" → ลูกค้าส่ง "KR-xxxx" ในไลน์ (linkWebLead) → ตอบการ์ด "ได้รับข้อมูลและรูปครบแล้ว กำลังประเมินราคา" (รูปกดไม่ได้) + เปลี่ยนเมนูล่างของคนนั้นเป็น "รอประเมินราคา" (rich menu รายคน, ไม่มีปุ่ม — รูป /img/richmenu-wait.png สร้างด้วย src/tools/richmenu.js, ตั้งครั้งแรกด้วย setupWaitMenu() → WAIT_MENU_ID) + แจ้งทีม "แอดไลน์แล้ว ชื่อไลน์ …" → จากนั้นบอทเงียบ ทีมพิมพ์ตอบเองในแชท (OA อยู่โหมด chat ตรวจด้วย botInfo())
+ทดสอบจริงครบสาย 2 พ.ย. 2026 (KR-1009) ผ่าน; ข้อความทักทายเพื่อนใหม่ตั้งใน LINE OA Manager (ใช้ {Nickname}) แยก 2 ทาง: กรอกจากเว็บแล้ว → กดส่งข้อความที่เตรียมไว้ / ยังไม่เคย → ปุ่ม "ส่งรูปรถ"
 sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token), M = ติดตามแล้ว (FOLLOW_COL); saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้
 ตามลีดที่ค้างรูป: trigger รายชั่วโมง `followUp()` (ติดตั้งด้วย installFollowUp) → SMS หลัง 2 ชม. + วันถัดไป (ลิงก์ /line/?t=… เดิม), ครบ 24 ชม. แจ้งทีมโทรตาม
 SMS: Thaibulksm API v2 (`sendSms()` ใน Code.gs) — บัญชี Thaibulksm ของทีม, API Key ชื่อแอป "Kairodwai" (ช่องทาง SMS/LON) — ค่าอยู่ใน Script properties `SMS_KEY`, `SMS_SECRET`, `SMS_TEST_TO` (เบอร์ทดสอบ), `SMS_SENDER` (ยังไม่ตั้ง = ใช้ "Demo"); ทดสอบด้วย `testSms()` ผ่านแล้ว 2 พ.ย. 2026
