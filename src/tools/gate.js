@@ -24,7 +24,7 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
     console.log(tag, 'tap on just-checking stays on gate:', await p.locator('[role=dialog]').count() === 0, '| hint elements:', await f.locator('[aria-live]').count());
     await f.screenshot({ path: `shots/${tag}-2-gate-hint.png` });
     // ready → form step 1
-    await f.getByRole('button', { name: 'พร้อมขาย ภายใน 7 วันนี้' }).click();
+    await f.getByRole('button', { name: 'พร้อมขายใน 1-7 วันนี้' }).click();
     await p.waitForTimeout(150);
     await f.screenshot({ path: `shots/${tag}-3-step1.png` });
     const sels = p.locator('form select');

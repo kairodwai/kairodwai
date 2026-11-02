@@ -31,7 +31,7 @@ GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้าน ประเมินฟรี ตรวจเสร็จโอนเงินทันที</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px;">
-<button type="button" onClick="{{ readyYes }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 18px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">พร้อมขาย ภายใน 7 วันนี้</button>
+<button type="button" onClick="{{ readyYes }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 18px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">พร้อมขายใน 1-7 วันนี้</button>
 <div style="display: flex; justify-content: center; padding-top: 2px;">
 <button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้)" style="position: relative; overflow: hidden; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #8C8983; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
 <span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 20px; background: #DEDBD3; {{ holdBar }}"></span>
