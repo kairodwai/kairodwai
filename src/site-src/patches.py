@@ -35,6 +35,24 @@ LINE_SHEET = '''<sc-if value="{{ lineSheet }}" hint-placeholder-val="{{ false }}
 </sc-if>
 '''
 
+# ---- คนที่กรอกข้อมูลไว้แล้วแต่ยังไม่ได้ถ่ายรูป (จำไว้ในเครื่อง 7 วัน): กลับมาแล้วพาต่อ ----
+RESUME = '''<sc-if value="{{ resumeOn }}" hint-placeholder-val="{{ false }}">
+<div style="display: flex; flex-direction: column; gap: 24px;">
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 14px; font-weight: 500; color: #0B7A36;">ส่งข้อมูลรถไว้แล้ว · รหัส {{ resumeRef }}</span>
+<h2 style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 24px; line-height: 1.3; text-wrap: balance;">เหลือแค่ถ่ายรูปรถ</h2>
+<p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ถ่ายครบ 5 มุม แล้วแอดไลน์คุยราคากับทีมงานได้เลย รูปที่ถ่ายไว้แล้วยังอยู่ครบ</p>
+</div>
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<a href="{{ resumeHref }}" style="display: flex; align-items: center; justify-content: center; height: 56px; border-radius: 28px; background: #141414; text-decoration: none; font-family: 'Kanit', sans-serif; font-size: 16px; font-weight: 500; color: #FFFFFF;">ถ่ายรูปรถต่อ</a>
+<div style="display: flex; justify-content: center;">
+<button type="button" onClick="{{ resumeReset }}" style="height: 44px; padding: 0 16px; border: 0; background: transparent; font-family: inherit; font-size: 14px; color: #75736C; cursor: pointer;">ขายรถคันอื่น เริ่มใหม่</button>
+</div>
+</div>
+</div>
+</sc-if>
+'''
+
 # ---- หน้าคัดกรองก่อนเข้าฟอร์ม: พร้อมขายไหม (กดปุ่มเดียว ไม่ต้องกรอก) ----
 # "แค่มาเช็คราคา" ต้องกดค้าง 0.7 วิ (กันมือลั่น ไม่มีคำใบ้) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
 NUM = '''<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 14px; line-height: 1;">'''
@@ -109,7 +127,11 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       noMenu: (e) => e.preventDefault(),
       lineSheet: !!st.lineSheet,
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
-      gateOn: !st.sent && st.ready === null,
+      resumeOn: !st.sent && !!st.resume && st.ready === null,
+      resumeRef: st.resume ? st.resume.ref : '',
+      resumeHref: st.resume ? '/line/?t=' + encodeURIComponent(st.resume.t) + '&ref=' + encodeURIComponent(st.resume.ref) : '',
+      resumeReset: () => { try { localStorage.removeItem('kr_resume'); } catch (e) {} this.setState({ resume: null }); },
+      gateOn: !st.sent && st.ready === null && !st.resume,
       notReady: !st.sent && st.ready === false,
       readyYes: () => { this.setState({ ready: true, missing: false, sell: 'ready' }); trk('ReadyToSell'); focusCard(); },
       readyNo: quit,
@@ -173,7 +195,7 @@ def apply(name, body, logic):
     # ---- หน้าคัดกรอง "พร้อมขายไหม" ก่อนฟอร์ม + แถบขั้นตอนแบบเลข ----
     anchor = '<sc-if value="{{ formOn }}" hint-placeholder-val="{{ true }}">'
     assert body.count(anchor) == 1, (name, 'formOn anchor')
-    body = body.replace(anchor, note + GATE + anchor)
+    body = body.replace(anchor, note + RESUME + GATE + anchor)
     # ขั้น 1: เรียงใหม่ ปี | ยี่ห้อ / รุ่น | รุ่นย่อย / ไมล์ (เต็มกว้าง ไม่โดนตัดคำ)
     def lbl(text):
         m = re.search(r'<label style="[^"]*">' + re.escape(text) + r'\n.*?</label>', body, re.S)
@@ -202,6 +224,7 @@ def apply(name, body, logic):
     rep("this.state = { sell: '', photoIdx: 0, step: 1,",
         "this.state = { ready: (() => { try { if (/[?&]kr=reset\\b/.test(location.search)) localStorage.removeItem('kr_noready'); "
         "const t = +localStorage.getItem('kr_noready') || 0; return Date.now() - t < 864e5 ? false : null; } catch (e) { return null; } })(), "
+        "resume: (() => { try { const r = JSON.parse(localStorage.getItem('kr_resume') || 'null'); return r && r.t && r.ref && Date.now() - r.ts < 7 * 864e5 ? r : null; } catch (e) { return null; } })(), "
         "sell: '', photoIdx: 0, step: 1,")
     rep("formOn: !st.sent && !blocked,", "formOn: !st.sent && !blocked && st.ready === true,")
     rep("lineReady: !!(st.brand && st.year && st.mile) && !blocked,", "lineReady: false,")
