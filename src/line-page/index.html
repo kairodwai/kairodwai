@@ -99,7 +99,7 @@ input[type=file]{display:none}
   </div>
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
-    <small id="doneNote" hidden>ข้อมูลและรูปทั้งหมดส่งถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านบนเพื่อประเมินราคากับทีมงาน</small>
+    <small id="doneNote" hidden>ข้อมูลและรูปทั้งหมดส่งเข้าไลน์ถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านบนเพื่อประเมินราคากับทีมงาน</small>
   </div></div>
 </div>
 
@@ -112,7 +112,7 @@ input[type=file]{display:none}
   <div class="wrap screen ready"><div class="card">
     <div class="big"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
     <h2>ส่งข้อมูลและรูปครบแล้ว</h2>
-    <p>ข้อมูลและรูปทั้งหมดส่งถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านล่างเพื่อประเมินราคากับทีมงาน</p>
+    <p>ข้อมูลและรูปทั้งหมดส่งเข้าไลน์ถึงทีมเรียบร้อยแล้ว<br>กด Add LINE ด้านล่างเพื่อประเมินราคากับทีมงาน</p>
     <button class="cta" id="readyBtn" type="button"></button>
     <div class="err" id="readyErr" hidden></div>
     <button class="link" id="editBtn" type="button">แก้ไขรูป</button>
@@ -192,8 +192,8 @@ function render(){
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
   btn.disabled = done < REQ || busy;
-  if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : !ready ? 'รอรูปส่งเสร็จ...' : 'Add LINE : @kairodwai') + '</span>'; $('doneNote').hidden = !ready;
-    $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @kairodwai</span>';
+  if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : !ready ? 'รอรูปส่งเสร็จ...' : 'Add LINE : @KAIRODWAI') + '</span>'; $('doneNote').hidden = !ready;
+    $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @KAIRODWAI</span>';
     if (ready && !editing && $('app').hidden === false) show('readyView'); }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
@@ -249,7 +249,7 @@ async function sendAll(btn, errEl){
     throw new Error();
   } catch (e) {
     errEl.textContent = 'ส่งไม่สำเร็จ เช็คเน็ตแล้วกดส่งอีกครั้ง';
-    errEl.hidden = false; btn.disabled = false; render(); if (REF) $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @kairodwai</span>';
+    errEl.hidden = false; btn.disabled = false; render(); if (REF) $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @KAIRODWAI</span>';
   }
 }
 $('sendBtn').onclick = () => sendAll($('sendBtn'), $('sendErr'));
