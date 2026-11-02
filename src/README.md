@@ -51,6 +51,12 @@ LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairod
 คนค้าง: หน้ารูปส่ง type left ตอนปิดหน้า (pagehide) → markLeft ตั้ง trigger 1 นาที (v17; trigger ของ Google หน่วงเองได้อีก ~0-1 นาที) → leftCheck: ยังไม่ครบ → push ปุ่ม "ถ่ายรูปต่อ" ให้ลูกค้า + แจ้งทีม "กรอกแล้ว ยังไม่ส่งรูป" (คอลัมน์ M = left) · followUp รายชั่วโมง: เห็น userId → push แทน SMS (push ไม่ผ่าน → SMS); โหมดไลน์ไม่มีกล่องถามตอนออก/ไม่มีแผง "ถ่ายทีหลัง" · เว็บธรรมดา (Google/คอม) ยังใช้ flow รหัส KR + Add LINE เหมือนเดิม
 ทดสอบจำลอง: `node src/tools/liff.js` · storyboard: `node src/tools/storyboard.js`
 
+## Health Monitor (หน้าเช็ค SEO/GEO + งานหลังบ้าน)
+หน้า private ใน Claude (Dashboard artifact "ขายรถไว Health Monitor") — ข้อมูลมาจาก 2 สคริปต์:
+`python3 -m http.server 8090` (ที่ root) แล้ว `node src/tools/seo-audit.js` → shots/seo-audit.json (ตรวจจริงทุกหน้า: HTML ดิบ vs หลังรัน JS, title/desc/H1/schema/alt/ลิงก์)
+`python3 src/tools/health-data.py` → shots/health.json (เช็คลิสต์ 83 ข้อ + หลังบ้าน 17 ข้อ + roadmap 6 เดือน 1 พ.ย. 2026 – 1 พ.ค. 2027; ข้อที่มี check=True อ่านผลจาก audit)
+อัปเดตหน้า: แก้สถานะใน health-data.py → รันสองสคริปต์ → อัปโหลด JSON ใหม่เข้า artifact
+
 ## บั๊กที่รู้แล้ว
 - gate.js: ขั้น goBack หลัง redirect ไป /line/ รอ html.dc-ready ไม่ทัน (TimeoutError) — ของเดิมก่อน LIFF, ขั้นก่อนหน้าผ่านครบ
 site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
