@@ -219,8 +219,10 @@ def apply(name, body, logic):
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
-    # ไมล์: ตัดตัวเลือก "มากกว่า 150,000" ออกจาก dropdown (เกณฑ์บอกไว้แล้วว่าไม่รับ)
-    rep("    MILES.push(['150up', 'มากกว่า 150,000']);\n", "")
+    # นอกเกณฑ์ (ปีก่อน 2016 / ไมล์เกิน 150,000): คงตัวเลือกไว้ให้คนตอบตามจริง -> หน้า "ไม่ผ่านเกณฑ์" สุภาพ + ยิง event Disqualified ให้แอดเอาไปกันคนกลุ่มนี้ออก
+    rep("pickMile: (e) => this.setState({ mile: e.target.value || null, missing: false }),",
+        "pickMile: (e) => { const v = e.target.value || null; this.setState({ mile: v, missing: false }); if (v === '150up') trk('Disqualified'); },")
+    rep("this.setState({ year: v, brand, model, trim, missing: false });", "this.setState({ year: v, brand, model, trim, missing: false }); if (v === 'old') trk('Disqualified');")
     # รุ่นย่อยชื่อยาว (เช่น "A4 Avant 45 TFSI quattro S Line Black Edition"): ตัดชื่อรุ่นที่ซ้ำข้างหน้าออกตอนแสดง
     rep("trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']),", "trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']).map((t) => ({ v: t, l: st.model && t.indexOf(st.model + ' ') === 0 ? t.slice(st.model.length + 1) : t })),")
     rep("st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : ''", "st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? (st.model && st.trim.indexOf(st.model + ' ') === 0 ? st.trim.slice(st.model.length + 1) : st.trim) : ''")

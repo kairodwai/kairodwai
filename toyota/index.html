@@ -73,6 +73,7 @@ class Component extends DCLogic {
     const fmt = (n) => n.toLocaleString('en-US');
     const MILES = [['u5', 'น้อยกว่า 5,000'], ['5-10', '5,000 – 10,000']];
     for (let k = 10000; k < 150000; k += 10000) MILES.push([String(k), fmt(k) + ' – ' + fmt(k + 10000)]);
+    MILES.push(['150up', 'มากกว่า 150,000']);
     const years = [];
     for (let y = 2026; y >= 2016; y--) years.push(String(y));
     const DOT = 'width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 16px; line-height: 1; ';
@@ -130,11 +131,11 @@ class Component extends DCLogic {
         if (brand && CARS[brand] && !Object.values(CARS[brand]).some((m) => Object.values(m).some(ok))) { brand = null; model = null; trim = null; }
         if (brand && model && CARS[brand] && CARS[brand][model] && !Object.values(CARS[brand][model]).some(ok)) { model = null; trim = null; }
         if (brand && model && trim && CARS[brand] && CARS[brand][model] && CARS[brand][model][trim] && !ok(CARS[brand][model][trim])) trim = null;
-        this.setState({ year: v, brand, model, trim, missing: false });
+        this.setState({ year: v, brand, model, trim, missing: false }); if (v === 'old') trk('Disqualified');
       },
       yearOld: yearOld,
       miles: MILES.map((m) => ({ id: m[0], name: m[1] })),
-      pickMile: (e) => this.setState({ mile: e.target.value || null, missing: false }),
+      pickMile: (e) => { const v = e.target.value || null; this.setState({ mile: v, missing: false }); if (v === '150up') trk('Disqualified'); },
       mileHigh: mileHigh,
       financed: st.financed,
       notFinanced: !st.financed,
