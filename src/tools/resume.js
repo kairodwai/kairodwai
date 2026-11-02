@@ -1,6 +1,7 @@
 // ทดสอบ flow ถ่ายทีหลัง: ถ่าย 2 รูป → แผ่น 'ถ่ายทีหลัง' + คัดลอกลิงก์ → หน้าแรกขึ้นการ์ด 'ถ่ายรูปรถต่อ' → กลับมารูปเดิมยังอยู่ → ครบแล้วล้างความจำ — node src/tools/resume.js
 const { chromium } = require('playwright'); const http=require('http'),fs=require('fs'),path=require('path');
-const ROOT=path.join(__dirname,'..','..');  // repo root const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg'};
+const ROOT=path.join(__dirname,'..','..');  // repo root
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg'};
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]); if(p.endsWith('/'))p+='index.html'; fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){r.writeHead(404);r.end();return;} r.writeHead(200,{'content-type':MIME[path.extname(p)]||'application/octet-stream'}); r.end(d);});}).listen(8066);
 (async()=>{const b=await chromium.launch(); const errs=[]; const ctx=await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2}); const p=await ctx.newPage(); p.on('pageerror',e=>errs.push(String(e)));
 await p.addInitScript(()=>{window.fbq=()=>{};});
