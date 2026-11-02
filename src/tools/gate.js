@@ -18,13 +18,13 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
     const f = p.locator('form');
     await p.screenshot({ path: `shots/${tag}-0-top.png` });
     await f.screenshot({ path: `shots/${tag}-1-gate.png` });
-    // not ready → exit message
-    await f.getByRole('button', { name: 'ยังไม่พร้อม แค่อยากเช็คราคา' }).click();
+    // "แค่มาเช็คราคา" ต้องกดค้าง 2 วิ — แตะเฉยๆ ต้องไม่หลุดออก (ทดสอบเต็มใน hold.js)
+    await f.getByRole('button', { name: /แค่มาเช็คราคา/ }).click();
     await p.waitForTimeout(150);
-    await f.screenshot({ path: `shots/${tag}-2-notready.png` });
-    console.log(tag, 'notready text ok:', await f.innerText().then(t => t.includes('ราคารถขึ้นลงทุกวัน') && !t.includes('ไลน์') && !t.includes('091')));
-    // change mind → form step 1
-    await f.getByRole('button', { name: 'เปลี่ยนใจ พร้อมขายแล้ว' }).click();
+    console.log(tag, 'tap on just-checking stays on gate:', await p.locator('[role=dialog]').count() === 0, '| hint:', await f.locator('[aria-live]').innerText());
+    await f.screenshot({ path: `shots/${tag}-2-gate-hint.png` });
+    // ready → form step 1
+    await f.getByRole('button', { name: 'พร้อมขาย ภายใน 7 วันนี้' }).click();
     await p.waitForTimeout(150);
     await f.screenshot({ path: `shots/${tag}-3-step1.png` });
     const sels = p.locator('form select');

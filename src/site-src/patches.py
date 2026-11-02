@@ -21,6 +21,8 @@ FTR_OLD = '''<span style="font-family: 'Kanit', sans-serif; font-size: 22px; fon
 FTR_NEW = '''<img src="/img/logo-light.png" alt="ขายรถไว" width="444" height="120" style="display: block; height: 26px; width: auto; align-self: flex-start;">'''
 
 # ---- หน้าคัดกรองก่อนเข้าฟอร์ม: พร้อมขายไหม (กดปุ่มเดียว ไม่ต้องกรอก) ----
+# "แค่มาเช็คราคา" ต้องกดค้าง 2 วิ (กันมือลั่น) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
+NUM = '''<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 14px; line-height: 1;">'''
 GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 22px;">
 <div style="display: flex; flex-direction: column; gap: 6px;">
@@ -29,19 +31,35 @@ GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้าน ประเมินฟรี ตรวจเสร็จโอนเงินทันที</p>
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px;">
-<button type="button" onClick="{{ readyYes }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 18px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">พร้อมขายแล้ว เริ่มเลย</button>
-<button type="button" onClick="{{ readyNo }}" style="height: 48px; border: 1px solid #C9C5BC; border-radius: 24px; background: #FFFFFF; font-family: inherit; font-size: 15px; font-weight: 500; color: #3D3B37; cursor: pointer;">ยังไม่พร้อม แค่อยากเช็คราคา</button>
+<button type="button" onClick="{{ readyYes }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 18px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">พร้อมขาย ภายใน 7 วันนี้</button>
+<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 4px;">
+<button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้ 2 วินาที)" style="position: relative; overflow: hidden; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #8C8983; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
+<span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 20px; background: #DEDBD3; {{ holdBar }}"></span>
+<span style="position: relative;">ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ</span>
+</button>
+<span aria-live="polite" style="font-size: 12px; line-height: 16px; min-height: 16px; color: #8C8983;">{{ holdHint }}</span>
+</div>
 </div>
 </div>
 </sc-if>
 <sc-if value="{{ notReady }}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 18px;">
-<span style="width: 48px; height: 48px; border-radius: 14px; background: #E9E6DF; display: flex; align-items: center; justify-content: center;"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#141414" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l5-5 4 4 5-6 4 3"></path><path d="M17 8h4v4"></path></svg></span>
-<div style="display: flex; flex-direction: column; gap: 8px;">
-<h2 style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 24px; line-height: 1.3;">ราคารถขึ้นลงทุกวัน</h2>
-<p style="margin: 0; font-size: 15px; line-height: 1.7; color: #3D3B37;">ราคาที่ประเมินวันนี้ จะไม่ใช่ราคาของวันที่คุณพร้อมขาย เราเลยแนะนำให้กลับมาอีกครั้งในวันที่พร้อม ทีมประเมินให้ฟรี ไม่มีค่าใช้จ่าย</p>
+<div role="dialog" aria-modal="true" aria-labelledby="kr-no-title" style="position: fixed; inset: 0; z-index: 9999; background: #B3121B; color: #FFFFFF; display: flex; overflow-y: auto; -webkit-overflow-scrolling: touch;">
+<div style="margin: auto; width: 100%; max-width: 560px; box-sizing: border-box; padding: calc(40px + env(safe-area-inset-top, 0px)) 24px calc(40px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 28px;">
+<span style="font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: 0.5px; opacity: 0.85;">ขายรถไว</span>
+<div style="display: flex; flex-direction: column; gap: 12px;">
+<h2 id="kr-no-title" style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.2;">วันนี้เรายังไม่ประเมินราคาให้</h2>
+<p style="margin: 0; font-size: 17px; line-height: 1.6; opacity: 0.92;">ไม่ใช่ไม่อยากช่วย แต่ราคาที่ให้ตอนคุณยังไม่พร้อมขาย จะทำให้คุณเสียประโยชน์เอง</p>
 </div>
-<button type="button" onClick="{{ readyYes }}" style="align-self: flex-start; height: 44px; padding: 0 18px; border: 1px solid #141414; border-radius: 22px; background: transparent; font-family: inherit; font-size: 15px; font-weight: 500; color: #141414; cursor: pointer;">เปลี่ยนใจ พร้อมขายแล้ว</button>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px;">
+<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''1</span><span style="font-size: 16px; line-height: 1.6;">ราคารถขึ้นลงทุกวัน ตัวเลขวันนี้ไม่ใช่ตัวเลขของวันที่คุณขายจริง</span></li>
+<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''2</span><span style="font-size: 16px; line-height: 1.6;">เราตีราคาจากการดูรถจริงถึงบ้าน ไม่ใช่จากข้อมูลบนหน้าจอ</span></li>
+<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''3</span><span style="font-size: 16px; line-height: 1.6;">ราคาที่เราให้ ต้องเป็นราคาที่รับเงินได้ทันที ไม่ใช่ราคาเอาไว้เทียบ</span></li>
+</ol>
+<div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 24px; display: flex; flex-direction: column; gap: 18px;">
+<p style="margin: 0; font-size: 16px; line-height: 1.6;">วันที่พร้อมขาย กลับมาที่นี่ได้เลย ทีมไปดูรถถึงบ้าน ประเมินฟรี ตรวจเสร็จโอนเงินทันที</p>
+<p style="margin: 0; font-size: 14px; line-height: 1.6; opacity: 0.75;">หน้านี้จะเปิดให้กรอกข้อมูลอีกครั้งในวันพรุ่งนี้</p>
+</div>
+</div>
 </div>
 </sc-if>
 '''
@@ -64,11 +82,19 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
     const DONE = 'background: #06C755; color: #FFFFFF;', ACTIVE = 'background: #141414; color: #FFFFFF;', TODO = 'background: #E9E6DF; color: #55534E;';
     const LN_ON = 'background: #06C755;', LN_OFF = 'background: #DEDBD3;';
     const trk = (n) => { try { window.KR.track(n); } catch (e) {} };
+    const quit = () => { this._hold = null; this.setState({ holding: false, ready: false, missing: false }); trk('NotReady'); try { localStorage.setItem('kr_noready', String(Date.now())); } catch (e) {} };
+    const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 2000); this.setState({ holding: true, holdHint: '' }); };
+    const holdEnd = () => { if (!this._hold) return; clearTimeout(this._hold); this._hold = null; this.setState({ holding: false, holdHint: 'กดค้างไว้ 2 วินาที' }); };
     return {
+      holdStart, holdEnd,
+      holdKey: (e) => { if (e.key !== ' ' && e.key !== 'Enter') return; e.preventDefault(); if (e.type === 'keydown') { if (!e.repeat) holdStart(); } else holdEnd(); },
+      noMenu: (e) => e.preventDefault(),
+      holdBar: st.holding ? 'width: 100%; transition: width 2s linear;' : 'width: 0; transition: none;',
+      holdHint: st.holdHint || '',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
       readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); },
-      readyNo: () => { this.setState({ ready: false, missing: false }); trk('NotReady'); },
+      readyNo: quit,
       dot1: DOT + (st.step > 1 ? DONE : ACTIVE), dot1Txt: st.step > 1 ? '\\u2713' : '1',
       dot2: DOT + (st.step > 2 ? DONE : st.step === 2 ? ACTIVE : TODO), dot2Txt: st.step > 2 ? '\\u2713' : '2',
       dot3: DOT + (st.step === 3 ? ACTIVE : TODO),
@@ -120,7 +146,10 @@ def apply(name, body, logic):
         nonlocal logic
         assert logic.count(old) >= 1, (name, old[:60])
         logic = logic.replace(old, new)
-    rep("this.state = { sell: '', photoIdx: 0, step: 1,", "this.state = { ready: null, sell: '', photoIdx: 0, step: 1,")
+    rep("this.state = { sell: '', photoIdx: 0, step: 1,",
+        "this.state = { ready: (() => { try { if (/[?&]kr=reset\\b/.test(location.search)) localStorage.removeItem('kr_noready'); "
+        "const t = +localStorage.getItem('kr_noready') || 0; return Date.now() - t < 864e5 ? false : null; } catch (e) { return null; } })(), "
+        "sell: '', photoIdx: 0, step: 1,")
     rep("formOn: !st.sent && !blocked,", "formOn: !st.sent && !blocked && st.ready === true,")
     rep("lineReady: !!(st.brand && st.year && st.mile) && !blocked,", "lineReady: false,")
     rep("lineLocked: !(st.brand && st.year && st.mile) || blocked,", "lineLocked: true,")
