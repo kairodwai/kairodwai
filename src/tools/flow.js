@@ -1,0 +1,36 @@
+const { chromium } = require('playwright');
+const http = require('http'), fs = require('fs'), path = require('path');
+const ROOT = path.join(__dirname, '..', '..');  // repo root = built site
+const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html'; fs.readFile(path.join(ROOT, p), (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': p.endsWith('.html') ? 'text/html; charset=utf-8' : p.endsWith('.js') ? 'text/javascript' : 'image/jpeg' }); r.end(d); }); }).listen(8098);
+(async () => {
+  const b = await chromium.launch();
+  const p = await (await b.newContext({ viewport: { width: 390, height: 900 } })).newPage();
+  const errs = []; p.on('pageerror', e => errs.push(String(e)));
+  let posted = null;
+  await p.route(/fonts\./, r => r.abort());
+  await p.route(/script\.google\.com/, r => { posted = r.request().postData(); r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true, t: 'abcdef0123456789abcd', ref: 'KR-2481' }) }); });
+  await p.goto('http://localhost:8098/?utm_source=facebook&utm_campaign=test', { waitUntil: 'load' });
+  const sels = p.locator('form select');
+  await sels.nth(0).selectOption('2020');
+  await sels.nth(1).selectOption({ index: 6 });
+  await sels.nth(2).selectOption('Toyota');
+  await sels.nth(3).selectOption('Yaris ATIV');
+  await p.waitForTimeout(100);
+  console.log('selects', await sels.count());
+  if (await sels.count() > 4) await sels.nth(4).selectOption({ index: 1 });
+  await p.getByRole('button', { name: 'ต่อไป' }).click();
+  await p.waitForTimeout(100);
+  await p.getByRole('button', { name: 'ตอนนี้' }).click();
+  await p.getByRole('button', { name: 'ต่อไป' }).click();
+  await p.waitForTimeout(100);
+  await p.locator('form input[type=tel], form input[inputmode=tel], form input').last().fill('0812345678');
+  await p.locator('form').getByRole('button', { name: 'ขอราคา' }).click();
+  await p.waitForTimeout(800);
+  console.log('posted', posted);
+  const f = p.locator('form');
+  await f.screenshot({ path: 'shots/sent.png' });
+  console.log('photo link', await p.locator('a[href^="/line/"]').getAttribute('href'));
+  console.log('line link', decodeURIComponent(await p.locator('form a[href*="oaMessage"]').first().getAttribute('href')));
+  console.log('errors', errs);
+  await b.close(); srv.close();
+})();

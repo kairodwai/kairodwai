@@ -1,0 +1,53 @@
+const { chromium } = require('playwright');
+const http = require('http'), fs = require('fs'), path = require('path');
+const ROOT = path.join(__dirname, '..', '..');  // repo root = built site
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml' };
+const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split('?')[0]); if (p.endsWith('/')) p += 'index.html'; fs.readFile(path.join(ROOT, p), (e, d) => { if (e) { r.writeHead(404); r.end(); return; } r.writeHead(200, { 'content-type': MIME[path.extname(p)] || 'application/octet-stream' }); r.end(d); }); }).listen(8099);
+(async () => {
+  const b = await chromium.launch();
+  const errs = [], tracked = [];
+  const run = async (width, tag) => {
+    const p = await (await b.newContext({ viewport: { width, height: 900 }, deviceScaleFactor: 2 })).newPage();
+    p.on('pageerror', e => errs.push(tag + ': ' + e));
+    let posted = null;
+    await p.route(/script\.google\.com/, r => { posted = r.request().postData(); r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ ok: true, t: 'abcdef0123456789abcd', ref: 'KR-2481' }) }); });
+    await p.addInitScript(() => { window.fbq = (...a) => (window.__fb = window.__fb || []).push(a); });
+    await p.goto('http://localhost:8099/', { waitUntil: 'load' });
+    await p.waitForSelector('html.dc-ready');
+    await p.waitForTimeout(400);
+    const f = p.locator('form');
+    await p.screenshot({ path: `shots/${tag}-0-top.png` });
+    await f.screenshot({ path: `shots/${tag}-1-gate.png` });
+    // not ready → exit message
+    await f.getByRole('button', { name: 'ยังไม่พร้อม แค่อยากเช็คราคา' }).click();
+    await p.waitForTimeout(150);
+    await f.screenshot({ path: `shots/${tag}-2-notready.png` });
+    console.log(tag, 'notready text ok:', await f.innerText().then(t => t.includes('ราคารถขึ้นลงทุกวัน') && !t.includes('ไลน์') && !t.includes('091')));
+    // change mind → form step 1
+    await f.getByRole('button', { name: 'เปลี่ยนใจ พร้อมขายแล้ว' }).click();
+    await p.waitForTimeout(150);
+    await f.screenshot({ path: `shots/${tag}-3-step1.png` });
+    const sels = p.locator('form select');
+    await sels.nth(0).selectOption('2020'); await sels.nth(1).selectOption({ index: 3 });
+    await sels.nth(2).selectOption('Toyota'); await sels.nth(3).selectOption('Yaris ATIV');
+    await p.waitForTimeout(100);
+    if (await sels.count() > 4) await sels.nth(4).selectOption({ index: 1 });
+    await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
+    await f.screenshot({ path: `shots/${tag}-4-step2.png` });
+    await f.getByRole('button', { name: 'ตอนนี้' }).click();
+    await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
+    await f.screenshot({ path: `shots/${tag}-5-step3.png` });
+    await p.locator('form input').last().fill('0812345678');
+    await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(600);
+    await f.screenshot({ path: `shots/${tag}-6-sent.png` });
+    console.log(tag, 'posted when:', posted && JSON.parse(posted).when, '| photo link:', await p.locator('a[href^="/line/"]').getAttribute('href'));
+    console.log(tag, 'fbq calls:', JSON.stringify(await p.evaluate(() => (window.__fb || []).map(a => a.slice(0, 2)))));
+    console.log(tag, 'header logo:', await p.locator('header img[src="/img/logo.png"]').evaluate(i => i.naturalWidth + 'x' + i.naturalHeight + ' css ' + i.getBoundingClientRect().height.toFixed(1)), '| footer logo:', await p.locator('footer img').count(), '| LINE text:', (await p.locator('body').innerText()).includes('@kairodwai'));
+    await p.locator('footer').screenshot({ path: `shots/${tag}-7-footer.png` });
+    await p.context().close();
+  };
+  await run(390, 'm');
+  await run(1280, 'd');
+  console.log('errors', errs);
+  await b.close(); srv.close();
+})();

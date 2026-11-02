@@ -1,0 +1,43 @@
+# kairodwai.com — source (โฟลเดอร์ src/)
+
+เว็บ "ขายรถไว" (รับซื้อรถถึงบ้าน) เป็น static site บน GitHub Pages: **root ของ repo นี้คือเว็บที่ออนไลน์อยู่** (branch main, custom domain kairodwai.com, DNS บน Cloudflare, Enforce HTTPS เปิด)
+`src/` ถูก exclude จาก Pages ด้วย `_config.yml` ที่ root จึงไม่ถูก serve
+
+## โครงสร้าง
+```
+src/site-src/    build.py (ตัว build), patches.py (แก้พฤติกรรมหน้าเว็บ), dc.js (runtime Preact), site.js (tracking + ส่ง lead),
+                 logo.png / logo-light.png / favicon.png / apple-touch-icon.png / og.jpg, prerender.json
+src/design/      project/*.dc.html จาก Claude Design (Main, Mobile, Brand, Province, Portfolio, Finance, Docs, Privacy) + canvas.json
+src/line-page/   index.html = หน้า /line/ (ส่งรูป 6 ช่อง หลัง LIFF login)
+src/vendor/      preact.min.umd.js
+src/logo/        ไฟล์โลโก้ต้นฉบับ (kairodwai-logo-1254.png เป็น master)
+src/tools/       สคริปต์ทดสอบ Playwright (gate.js = e2e gate→ฟอร์ม→ส่ง, measure.js = วัดโลโก้, pre.js = prerender, อื่นๆ = screenshot)
+```
+
+## build
+```
+python3 src/site-src/build.py                 # เขียนทับหน้าเว็บที่ root ของ repo ตรงๆ
+KR_OUT=/tmp/dry python3 src/site-src/build.py # build ลงที่อื่นเพื่อเทียบก่อน (diff -rq /tmp/dry . -x .git -x src)
+node src/tools/gate.js                        # e2e: gate → ไม่พร้อม → เปลี่ยนใจ → 3 ขั้น → ส่ง (mock backend) → screenshots ใน shots/
+node src/tools/pre.js && python3 src/site-src/build.py --prerender   # prerender สำหรับ SEO (ยังไม่เปิดใช้จริง)
+```
+รูปประกอบหน้าเว็บอยู่ที่ `/img/*.jpg` (root) ถ้า export ดีไซน์ใหม่จาก Claude Design ให้วาง jpg ไว้ใน `src/design/` แล้ว build จะ copy ไปให้
+
+## หน้าเว็บ
+`/` (Main desktop / Mobile), `/toyota/` (Brand), `/chiang-mai/` (Province), `/portfolio/`, `/finance/`, `/documents/`, `/privacy/`, `/line/`
+flow: gate "พร้อมขายรถตอนนี้ไหม?" → ฟอร์ม 3 ขั้น → `KR.lead()` POST ไป Apps Script → ได้ ref KR-xxxx → `/line/?t=…&ref=…` → ส่งรูป → "คุยต่อในไลน์"
+events (site.js `track()`): ReadyToSell / NotReady (trackCustom), Lead เฉพาะกรอกฟอร์มจบ; fbq สำหรับชื่อมาตรฐาน (Lead, Contact, ViewContent, CompleteRegistration, SubmitApplication) ใช้ `track` ที่เหลือ `trackCustom`
+
+## หลังบ้าน
+Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app v9) — URL อยู่ใน site.js
+saveLead คืน {ok,t,ref}; sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token); linkWebLead จับข้อความ "KR-" ใน LINE; finishPhotos ข้าม push สำหรับ lead จากเว็บ; saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้
+
+## บั๊กที่รู้แล้ว
+site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
+
+## ค้างอยู่
+- Meta Pixel ID / Google Ads conversion ID ยังไม่ใส่
+- placeholder ที่รอข้อมูลจริง: รีวิวหน้าแรก, การ์ด portfolio, Finance ข้อ 3, intro เชียงใหม่, Privacy (ชื่อบริษัท วันที่ ระยะเก็บข้อมูล)
+- Cloudflare: CNAME www → ควรชี้ kairodwai.github.io
+- รูปคน: ห้าม generate เอง
+- แผนโครงสร้าง funnel ทั้งระบบ: https://claude.ai/artifact/1aLPX8djoyrfAZtcQfrbzX
