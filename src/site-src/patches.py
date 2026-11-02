@@ -22,7 +22,7 @@ FTR_NEW = '''<img src="/img/logo-light.png" alt="ขายรถไว" width="4
 
 # ---- เงื่อนไขเมื่อกดปุ่มแอดไลน์: ขึ้นบนหัวการ์ดฟอร์ม ----
 LINE_NOTE = '''<sc-if value="{{ lineNote }}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border-radius: 14px; background: #E8F8EE; border: 1px solid #B9E8CB; color: #06C755;">__SVG__<div style="display: flex; flex-direction: column; gap: 2px;">
+<div style="display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: 16px; background: #E8F8EE; border: 1px solid #B9E8CB; color: #0B7A36;">__SVG__<div style="display: flex; flex-direction: column; gap: 4px;">
 <span style="font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 15px; color: #0B1A10;">แอดไลน์ได้หลังกรอกข้อมูลรถ</span>
 <span style="font-size: 14px; line-height: 1.5; color: #1F4D30;">ใช้เวลาไม่ถึง 1 นาที ทีมจะได้ตอบราคาในไลน์ได้ทันที ไม่ต้องถามซ้ำ</span>
 </div></div>
@@ -33,17 +33,17 @@ LINE_NOTE = '''<sc-if value="{{ lineNote }}" hint-placeholder-val="{{ false }}">
 # "แค่มาเช็คราคา" ต้องกดค้าง 0.7 วิ (กันมือลั่น ไม่มีคำใบ้) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
 NUM = '''<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 14px; line-height: 1;">'''
 GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
-<div style="display: flex; flex-direction: column; gap: 22px;">
-<div style="display: flex; flex-direction: column; gap: 6px;">
-<span style="font-size: 14px; font-weight: 500; color: #55534E;">ขายง่ายๆ ใน 3 ขั้นตอน · ใช้เวลาไม่ถึง 1 นาที</span>
-<h2 style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 26px; line-height: 1.3;">พร้อมขายรถตอนนี้ไหม?</h2>
+<div style="display: flex; flex-direction: column; gap: 24px;">
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<span style="font-size: 14px; font-weight: 500; color: #0B7A36;">ขายง่ายๆ ใน 3 ขั้นตอน · ใช้เวลาไม่ถึง 1 นาที</span>
+<h2 style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 24px; line-height: 1.3; text-wrap: balance;">พร้อมขายรถตอนนี้ไหม?</h2>
 <p style="margin: 0; font-size: 15px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้าน ประเมินเสร็จรับเงินทันที</p>
 </div>
-<div style="display: flex; flex-direction: column; gap: 10px;">
+<div style="display: flex; flex-direction: column; gap: 8px;">
 <button type="button" onClick="{{ readyYes }}" style="height: 56px; padding: 0 12px; border: 0; border-radius: 28px; white-space: nowrap; font-family: 'Kanit', sans-serif; font-size: 16px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">รถพร้อมขายทันที (ภายใน 1-7 วันนี้)</button>
-<div style="display: flex; justify-content: center; padding-top: 2px;">
-<button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้)" style="position: relative; overflow: hidden; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #8C8983; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
-<span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 20px; background: #DEDBD3; {{ holdBar }}"></span>
+<div style="display: flex; justify-content: center;">
+<button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้)" style="position: relative; overflow: hidden; height: 44px; padding: 0 16px; border: 0; border-radius: 22px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #75736C; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
+<span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 22px; background: #DEDBD3; {{ holdBar }}"></span>
 <span style="position: relative;">ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ</span>
 </button>
 </div>
@@ -52,18 +52,18 @@ GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 </sc-if>
 <sc-if value="{{ notReady }}" hint-placeholder-val="{{ false }}">
 <div role="dialog" aria-modal="true" aria-labelledby="kr-no-title" style="position: fixed; inset: 0; z-index: 9999; background: #B3121B; color: #FFFFFF; display: flex; overflow-y: auto; -webkit-overflow-scrolling: touch;">
-<div style="margin: auto; width: 100%; max-width: 560px; box-sizing: border-box; padding: calc(40px + env(safe-area-inset-top, 0px)) 24px calc(40px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 28px;">
-<span style="font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: 0.5px; opacity: 0.85;">ขายรถไว</span>
+<div style="margin: auto; width: 100%; max-width: 560px; box-sizing: border-box; padding: calc(40px + env(safe-area-inset-top, 0px)) 24px calc(40px + env(safe-area-inset-bottom, 0px)); display: flex; flex-direction: column; gap: 32px;">
+<img src="/img/logo-light.png" alt="ขายรถไว" width="444" height="120" style="display: block; height: 28px; width: auto; align-self: flex-start;">
 <div style="display: flex; flex-direction: column; gap: 12px;">
 <h2 id="kr-no-title" style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 34px; line-height: 1.2;">วันนี้เรายังไม่ประเมินราคาให้</h2>
 <p style="margin: 0; font-size: 17px; line-height: 1.6; opacity: 0.92;">ไม่ใช่ไม่อยากช่วย แต่ราคาที่ให้ตอนคุณยังไม่พร้อมขาย จะทำให้คุณเสียประโยชน์เอง</p>
 </div>
-<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 14px;">
-<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''1</span><span style="font-size: 16px; line-height: 1.6;">ราคารถขึ้นลงทุกวัน ตัวเลขวันนี้ไม่ใช่ตัวเลขของวันที่คุณขายจริง</span></li>
-<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''2</span><span style="font-size: 16px; line-height: 1.6;">เราตีราคาจากการดูรถจริงถึงบ้าน ไม่ใช่จากข้อมูลบนหน้าจอ</span></li>
-<li style="display: flex; gap: 14px; align-items: flex-start;">''' + NUM + '''3</span><span style="font-size: 16px; line-height: 1.6;">ราคาที่เราให้ ต้องเป็นราคาที่รับเงินได้ทันที ไม่ใช่ราคาเอาไว้เทียบ</span></li>
+<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 16px;">
+<li style="display: flex; gap: 16px; align-items: flex-start;">''' + NUM + '''1</span><span style="font-size: 16px; line-height: 1.6;">ราคารถขึ้นลงทุกวัน ตัวเลขวันนี้ไม่ใช่ตัวเลขของวันที่คุณขายจริง</span></li>
+<li style="display: flex; gap: 16px; align-items: flex-start;">''' + NUM + '''2</span><span style="font-size: 16px; line-height: 1.6;">เราตีราคาจากการดูรถจริงถึงบ้าน ไม่ใช่จากข้อมูลบนหน้าจอ</span></li>
+<li style="display: flex; gap: 16px; align-items: flex-start;">''' + NUM + '''3</span><span style="font-size: 16px; line-height: 1.6;">ราคาที่เราให้ ต้องเป็นราคาที่รับเงินได้ทันที ไม่ใช่ราคาเอาไว้เทียบ</span></li>
 </ol>
-<div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 24px; display: flex; flex-direction: column; gap: 18px;">
+<div style="border-top: 1px solid rgba(255,255,255,0.3); padding-top: 24px; display: flex; flex-direction: column; gap: 16px;">
 <p style="margin: 0; font-size: 16px; line-height: 1.6;">วันที่พร้อมขาย กลับมาที่นี่ได้เลย ทีมไปดูรถถึงบ้าน ประเมินฟรี ตรวจเสร็จโอนเงินทันที</p>
 <p style="margin: 0; font-size: 14px; line-height: 1.6; opacity: 0.75;">หน้านี้จะเปิดให้กรอกข้อมูลอีกครั้งในวันพรุ่งนี้</p>
 </div>
@@ -119,6 +119,9 @@ def common(body):
     # โลโก้ตัวจริงแทนตัวหนังสือ หัวเว็บ + ท้ายเว็บ
     assert HDR_OLD in body and FTR_OLD in body, 'logo anchor missing'
     body = body.replace(HDR_OLD, HDR_NEW).replace(FTR_OLD, FTR_NEW)
+    # ระบบสี: ดำ = หัวข้อ/เนื้อหา/ปุ่มหลัก, เขียว = จุดเดียวต่อส่วน (ป้ายจุดขาย, tagline, ไลน์, ความคืบหน้า)
+    badge_old = 'height: 32px; padding: 0 14px; border-radius: 16px; background: #141414; color: #F5F4F0; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>'
+    body = body.replace(badge_old, 'height: 32px; padding: 0 14px; border-radius: 16px; background: #06C755; color: #0B1A10; font-family: \'Kanit\', sans-serif; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>')
     # ไม่พร้อมขาย ไม่ให้แอด: เอาไอดีไลน์ท้ายเว็บออก
     body = re.sub(r'<span>LINE @kairodwai</span>\s*', '', body)
     return body
@@ -142,7 +145,7 @@ def apply(name, body, logic):
     body = body[:a] + body[b:]
     # ---- ปุ่มไลน์: ให้ดูเป็นปุ่มแอดไลน์จริง (เขียว LINE) แต่กดแล้วเลื่อนไปฟอร์ม + ขึ้นเงื่อนไข "กรอกข้อมูลรถก่อน" ----
     body = re.sub(r'(<button type="button" onClick="\{\{ goForm \}\}" aria-label=")[^"]*("[^>]*>)\s*<svg.*?</svg>\s*<span>แอดไลน์</span>',
-                  lambda m: m.group(1) + 'แอดไลน์ (กรอกข้อมูลรถก่อน)' + m.group(2).replace('background: #E4E1DA;', 'background: #06C755;').replace('color: #4A4843;', 'color: #FFFFFF;') + line_svg + '<span>แอดไลน์</span>', body, count=1, flags=re.S)
+                  lambda m: m.group(1) + 'แอดไลน์ (กรอกข้อมูลรถก่อน)' + m.group(2).replace('background: #E4E1DA;', 'background: #06C755;').replace('color: #4A4843;', 'color: #0B1A10;') + line_svg + '<span>แอดไลน์</span>', body, count=1, flags=re.S)
     sec_old = 'font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">กรอกข้อมูลรถก่อน</button>'
     assert body.count(sec_old) == (1 if name == 'Main' else 0), (name, 'section line button')
     body = body.replace(sec_old, 'gap: 10px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">' + line_svg.replace('width="20" height="20"', 'width="22" height="22"') + '<span>แอดไลน์ ขายรถไว</span></button>')
