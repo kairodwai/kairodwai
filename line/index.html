@@ -105,6 +105,16 @@ header p{margin:0;font-size:14px}
 .err{background:var(--err-soft);color:var(--err);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 input[type=file]{display:none}
 .ghost{height:48px;padding:0 24px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+.ho [hidden]{display:none!important}
+.ho{gap:16px;width:100%}
+.ho-logo{width:120px;height:auto}
+.ho .cta{text-decoration:none}
+.ho-qr{display:grid;justify-items:center;gap:6px;padding:20px 24px;border:1.5px solid var(--line);border-radius:16px;background:#fff}
+.ho-qr #hoQrBox{width:200px;height:200px}
+.ho-qr #hoQrBox svg{width:100%;height:100%;display:block}
+.ho-qr b{font-family:var(--f-display);font-weight:600;font-size:16px;margin-top:6px}
+.ho-qr span{font-size:13px;color:var(--ink-2)}
+.ho-note{font-size:13px}
 .going{width:100%;display:grid;gap:8px;justify-items:center;margin-top:4px}
 .going .lead{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:16px}
 .going .track{width:160px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
@@ -189,6 +199,16 @@ input[type=file]{display:none}
 
 <div id="loadView"><div class="wrap screen"><div class="card"><p>กำลังเปิด...</p></div></div></div>
 
+<!-- เปิดในเบราว์เซอร์ (คอม / Chrome / Safari): ส่งรูปต่อในแอป LINE ทางเดียวกับคนมาจากแอด — มือถือกดปุ่ม, คอมสแกน QR -->
+<div id="handoffView" hidden><div class="wrap screen"><div class="card ho">
+  <img class="ho-logo" src="/img/logo.png" alt="ขายรถไว" width="120" height="33">
+  <h2>ได้รับข้อมูลรถแล้ว</h2>
+  <p>ขั้นต่อไป ส่งรูปรถ 5 มุมในแอป LINE<br>ทีมงานประเมินราคาให้ในแชทภายใน 5 นาที</p>
+  <a class="cta" id="hoBtn" href="#" hidden><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:24px;height:24px;flex:none"><path d="M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg><span>ส่งรูปในแอป LINE</span></a>
+  <div class="ho-qr" id="hoQr" hidden><div id="hoQrBox" aria-label="QR สำหรับเปิดในแอป LINE"></div><b>สแกนด้วยกล้องมือถือ</b><span>เปิดในแอป LINE แล้วส่งรูปได้เลย</span></div>
+  <p class="ho-note">ไม่ใช้ LINE?<br>ทีมงานจะโทรหาคุณที่เบอร์ที่กรอกไว้ (8:00–20:00)</p>
+</div></div></div>
+
 <input type="file" id="picker" accept="image/*">
 
 <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -226,7 +246,7 @@ let current = -1;
 const $ = id => document.getElementById(id);
 const cam = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-2.5h6L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.6"/></svg>';
 
-function show(id){ ['app','readyView','doneView','badView','loadView'].forEach(v => $(v).hidden = v !== id); window.scrollTo(0,0); }
+function show(id){ ['app','readyView','doneView','badView','loadView','handoffView'].forEach(v => $(v).hidden = v !== id); window.scrollTo(0,0); }
 let editing = false;   // กด "แก้ไขรูป" แล้ว ไม่เด้งหน้า ready ซ้ำจนกว่าจะเปลี่ยนรูปใหม่
 
 function render(){
@@ -336,7 +356,8 @@ const tokenReady = (async () => {
   return (token = r.t);
 })();
 tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
-if (VIA_LIFF && window.liff) { liff.init({ liffId: LIFF_WEB_ID }).catch(() => {}); }   // ให้ liff.closeWindow() ใช้ได้ตอนจบ
+// ให้ liff.closeWindow() ใช้ได้ตอนจบ + ผูกไลน์คนนี้กับลีด (ลีดที่กรอกจากเบราว์เซอร์แล้วมาส่งรูปในไลน์ — บอทจะทัก/ส่งการ์ด/เปลี่ยนเมนูได้)
+if (VIA_LIFF && window.liff) { liff.init({ liffId: LIFF_WEB_ID }).then(() => { if (token && liff.isLoggedIn()) { const idt = liff.getIDToken(); if (idt) post({ type: 'bind', t: token, idToken: idt }).catch(() => {}); } }).catch(() => {}); }
 let leaving = false, panelShown = false, armed = false, doneSent = false, doneSending = false;
 const allIn = () => st.slice(0, REQ).filter(x => x.state === 'done').length >= REQ && !st.some(x => x.state === 'up');
 const arm = () => { if (!REF || armed || VIA_LIFF) return; try { history.pushState({ kr: 1 }, ''); armed = true; } catch (e) {} };
@@ -371,7 +392,22 @@ if (REF) {
   if (VIA_LIFF) $('hdSub').textContent = 'ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบ 5 มุมส่งทีเดียว ทีมงานประเมินราคาให้ในแชท';
   const bad = document.querySelector('#badView p'); if (bad) bad.innerHTML = 'ลิงก์หมดอายุแล้ว <a href="/">กลับไปกรอกข้อมูลรถอีกครั้ง</a> หรือโทร <a href="tel:0914922662">091-492-2662</a>';
 }
-render(); show('app');
+render();
+// เปิดในเบราว์เซอร์ (ไม่ใช่ในแอป LINE) พร้อมรหัสลีด → ไม่ส่งรูปบนเบราว์เซอร์ พาไปส่งในแอป LINE แทน (ทุกคนจบทางเดียวกัน)
+const HANDOFF = REF && token && !VIA_LIFF && LIFF_WEB_ID.indexOf('__') < 0;
+if (HANDOFF) {
+  const ua = navigator.userAgent, android = /Android/i.test(ua), mobile = android || /iPhone|iPad|iPod/i.test(ua);
+  const q = 'via=liff&t=' + encodeURIComponent(token) + '&ref=' + encodeURIComponent(REF);
+  const liffUrl = 'https://liff.line.me/' + LIFF_WEB_ID + '?' + q;
+  if (mobile) { $('hoBtn').href = android ? 'intent://liff.line.me/' + LIFF_WEB_ID + '?' + q + '#Intent;scheme=https;package=jp.naver.line.android;end' : liffUrl; $('hoBtn').hidden = false; }
+  else {
+    $('hoQr').hidden = false;
+    const s = document.createElement('script'); s.src = '/assets/qrcode.min.js';
+    s.onload = () => { try { const qr = qrcode(0, 'M'); qr.addData(liffUrl); qr.make(); $('hoQrBox').innerHTML = qr.createSvgTag({ cellSize: 4, margin: 0, scalable: true }); } catch (e) {} };
+    document.head.appendChild(s);
+  }
+  remember(); show('handoffView');
+} else show('app');
 </script>
 </body>
 </html>

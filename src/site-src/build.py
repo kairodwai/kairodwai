@@ -250,6 +250,7 @@ def main():
     shutil.copy(os.path.join(SRC, 'vendor/preact.min.umd.js'), os.path.join(OUT, 'assets/preact.min.js'))
     shutil.copy(os.path.join(HERE, 'dc.js'), os.path.join(OUT, 'assets/dc.js'))
     shutil.copy(os.path.join(HERE, 'site.js'), os.path.join(OUT, 'assets/site.js'))
+    shutil.copy(os.path.join(SRC, 'vendor/qrcode.min.js'), os.path.join(OUT, 'assets/qrcode.min.js'))   # QR บนหน้า /line/ (เปิดจากคอม → สแกนไปส่งรูปในไลน์) — qrcode-generator 1.4.4 MIT
     for f in os.listdir(DESIGN):  # page photos live in <repo>/img; design/*.jpg only if re-exported from Claude Design
         if f.endswith('.jpg'): shutil.copy(os.path.join(DESIGN, f), os.path.join(OUT, 'img', f))
     print('built', OUT)
