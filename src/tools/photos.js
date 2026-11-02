@@ -1,6 +1,7 @@
 // ทดสอบหน้า /line/ แบบมาจากเว็บ: เลือกรูป 5 มุม → ส่งทีเดียว → เด้งไปไลน์ (mock backend) — node src/tools/photos.js
 const { chromium } = require('playwright'); const http=require('http'),fs=require('fs'),path=require('path');
-const ROOT=path.join(__dirname,'..','..');  // repo root const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg'};
+const ROOT=path.join(__dirname,'..','..');  // repo root
+const MIME={'.html':'text/html; charset=utf-8','.js':'text/javascript','.png':'image/png','.jpg':'image/jpeg'};
 const srv=http.createServer((q,r)=>{let p=decodeURIComponent(q.url.split('?')[0]); if(p.endsWith('/'))p+='index.html'; fs.readFile(path.join(ROOT,p),(e,d)=>{if(e){r.writeHead(404);r.end();return;} r.writeHead(200,{'content-type':MIME[path.extname(p)]||'application/octet-stream'}); r.end(d);});}).listen(8082);
 (async()=>{const b=await chromium.launch(); const errs=[]; const posts=[];
 const p=await(await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2})).newPage(); p.on('pageerror',e=>errs.push(String(e)));

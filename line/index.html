@@ -32,7 +32,7 @@ header p{margin:0;font-size:14px}
 .prog-top span{color:var(--ink-2);font-size:13px}
 .bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:999px;transition:width .3s ease}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:14px 132px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:14px 160px}
 .slot{position:relative;display:grid;grid-template-rows:auto 1fr;background:var(--card);border:1.5px dashed #b9c4be;border-radius:14px;padding:0;overflow:hidden;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .slot:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 .ph{position:relative;aspect-ratio:4/3;background:var(--green-soft);display:grid;place-items:center;color:var(--green-d)}
@@ -60,6 +60,13 @@ header p{margin:0;font-size:14px}
 .send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer}
 .send button:disabled{background:#c9d2cd;cursor:not-allowed}
 .send small{text-align:center;color:var(--ink-2);font-size:12px}
+.send .next{display:none;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:#05A647}
+.send .next svg{width:18px;height:18px;flex-shrink:0}
+.journey{display:none;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
+.journey span{display:grid;justify-items:center;gap:4px;font-size:11px;line-height:1.2;color:rgba(255,255,255,.75);text-align:center}
+.journey i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:600;font-size:12px;background:rgba(255,255,255,.25);color:#fff}
+.journey .done i{background:#fff;color:var(--green)}.journey .now{color:#fff}.journey .now i{background:#141414;color:#fff}
+.web .journey{display:grid}.web .send .next{display:flex}
 .screen{min-height:100vh;display:grid;place-items:center;padding-block:48px}
 .card{display:grid;gap:12px;justify-items:center;text-align:center;max-width:360px}
 .big{width:72px;height:72px;border-radius:50%;background:var(--green);display:grid;place-items:center}
@@ -77,6 +84,7 @@ input[type=file]{display:none}
   <header><div class="wrap">
     <h1 id="hdTitle">ถ่ายรูปรถ 6 มุม</h1>
     <p id="hdSub">กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่ง ทีมประเมินราคาให้ฟรี</p>
+    <div class="journey" aria-label="ขั้นตอน"><span class="done"><i>✓</i>ข้อมูลรถ</span><span class="done"><i>✓</i>เบอร์โทร</span><span class="now"><i>3</i>รูปรถ</span><span><i>4</i>คุยในไลน์</span></div>
   </div></header>
   <div class="wrap">
     <div class="prog">
@@ -89,6 +97,7 @@ input[type=file]{display:none}
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
     <small>รูปที่ 6 รอย/ตำหนิ ไม่บังคับ ถ้าไม่มีข้ามได้เลย</small>
+    <div class="next"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg><span>ขั้นสุดท้ายแล้ว ส่งเสร็จเปิดไลน์ให้เลย ทีมตอบราคาในไลน์</span></div>
   </div></div>
 </div>
 
@@ -234,8 +243,9 @@ const tokenReady = (async () => {
 })();
 tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
 if (REF) {
-  $('hdTitle').textContent = 'ขั้นสุดท้าย เลือกรูปรถ 6 มุม';
-  $('hdSub').textContent = 'กดที่ช่อง ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบแล้วกดส่งทีเดียว ระบบส่งข้อมูลรถ+รูปให้ทีม แล้วพาไปคุยต่อในไลน์';
+  document.body.classList.add('web');
+  $('hdTitle').textContent = 'ขั้นที่ 3 จาก 4 เลือกรูปรถ';
+  $('hdSub').textContent = 'ถ่ายใหม่หรือเลือกจากอัลบั้มก็ได้ ครบ 5 มุมกดส่งทีเดียว แล้วไปคุยต่อในไลน์';
   const bad = document.querySelector('#badView p'); if (bad) bad.innerHTML = 'ลิงก์หมดอายุแล้ว <a href="/">กลับไปกรอกข้อมูลรถอีกครั้ง</a> หรือโทร <a href="tel:0914922662">091-492-2662</a>';
 }
 render(); show('app');
