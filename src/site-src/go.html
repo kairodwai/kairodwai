@@ -26,23 +26,23 @@ p{margin:0;color:#5b6660;font-size:15px;line-height:1.5}
 </div></main>
 <script>
 // ลิงก์โฆษณา: kairodwai.com/go?utm_… → เปิดเว็บเราในแอปไลน์ (LIFF "kairodwai-web") รู้ตัวตนลูกค้าตั้งแต่แรก
-// มือถือ: ลองเปิดแอปอัตโนมัติ 1 ครั้ง (Android ใช้ intent:// เพื่อเลี่ยงหน้า login ของ LINE บน browser) ถ้าไม่เด้งใน 1.2 วิ โชว์ปุ่มให้กดเอง (การกดของคนเปิดแอปได้ชัวร์กว่า)
-// คอม / ไม่มีแอป: เว็บธรรมดา   พารามิเตอร์ utm/fbclid ส่งต่อครบทุกทาง
+// Android: ลองเปิดแอปด้วย intent:// (ไม่ใส่ fallback เพื่อไม่ให้ Chrome พาไปเว็บเอง) — ถ้า Chrome ไม่ยอม (ไม่ใช่การกดของคน) ภายใน 1.2 วิ จะขึ้นปุ่มให้กดเอง
+// iOS: โชว์ปุ่มเลย (Safari เปิดแอปจากการกดเท่านั้น)   คอม/ไม่มี ID: เว็บธรรมดา   utm/fbclid ส่งต่อครบทุกทาง
 (function () {
   var ID = '__LIFF_WEB_ID__';
   var q = new URLSearchParams(location.search); q.delete('via');
   var webUrl = '/' + (q.toString() ? '?' + q.toString() : '');
   q.set('via', 'liff');
   var liffUrl = 'https://liff.line.me/' + ID + '?' + q.toString();
+  var intentUrl = 'intent://liff.line.me/' + ID + '?' + q.toString() + '#Intent;scheme=https;package=jp.naver.line.android;end';
   var ua = navigator.userAgent, android = /Android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua);
   if (!ID || !(android || ios)) { location.replace(webUrl); return; }
-  document.getElementById('openLine').href = liffUrl;
+  var openLine = document.getElementById('openLine');
+  openLine.href = android ? intentUrl : liffUrl;
   document.getElementById('openWeb').href = webUrl;
-  var t0 = Date.now();
-  setTimeout(function () { if (!document.hidden && Date.now() - t0 < 4000) { document.getElementById('wait').hidden = true; document.getElementById('manual').hidden = false; } }, 1200);
-  try {
-    if (android) location.href = 'intent://liff.line.me/' + ID + '?' + q.toString() + '#Intent;scheme=https;package=jp.naver.line.android;S.browser_fallback_url=' + encodeURIComponent(location.origin + webUrl) + ';end';
-    else location.href = liffUrl;
-  } catch (e) {}
+  var showManual = function () { document.getElementById('wait').hidden = true; document.getElementById('manual').hidden = false; };
+  if (ios) { showManual(); return; }
+  setTimeout(function () { if (!document.hidden) showManual(); }, 1200);
+  try { location.href = intentUrl; } catch (e) { showManual(); }
 })();
 </script></body></html>
