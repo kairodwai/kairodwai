@@ -132,6 +132,7 @@ def common(body):
     # ระบบสี: ดำ = หัวข้อ/เนื้อหา/ปุ่มหลัก, เขียว = จุดเดียวต่อส่วน (ป้ายจุดขาย, tagline, ไลน์, ความคืบหน้า)
     badge_old = 'height: 32px; padding: 0 14px; border-radius: 16px; background: #141414; color: #F5F4F0; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>'
     body = body.replace(badge_old, 'height: 32px; padding: 0 14px; border-radius: 16px; background: #06C755; color: #0B1A10; font-family: \'Kanit\', sans-serif; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>')
+    body = body.replace('ยังผ่อนไม่หมด ก็ขายได้ถูกกฎหมาย', 'ยังผ่อนไม่หมด ก็ขายได้ถูกต้องตามกฎหมาย 100%')
     # ส่วนไฟแนนซ์: ไม่มีระบบเช็คราคาในเว็บ ปุ่ม "เช็คว่ารถคุณเหลือเงินเท่าไหร่" -> ลิงก์ไปคู่มือขายรถติดไฟแนนซ์แทน
     body = body.replace('<a href="#top" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">เช็คว่ารถคุณเหลือเงินเท่าไหร่',
                         '<a href="/finance/" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">ดูขั้นตอนขายรถติดไฟแนนซ์')
