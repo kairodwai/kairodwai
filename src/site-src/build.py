@@ -135,6 +135,20 @@ def js_safe(t):
     return t.replace('</', '<\\/')
 
 
+# แผ่นเงื่อนไขเมื่อกดปุ่มไลน์: bottom sheet บนมือถือ, กล่องกลางจอบนคอม (เด้งทันทีที่กด ให้รู้ว่ามาจากปุ่มนั้น)
+SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-index:9990;animation:krFade .2s}'
+    '.kr-sheet{position:fixed;left:0;right:0;bottom:0;z-index:9991;background:#FFFFFF;color:#141414;border-radius:24px 24px 0 0;'
+    'padding:12px 24px calc(24px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto;'
+    'box-sizing:border-box;animation:krUp .25s ease-out}'
+    '.kr-grab{width:40px;height:4px;border-radius:2px;background:#DEDBD3;align-self:center;margin-bottom:4px}'
+    '@media(min-width:720px){.kr-sheet{bottom:auto;top:50%;left:50%;right:auto;transform:translate(-50%,-50%);border-radius:24px;'
+    'padding:32px;width:min(480px,calc(100% - 48px));animation:krPop .2s ease-out}.kr-grab{display:none}}'
+    '@keyframes krUp{from{transform:translateY(32px);opacity:0}to{transform:none;opacity:1}}'
+    '@keyframes krPop{from{transform:translate(-50%,-50%) scale(.96);opacity:0}to{transform:translate(-50%,-50%);opacity:1}}'
+    '@keyframes krFade{from{opacity:0}}'
+    '@media(prefers-reduced-motion:reduce){.kr-ov,.kr-sheet{animation:none}}')
+
+
 def page_html(name, helmet, tree, logic, prerender=''):
     path, title, desc = PAGES[name]
     url = DOMAIN + path
@@ -159,6 +173,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {helmet.strip()}
+<style>{SHEET_CSS}</style>
 <script src="/assets/preact.min.js" defer></script>
 <script src="/assets/site.js" defer></script>
 <script src="/assets/dc.js" defer></script>

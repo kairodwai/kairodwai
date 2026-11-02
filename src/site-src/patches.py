@@ -20,7 +20,20 @@ HDR_NEW = '''<img src="/img/logo.png" alt="ขายรถไว" width="444" he
 FTR_OLD = '''<span style="font-family: 'Kanit', sans-serif; font-size: 22px; font-weight: 600; color: #F5F4F0;">ขายรถไว</span>'''
 FTR_NEW = '''<img src="/img/logo-light.png" alt="ขายรถไว" width="444" height="120" style="display: block; height: 26px; width: auto; align-self: flex-start;">'''
 
-# ---- เงื่อนไขเมื่อกดปุ่มแอดไลน์: ขึ้นบนหัวการ์ดฟอร์ม ----
+# ---- เงื่อนไขเมื่อกดปุ่มแอดไลน์: แผ่นเด้งทันที (bottom sheet) + กล่องย้ำบนหัวการ์ดฟอร์มหลังกด "กรอกข้อมูลรถ" ----
+LINE_SHEET = '''<sc-if value="{{ lineSheet }}" hint-placeholder-val="{{ false }}">
+<div class="kr-ov" onClick="{{ sheetClose }}"></div>
+<div class="kr-sheet" role="dialog" aria-modal="true" aria-labelledby="kr-sheet-t">
+<span class="kr-grab" aria-hidden="true"></span>
+<div style="display: flex; align-items: center; gap: 12px; color: #06C755;">__SVG36__<h2 id="kr-sheet-t" style="margin: 0; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.3; color: #141414;">แอดไลน์ได้หลังกรอกข้อมูลรถ</h2></div>
+<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">กรอกข้อมูลรถ 3 ขั้นตอน ใช้เวลาไม่ถึง 1 นาที แล้วไลน์จะเปิดให้คุยกับทีมได้ทันที ทีมตอบราคาได้เลยไม่ต้องถามซ้ำ</p>
+<div style="display: flex; flex-direction: column; gap: 8px;">
+<button type="button" onClick="{{ sheetGo }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 17px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">กรอกข้อมูลรถ ใช้เวลา 1 นาที</button>
+<button type="button" onClick="{{ sheetClose }}" style="height: 44px; border: 0; background: transparent; font-family: inherit; font-size: 15px; font-weight: 500; color: #55534E; cursor: pointer;">ไว้ก่อน</button>
+</div>
+</div>
+</sc-if>
+'''
 LINE_NOTE = '''<sc-if value="{{ lineNote }}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; align-items: flex-start; gap: 12px; padding: 16px; border-radius: 16px; background: #E8F8EE; border: 1px solid #B9E8CB; color: #0B7A36;">__SVG__<div style="display: flex; flex-direction: column; gap: 4px;">
 <span style="font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 15px; color: #0B1A10;">แอดไลน์ได้หลังกรอกข้อมูลรถ</span>
@@ -91,6 +104,8 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
     const LN_ON = 'background: #06C755;', LN_OFF = 'background: #DEDBD3;';
     const trk = (n) => { try { window.KR.track(n); } catch (e) {} };
     const quit = () => { this._hold = null; this.setState({ holding: false, ready: false, missing: false }); trk('NotReady'); try { localStorage.setItem('kr_noready', String(Date.now())); } catch (e) {} };
+    const sheetShut = () => { this.setState({ lineSheet: false }); document.body.style.overflow = ''; if (this._esc) { removeEventListener('keydown', this._esc); this._esc = null; } };
+    const sheetOpen = () => { this.setState({ lineSheet: true }); document.body.style.overflow = 'hidden'; this._esc = (e) => { if (e.key === 'Escape') sheetShut(); }; addEventListener('keydown', this._esc); };
     const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 700); this.setState({ holding: true }); };
     const holdEnd = () => { if (!this._hold) return; clearTimeout(this._hold); this._hold = null; this.setState({ holding: false }); };
     return {
@@ -98,6 +113,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       holdKey: (e) => { if (e.key !== ' ' && e.key !== 'Enter') return; e.preventDefault(); if (e.type === 'keydown') { if (!e.repeat) holdStart(); } else holdEnd(); },
       noMenu: (e) => e.preventDefault(),
       lineNote: !!st.lineNote && !st.sent && st.ready !== false,
+      lineSheet: !!st.lineSheet,
       holdBar: st.holding ? 'width: 100%; transition: width 0.7s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
@@ -151,7 +167,7 @@ def apply(name, body, logic):
     body = body.replace(sec_old, 'gap: 10px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">' + line_svg.replace('width="20" height="20"', 'width="22" height="22"') + '<span>แอดไลน์ ขายรถไว</span></button>')
     body = body.replace('ส่งรูปทางไลน์ รับราคา', 'กรอกข้อมูลรถ ส่งรูป คุยต่อในไลน์')
     body = body.replace('ส่งรูปมาทางไลน์ ทีมตอบกลับเร็วในเวลาทำการ', 'คุยกับทีมทางไลน์ ตอบไวในเวลาทำการ')
-    note = LINE_NOTE.replace('__SVG__', line_svg.replace('width="20" height="20"', 'width="22" height="22"'))
+    note = LINE_SHEET.replace('__SVG36__', line_svg.replace('width="20" height="20"', 'width="36" height="36"')) + LINE_NOTE.replace('__SVG__', line_svg.replace('width="20" height="20"', 'width="22" height="22"'))
     # ---- หน้าคัดกรอง "พร้อมขายไหม" ก่อนฟอร์ม + แถบขั้นตอนแบบเลข ----
     anchor = '<sc-if value="{{ formOn }}" hint-placeholder-val="{{ true }}">'
     assert body.count(anchor) == 1, (name, 'formOn anchor')
@@ -184,5 +200,9 @@ def apply(name, body, logic):
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
-    rep("goForm: () => { if (!blocked) this.setState({ missing: true });", "goForm: () => { trk('LineTap'); if (!blocked) this.setState({ missing: true, lineNote: true });")
+    rep("goForm: () => { if (!blocked) this.setState({ missing: true }); const f = document.querySelector('form'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); },",
+        "goForm: () => { trk('LineTap'); if (st.sent && st.photoHref) { location.href = st.photoHref; return; } sheetOpen(); },\n"
+        "      sheetGo: () => { sheetShut(); this.setState({ lineNote: true, missing: st.ready === true && !blocked }); setTimeout(() => { const f = document.querySelector('form'); if (!f) return; "
+        "const tall = f.getBoundingClientRect().height > innerHeight * 0.8; f.scrollIntoView({ behavior: 'smooth', block: tall ? 'start' : 'center' }); }, 60); },\n"
+        "      sheetClose: () => sheetShut(),")
     return body, logic
