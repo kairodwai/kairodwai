@@ -31,7 +31,10 @@ events (site.js `track()`): ReadyToSell / NotReady (trackCustom), Lead เฉพ
 ## หลังบ้าน
 Apps Script (บัญชี Google ของทีม, project "ขายรถไว ระบบหลังบ้าน", web app **v10** 2 พ.ย. 2026) — URL อยู่ใน site.js, โค้ดไฟล์เดียว Code.gs (แก้ผ่าน editor ในเบราว์เซอร์)
 flow แจ้งทีม: saveLead เก็บเงียบ (ไม่แจ้ง) → รูปครบ (type done) แจ้งทีม 1 ข้อความแบบ "Kairodwai Lead : KR-xxxx / Details / Status / Call / Source / Photos" + สถานะชีท "รูปครบ รอโทร" → ลูกค้าส่ง "KR-xxxx" ในไลน์ (linkWebLead) → ตอบการ์ดสรุปให้ลูกค้า + แจ้งทีม "แอดไลน์แล้ว ชื่อไลน์ …"
-sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token); saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้; งานถัดไป: followUp() ตามลีดที่ค้างรูป (SMS 2 ชม. + วันถัดไป, แจ้งทีมโทรตาม)
+sheet "ฟอร์มเว็บ" คอลัมน์ I-L (รหัส, หน้าเว็บ, มาจาก, token), M = ติดตามแล้ว (FOLLOW_COL); saveSiteImg (หมดอายุ 2026-11-03) — ถอดออกได้
+ตามลีดที่ค้างรูป: trigger รายชั่วโมง `followUp()` (ติดตั้งด้วย installFollowUp) → SMS หลัง 2 ชม. + วันถัดไป (ลิงก์ /line/?t=… เดิม), ครบ 24 ชม. แจ้งทีมโทรตาม
+SMS: Thaibulksm API v2 (`sendSms()` ใน Code.gs) — บัญชี Thaibulksm ของทีม, API Key ชื่อแอป "Kairodwai" (ช่องทาง SMS/LON) — ค่าอยู่ใน Script properties `SMS_KEY`, `SMS_SECRET`, `SMS_TEST_TO` (เบอร์ทดสอบ), `SMS_SENDER` (ยังไม่ตั้ง = ใช้ "Demo"); ทดสอบด้วย `testSms()` ผ่านแล้ว 2 พ.ย. 2026
+  ค้าง: เติมเครดิต (ทดลองได้ 10 เครดิต ส่งเข้าเบอร์ตัวเองเท่านั้น) + ขอชื่อผู้ส่ง KAIRODWAI แล้วใส่ `SMS_SENDER`
 
 ## บั๊กที่รู้แล้ว
 site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
