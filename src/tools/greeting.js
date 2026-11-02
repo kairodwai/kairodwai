@@ -23,7 +23,7 @@ html,body{margin:0}body{width:1040px;height:1040px;background:#fff;font-family:L
 <div class="top"><img src="${logo}"><h1>กรอกข้อมูลรถจากเว็บมาแล้ว?<small>เหลือแค่กดส่งข้อความที่เตรียมไว้ให้</small></h1></div>
 <div class="bar"><span class="ic">☰</span><div class="inp">กรุณากดปุ่มส่งข้อความทางขวามือ
 ระบบจะส่งข้อมูลรถของคุณที่ลงไว้
-(รหัส KR-1xxx)</div><span class="send"><svg width="52" height="52" viewBox="0 0 24 24" fill="#1E88E5"><path d="M3 11.5 20.5 4l-4 16-5.3-5.6L3 11.5z"/><path d="M11.2 14.4 20.5 4" stroke="#fff" stroke-width="1.3"/></svg></span></div>
+(รหัส KR-1xxx)</div><span class="send"><svg width="66" height="66" viewBox="0 0 24 24"><path d="M5 5.5 L20 12 L5 18.5 Z" fill="#3B7DE8" stroke="#3B7DE8" stroke-width="3" stroke-linejoin="round"/><path d="M5 12 H11.5" stroke="#fff" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
 <div class="cta">กดปุ่มส่ง 1 ครั้ง ก็เสร็จ<b>ทีมงานได้รับข้อมูลรถของคุณ และเริ่มประเมินราคาทันที</b></div>
 <svg class="arrow" viewBox="0 0 300 230" fill="none"><defs><marker id="h" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0 0 L6 3 L0 6 z" fill="#E53935"/></marker></defs><path d="M40 16 C 50 110, 150 130, 215 205" stroke="#E53935" stroke-width="16" stroke-linecap="round" marker-end="url(#h)"/></svg>
 <div class="foot">ยังไม่เคยกรอกข้อมูล? กดปุ่ม <b>"ส่งรูปรถ"</b> ด้านล่างแทน<br>ทีมงานตอบในแชทนี้ ทุกวัน 8:00–20:00</div>
