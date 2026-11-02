@@ -18,10 +18,10 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
     const f = p.locator('form');
     await p.screenshot({ path: `shots/${tag}-0-top.png` });
     await f.screenshot({ path: `shots/${tag}-1-gate.png` });
-    // "แค่มาเช็คราคา" ต้องกดค้าง 2 วิ — แตะเฉยๆ ต้องไม่หลุดออก (ทดสอบเต็มใน hold.js)
+    // "แค่มาเช็คราคา" ต้องกดค้าง 1 วิ — แตะเฉยๆ ต้องไม่หลุดออก (ทดสอบเต็มใน hold.js)
     await f.getByRole('button', { name: /แค่มาเช็คราคา/ }).click();
     await p.waitForTimeout(150);
-    console.log(tag, 'tap on just-checking stays on gate:', await p.locator('[role=dialog]').count() === 0, '| hint:', await f.locator('[aria-live]').innerText());
+    console.log(tag, 'tap on just-checking stays on gate:', await p.locator('[role=dialog]').count() === 0, '| hint elements:', await f.locator('[aria-live]').count());
     await f.screenshot({ path: `shots/${tag}-2-gate-hint.png` });
     // ready → form step 1
     await f.getByRole('button', { name: 'พร้อมขาย ภายใน 7 วันนี้' }).click();

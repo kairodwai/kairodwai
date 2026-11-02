@@ -21,7 +21,7 @@ FTR_OLD = '''<span style="font-family: 'Kanit', sans-serif; font-size: 22px; fon
 FTR_NEW = '''<img src="/img/logo-light.png" alt="ขายรถไว" width="444" height="120" style="display: block; height: 26px; width: auto; align-self: flex-start;">'''
 
 # ---- หน้าคัดกรองก่อนเข้าฟอร์ม: พร้อมขายไหม (กดปุ่มเดียว ไม่ต้องกรอก) ----
-# "แค่มาเช็คราคา" ต้องกดค้าง 2 วิ (กันมือลั่น) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
+# "แค่มาเช็คราคา" ต้องกดค้าง 1 วิ (กันมือลั่น ไม่มีคำใบ้) -> หน้าแดงเต็มจอ บอกเหตุผล 3 ข้อ ไม่มีเบอร์/ไลน์ ไม่มีปุ่มเปลี่ยนใจ จำไว้ในเครื่อง 24 ชม. (ล้างด้วย ?kr=reset)
 NUM = '''<span style="flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; border: 1px solid rgba(255,255,255,0.7); display: flex; align-items: center; justify-content: center; font-family: 'Kanit', sans-serif; font-weight: 600; font-size: 14px; line-height: 1;">'''
 GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 <div style="display: flex; flex-direction: column; gap: 22px;">
@@ -32,12 +32,11 @@ GATE = '''<sc-if value="{{ gateOn }}" hint-placeholder-val="{{ false }}">
 </div>
 <div style="display: flex; flex-direction: column; gap: 10px;">
 <button type="button" onClick="{{ readyYes }}" style="height: 56px; border: 0; border-radius: 28px; font-family: 'Kanit', sans-serif; font-size: 18px; font-weight: 500; background: #141414; color: #FFFFFF; cursor: pointer;">พร้อมขาย ภายใน 7 วันนี้</button>
-<div style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 4px;">
-<button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้ 2 วินาที)" style="position: relative; overflow: hidden; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #8C8983; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
+<div style="display: flex; justify-content: center; padding-top: 2px;">
+<button type="button" onPointerDown="{{ holdStart }}" onPointerUp="{{ holdEnd }}" onPointerLeave="{{ holdEnd }}" onPointerCancel="{{ holdEnd }}" onContextMenu="{{ noMenu }}" onKeyDown="{{ holdKey }}" onKeyUp="{{ holdKey }}" aria-label="ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ (กดค้างไว้ 1 วินาที)" style="position: relative; overflow: hidden; height: 40px; padding: 0 16px; border: 0; border-radius: 20px; background: transparent; font-family: inherit; font-size: 14px; font-weight: 400; color: #8C8983; cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent;">
 <span aria-hidden="true" style="position: absolute; left: 0; top: 0; bottom: 0; border-radius: 20px; background: #DEDBD3; {{ holdBar }}"></span>
 <span style="position: relative;">ยังไม่พร้อมขาย แค่มาเช็คราคาเฉยๆ</span>
 </button>
-<span aria-live="polite" style="font-size: 12px; line-height: 16px; min-height: 16px; color: #8C8983;">{{ holdHint }}</span>
 </div>
 </div>
 </div>
@@ -83,14 +82,13 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
     const LN_ON = 'background: #06C755;', LN_OFF = 'background: #DEDBD3;';
     const trk = (n) => { try { window.KR.track(n); } catch (e) {} };
     const quit = () => { this._hold = null; this.setState({ holding: false, ready: false, missing: false }); trk('NotReady'); try { localStorage.setItem('kr_noready', String(Date.now())); } catch (e) {} };
-    const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 2000); this.setState({ holding: true, holdHint: '' }); };
-    const holdEnd = () => { if (!this._hold) return; clearTimeout(this._hold); this._hold = null; this.setState({ holding: false, holdHint: 'กดค้างไว้ 2 วินาที' }); };
+    const holdStart = (e) => { if (e && e.preventDefault) e.preventDefault(); if (this._hold) return; this._hold = setTimeout(quit, 1000); this.setState({ holding: true }); };
+    const holdEnd = () => { if (!this._hold) return; clearTimeout(this._hold); this._hold = null; this.setState({ holding: false }); };
     return {
       holdStart, holdEnd,
       holdKey: (e) => { if (e.key !== ' ' && e.key !== 'Enter') return; e.preventDefault(); if (e.type === 'keydown') { if (!e.repeat) holdStart(); } else holdEnd(); },
       noMenu: (e) => e.preventDefault(),
-      holdBar: st.holding ? 'width: 100%; transition: width 2s linear;' : 'width: 0; transition: none;',
-      holdHint: st.holdHint || '',
+      holdBar: st.holding ? 'width: 100%; transition: width 1s linear;' : 'width: 0; transition: none;',
       gateOn: !st.sent && st.ready === null,
       notReady: !st.sent && st.ready === false,
       readyYes: () => { this.setState({ ready: true, missing: false }); trk('ReadyToSell'); },
