@@ -238,7 +238,7 @@ def apply(name, body, logic):
         "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || '') + (window.KR && KR.viaLiff ? '&via=liff' : ''); setTimeout(() => { location.href = h; }, 350); return; } "
         "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); "
         "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
-    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังไปหน้าเลือกรูปรถของคุณ…' : 'ยืนยัน'))")
+    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กรุณารอสักครู่…' : 'ยืนยัน'))")
     rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")

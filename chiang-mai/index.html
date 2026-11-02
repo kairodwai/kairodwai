@@ -149,7 +149,7 @@ class Component extends DCLogic {
       pickNo: () => this.setState({ financed: false }),
       pickYes: () => this.setState({ financed: true }),
       blocked: blocked,
-      sendLabel: blocked ? 'รถคันนี้ยังไม่อยู่ในเกณฑ์รับซื้อ' : (st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังไปหน้าเลือกรูปรถของคุณ…' : 'ยืนยัน')),
+      sendLabel: blocked ? 'รถคันนี้ยังไม่อยู่ในเกณฑ์รับซื้อ' : (st.step < 3 ? 'ต่อไป' : (st.sending ? 'กรุณารอสักครู่…' : 'ยืนยัน')),
       sendStyle: 'height: 56px; border: 0; border-radius: 28px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500; ' + (blocked ? 'background: #E4E1DA; color: #4A4843; cursor: not-allowed;' : 'background: #141414; color: #FFFFFF; cursor: pointer;'),
       sent: st.sent,
       stepNo: st.step,
