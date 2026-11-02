@@ -24,27 +24,27 @@ const srv = http.createServer((q, r) => { let p = decodeURIComponent(q.url.split
   const f = p.locator('form');
   await f.getByRole('button', { name: /รถพร้อมขายทันที/ }).click(); await p.waitForTimeout(150);
   const sels = p.locator('form select');
-  await sels.nth(0).selectOption('2020'); await sels.nth(1).selectOption({ index: 3 });
-  await sels.nth(2).selectOption('Toyota'); await sels.nth(3).selectOption('Yaris ATIV');
+  await sels.nth(0).selectOption('2020'); await sels.nth(1).selectOption('Toyota'); await sels.nth(2).selectOption('Yaris ATIV');
   await p.waitForTimeout(100);
-  if (await sels.count() > 4) await sels.nth(4).selectOption({ index: 1 });
+  if (await sels.count() > 4) await sels.nth(3).selectOption({ index: 1 });
+  await sels.last().selectOption({ index: 3 });  // ไมล์อยู่ท้ายสุด
   await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
     await f.getByRole('button', { name: 'ต่อไป' }).click(); await p.waitForTimeout(150);
   await p.locator('form input').last().fill('0812345678');
   const txt = async () => (await f.innerText()).replace(/\s+/g, ' ');
   // 1) network failure
-  await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(700);
+  await f.getByRole('button', { name: 'เลือกรูปรถ' }).click(); await p.waitForTimeout(700);
   await f.screenshot({ path: 'shots/fail-1-network.png' });
   const t1 = await txt();
-  console.log('network fail → still on form:', t1.includes('ขอราคา') && !t1.includes('รหัสอ้างอิง'), '| message:', t1.includes('ส่งไม่สำเร็จ'), '| button enabled:', await f.getByRole('button', { name: 'ขอราคา' }).isEnabled());
+  console.log('network fail → still on form:', t1.includes('เลือกรูปรถ') && !t1.includes('รหัสอ้างอิง'), '| message:', t1.includes('ส่งไม่สำเร็จ'), '| button enabled:', await f.getByRole('button', { name: 'เลือกรูปรถ' }).isEnabled());
   // 2) backend says ok:false
   mode = 'bad';
-  await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(700);
+  await f.getByRole('button', { name: 'เลือกรูปรถ' }).click(); await p.waitForTimeout(700);
   const t2 = await txt();
   console.log('ok:false → message:', t2.includes('ส่งไม่สำเร็จ'), '| not sent:', !t2.includes('รหัสอ้างอิง'));
   // 3) retry succeeds
   mode = 'ok';
-  await f.getByRole('button', { name: 'ขอราคา' }).click(); await p.waitForTimeout(150);
+  await f.getByRole('button', { name: 'เลือกรูปรถ' }).click(); await p.waitForTimeout(150);
   const leadCalls = p.evaluate(() => (window.__fb || []).filter(a => a[1] === 'Lead').length);
   await p.waitForURL(/\/line\//, { timeout: 5000 });
   console.log('retry ok → went to photos:', new URL(p.url()).pathname + new URL(p.url()).search);

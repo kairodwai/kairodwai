@@ -170,6 +170,20 @@ def apply(name, body, logic):
     anchor = '<sc-if value="{{ formOn }}" hint-placeholder-val="{{ true }}">'
     assert body.count(anchor) == 1, (name, 'formOn anchor')
     body = body.replace(anchor, note + GATE + anchor)
+    # ขั้น 1: เรียงใหม่ ปี | ยี่ห้อ / รุ่น | รุ่นย่อย / ไมล์ (เต็มกว้าง ไม่โดนตัดคำ)
+    def lbl(text):
+        m = re.search(r'<label style="[^"]*">' + re.escape(text) + r'\n.*?</label>', body, re.S)
+        assert m, (name, 'label', text)
+        return m.group(0)
+    L_YEAR, L_MILE, L_BRAND, L_MODEL = lbl('ปีจดทะเบียน'), lbl('เลขไมล์ (กม.)'), lbl('ยี่ห้อ'), lbl('รุ่น')
+    m_trim = re.search(r'<sc-if value="\{\{ showTrim \}\}"[^>]*>.*?</sc-if>', body, re.S); assert m_trim, (name, 'trim block')
+    m_ask = re.search(r'<sc-if value="\{\{ askText \}\}"[^>]*>.*?</sc-if>', body, re.S); assert m_ask, (name, 'ask block')
+    start = body.index('<div style="display: flex; flex-direction: column; gap: 12px;">', body.index('<sc-if value="{{ step1 }}"'))
+    end = m_ask.end()
+    GRID = '<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">'
+    L_MODEL2 = L_MODEL.replace('min-width: 0;">รุ่น', 'min-width: 0; grid-column: {{ modelCol }};">รุ่น', 1)
+    assert L_MODEL2 != L_MODEL
+    body = body[:start] + GRID + '\n' + L_YEAR + '\n' + L_BRAND + '\n</div>\n' + GRID + '\n' + L_MODEL2 + '\n' + m_trim.group(0) + '\n</div>\n' + m_ask.group(0) + '\n' + L_MILE + body[end:]
     # ขั้น 2: ตัดคำถาม "จะขายเมื่อไหร่" ออก (หน้า gate ถามไปแล้วว่าพร้อมขายใน 1-7 วัน)
     body, n = re.subn(r'<div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">\s*<span style="font-size: 15px; font-weight: 600;">จะขายเมื่อไหร่</span>.*?</sc-for>\s*</div>', '', body, count=1, flags=re.S)
     assert n == 1, (name, 'sell-when block')
@@ -197,10 +211,11 @@ def apply(name, body, logic):
         "if (r && r.ok && r.t) { const h = '/line/?t=' + r.t + '&ref=' + encodeURIComponent(r.ref || ''); setTimeout(() => { location.href = h; }, 350); return; } "
         "if (r && r.ok) this.setState({ sending: false, sent: true, refNo: r.ref || '', photoHref: '' }); "
         "else this.setState({ sending: false, sent: false, failed: true, missing: true }); }); }")
-    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'ขอราคา'))")
-    rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดขอราคาอีกครั้งได้เลย' : st.step === 1 ?")
+    rep("(st.step < 3 ? 'ต่อไป' : 'ขอราคา')", "(st.step < 3 ? 'ต่อไป' : (st.sending ? 'กำลังส่ง…' : 'เลือกรูปรถ'))")
+    rep("missingText: st.step === 1 ?", "missingText: st.failed ? 'ส่งไม่สำเร็จ สัญญาณอาจหลุด กดเลือกรูปรถอีกครั้งได้เลย' : st.step === 1 ?")
     rep("    return {\n      brands:", LOGIC_VALS)
     rep("send: () => { if (!blocked) this.setState({ sent: true }); },", "send: () => {},")
+    rep("showTrim: trimList.length > 0,", "showTrim: trimList.length > 0, modelCol: trimList.length > 0 ? 'auto' : '1 / -1',")
     rep("goForm: () => { if (!blocked) this.setState({ missing: true }); const f = document.querySelector('form'); if (f) f.scrollIntoView({ behavior: 'smooth', block: 'start' }); },",
         "goForm: () => { trk('LineTap'); if (st.sent && st.photoHref) { location.href = st.photoHref; return; } sheetOpen(); },\n"
         "      sheetGo: () => { sheetShut(); this.setState({ missing: st.ready === true && !blocked }); focusCard(); },\n"
