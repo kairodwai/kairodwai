@@ -7,7 +7,7 @@ const logo = 'data:image/png;base64,' + fs.readFileSync(path.join(__dirname, '..
 const html = `<!doctype html><meta charset="utf-8"><style>
 html,body{margin:0}body{width:1040px;height:1040px;background:#fff;font-family:Loma,'Noto Sans Thai',sans-serif;color:#0B1A10;display:flex;flex-direction:column;box-sizing:border-box;padding:64px 64px 56px;position:relative}
 .top{display:flex;align-items:center;gap:24px}
-.top img{width:96px;height:96px}
+.top img{width:200px;height:auto}
 .top h1{font-size:44px;line-height:1.2;margin:0;font-weight:700}
 .top h1 small{display:block;font-size:30px;font-weight:400;color:#3F4A44;margin-top:6px}
 .bar{margin-top:56px;display:grid;grid-template-columns:56px 1fr 96px;align-items:center;gap:20px;background:#E9EBEF;border-radius:32px;padding:28px 28px 28px 24px}
