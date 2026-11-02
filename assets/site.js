@@ -27,7 +27,7 @@
   function lead(st, MILES) {
     var mile = st.mile ? ((MILES.find(function (m) { return m[0] === st.mile; }) || [0, ''])[1] + ' กม.') : '';
     var car = [st.brand === 'ยี่ห้ออื่น' ? (st.other || 'ยี่ห้ออื่น') : st.brand, st.model === 'รุ่นอื่น' ? st.other : st.model,
-      st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? st.trim : ''].filter(Boolean).join(' ');
+      st.trim && st.trim !== 'ไม่แน่ใจรุ่นย่อย' ? (st.model && st.trim.indexOf(st.model + ' ') === 0 ? st.trim.slice(st.model.length + 1) : st.trim) : ''].filter(Boolean).join(' ');
     var fin = st.financed ? ['ยังผ่อนอยู่', st.price ? 'ราคาซื้อ ' + st.price : '', st.term ? 'สัญญา ' + st.term : '',
       st.paid ? 'ผ่อนแล้ว ' + st.paid + ' งวด' : '', st.monthly ? 'งวดละ ' + st.monthly : ''].filter(Boolean).join(' · ') : 'ไม่ติดไฟแนนซ์';
     var when = { ready: 'พร้อมขายทันที (1-7 วัน)', now: 'ตอนนี้', '7d': 'ภายใน 7 วัน', month: 'ภายในเดือนนี้' }[st.sell] || '';
