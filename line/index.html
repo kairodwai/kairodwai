@@ -71,12 +71,15 @@ header p{margin:0;font-size:14px}
 .card .cta:disabled{background:#c9d2cd;cursor:not-allowed}
 .card .link{height:44px;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:underline;cursor:pointer}
 .card .err{margin-top:0;width:100%}
-.demo{margin:4px 0 0;width:100%;display:grid;gap:8px}
-.demo figcaption{font-size:13px;line-height:1.5;color:var(--ink-2)}.demo figcaption b{color:#0B1A10}
+.demo{margin:12px 0 0;width:100%;display:grid;gap:10px;padding-top:16px;border-top:1px solid #E3E6E3;text-align:left}
+.demo figcaption{font-size:14px;line-height:1.5;color:var(--ink-2)}.demo figcaption b{color:#0B1A10}
+.demo-k{display:block;font-family:var(--f-display);font-weight:600;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:#0B7A36;margin-bottom:4px}
 .demo-bar{position:relative;display:grid;grid-template-columns:28px 1fr 40px;align-items:center;gap:8px;background:#E9EBEF;border-radius:14px;padding:12px 12px 12px 10px;text-align:left}
 .demo-ic{color:#555;font-size:18px;text-align:center}
 .demo-input{background:#fff;border-radius:18px;padding:9px 12px;font-size:13px;line-height:1.45;color:#222;white-space:pre-line;min-width:0}
-.demo-send{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 3px #E53935;background:#fff}
+.demo-send{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;box-shadow:0 0 0 3px #E53935;background:#fff;animation:ring 1.6s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 3px #E53935,0 0 0 3px rgba(229,57,53,.6)}70%{box-shadow:0 0 0 3px #E53935,0 0 0 14px rgba(229,57,53,0)}100%{box-shadow:0 0 0 3px #E53935,0 0 0 14px rgba(229,57,53,0)}}
+@media(prefers-reduced-motion:reduce){.demo-send{animation:none}}
 .demo-tag{position:absolute;right:4px;bottom:-10px;background:#E53935;color:#fff;font-size:11px;font-weight:600;line-height:1;padding:4px 7px;border-radius:999px}
 .ok{color:#0B7A36;font-weight:600}
 .send .later{display:none;height:44px;border:0;background:none;font:inherit;font-size:14px;font-weight:600;color:var(--ink-2);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
@@ -152,7 +155,7 @@ input[type=file]{display:none}
     <button class="cta" id="readyBtn" type="button"></button>
     <div class="err" id="readyErr" hidden></div>
     <figure class="demo" aria-label="ตัวอย่างหน้าจอในไลน์">
-      <figcaption>เข้าไลน์แล้วจะเจอแบบนี้ — <b>กดปุ่มส่ง 1 ครั้ง</b> ก็เสร็จ</figcaption>
+      <figcaption><span class="demo-k">ขั้นต่อไปในไลน์</span>เข้าไลน์แล้ว <b>กดส่งข้อความที่เราเตรียมไว้ให้</b>ได้เลย<br>ระบบจะส่งข้อมูลรถคุณทั้งหมดให้แอดมินอัตโนมัติ</figcaption>
       <div class="demo-bar">
         <span class="demo-ic" aria-hidden="true">☰</span>
         <div class="demo-input" id="demoMsg"></div>
