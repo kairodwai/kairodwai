@@ -59,11 +59,11 @@ LIFF app "kairodwai-web" (LINE Login channel 2012318037, endpoint https://kairod
 
 ## บั๊กที่รู้แล้ว
 - gate.js: ขั้น goBack หลัง redirect ไป /line/ รอ html.dc-ready ไม่ทัน (TimeoutError) — ของเดิมก่อน LIFF, ขั้นก่อนหน้าผ่านครบ
-site.js `lead()`: ถ้า POST ล้มเหลว (เน็ตหลุด) ฟอร์มค้างที่ "กำลังส่ง…" ตลอด — ต้องใส่ .catch → setState({sending:false, missing:true}) พร้อมข้อความให้ลองใหม่
+- (แก้แล้ว) ฟอร์มเน็ตหลุด: site.js lead() catch → null → ปุ่มกลับมา + "ส่งไม่สำเร็จ สัญญาณอาจหลุด กดยืนยันอีกครั้ง"
 
 ## ค้างอยู่
 - Meta Pixel ID / Google Ads conversion ID ยังไม่ใส่
-- placeholder ที่รอข้อมูลจริง: รีวิวหน้าแรก, การ์ด portfolio, Finance ข้อ 3, intro เชียงใหม่, Privacy (ชื่อบริษัท วันที่ ระยะเก็บข้อมูล)
+- placeholder ที่รอข้อมูลจริง: Finance (3 ข้อ "ยืนยัน"), เชียงใหม่ (intro + นัดล่วงหน้ากี่วัน), Privacy (ผู้ควบคุมข้อมูล วันที่ ระยะเก็บ เครื่องมือ) — build เตือน (WARN) ทุกหน้า และหยุด build ถ้าหน้าแรกมี placeholder · ซ่อนแล้วจนกว่าจะมีของจริง: รีวิวหน้าแรก, "รับซื้อล่าสุด" หน้า Toyota/เชียงใหม่, หน้า /portfolio/ (noindex, ไม่อยู่ใน sitemap, ไม่มีลิงก์เข้า — build.py HIDDEN)
 - Cloudflare: CNAME www → ควรชี้ kairodwai.github.io
 - รูปคน: ห้าม generate เอง
 - แผนโครงสร้าง funnel ทั้งระบบ: https://claude.ai/artifact/1aLPX8djoyrfAZtcQfrbzX

@@ -33,6 +33,10 @@ ATTR_RE = re.compile(r'''\s([^\s=/>"']+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>]+))?'''
 WHOLE = re.compile(r'^\s*\{\{\s*([^}]*?)\s*\}\}\s*$')
 
 
+HIDDEN = {'Portfolio'}   # หน้าที่ยังไม่มีข้อมูลจริง: noindex + ไม่อยู่ใน sitemap + ไม่มีลิงก์เข้า (patches.common)
+ROBOTS_NOINDEX = '\n<meta name="robots" content="noindex">'
+PLACEHOLDER = re.compile(r'\[[^\]{}"<>0-9,\'\[]*[\u0e00-\u0e7f][^\]{}"<>]{0,60}\]')   # ข้อความในวงเล็บเหลี่ยมภาษาไทย = placeholder ที่ยังไม่ได้ใส่ข้อมูลจริง
+
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
 
 # รูปประกอบหน้าเว็บ: jpg ต้นฉบับอยู่ <repo>/img → build ทำ .webp (เบากว่า ~3 เท่า ภาพเท่าเดิม) + ตัวย่อ 800px สำหรับมือถือ แล้วใส่ srcset/lazy ให้ทุก <img>
@@ -199,7 +203,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc)}">
-<link rel="canonical" href="{url}">
+<link rel="canonical" href="{url}">{ROBOTS_NOINDEX if name in HIDDEN else ''}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="ขายรถไว">
 <meta property="og:title" content="{html.escape(title)}">
@@ -242,8 +246,13 @@ def main():
         strip_ws(c.root)
         d = os.path.join(OUT, PAGES[name][0].strip('/'))
         os.makedirs(d, exist_ok=True)
-        open(os.path.join(d, 'index.html'), 'w', encoding='utf-8').write(
-            page_html(name, helmet, c.root['kids'], logic, pre.get(name, '')))
+        out_html = page_html(name, helmet, c.root['kids'], logic, pre.get(name, ''))
+        # content gate: placeholder ภาษาไทยในวงเล็บเหลี่ยม = ข้อมูลที่ยังไม่ได้ใส่ — หน้าแรก (หน้าที่แอดพามา) ห้ามมีเลย, หน้าอื่นเตือน
+        ph = sorted(set(m for m in PLACEHOLDER.findall(out_html) if not m.startswith("['")))
+        if ph:
+            print(('BLOCK ' if name == 'Main' else 'WARN  ') + PAGES[name][0] + ' placeholder: ' + ' '.join(ph))
+            if name == 'Main': sys.exit('content gate: หน้าแรกยังมี placeholder')
+        open(os.path.join(d, 'index.html'), 'w', encoding='utf-8').write(out_html)
     # ไฟล์ประกอบ
     os.makedirs(os.path.join(OUT, 'assets'), exist_ok=True)
     os.makedirs(os.path.join(OUT, 'img'), exist_ok=True)
@@ -277,7 +286,7 @@ def extras():
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))
     open(os.path.join(OUT, 'CNAME'), 'w').write('kairodwai.com\n')
-    urls = [DOMAIN + v[0] for v in PAGES.values()]
+    urls = [DOMAIN + v[0] for k, v in PAGES.items() if k not in HIDDEN]
     open(os.path.join(OUT, 'sitemap.xml'), 'w').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
         ''.join(f'  <url><loc>{u}</loc></url>\n' for u in urls) + '</urlset>\n')

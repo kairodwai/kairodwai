@@ -164,11 +164,22 @@ def common(body):
                         '<a href="/finance/" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">ดูขั้นตอนขายรถติดไฟแนนซ์')
     # ไม่พร้อมขาย ไม่ให้แอด: เอาไอดีไลน์ท้ายเว็บออก
     body = re.sub(r'<span>LINE @kairodwai</span>\s*', '', body)
+    # ของปลอม/placeholder ห้ามขึ้นเว็บจริง: ซ่อนจนกว่าจะมีข้อมูลจริง (รีวิวลูกค้า, รถที่รับซื้อล่าสุด, หน้าผลงาน)
+    body = re.sub(r'<a href="Portfolio\.dc\.html"[^>]*>(?:ผลงานรับซื้อ|ดูผลงานรับซื้อทั้งหมด)[^<]*</a>\s*', '', body)
+    for marker in ('รีวิวจริงจาก Google ทุกอัน', '[เดือน ปี]'):
+        i = body.find(marker)
+        if i < 0: continue
+        a = body.rfind('<section', 0, i); b = body.find('</section>', i)
+        assert a >= 0 and b > i and '<section' not in body[a + 8:i], ('placeholder section', marker)
+        body = body[:a] + body[b + len('</section>'):]
     return body
 
 
 def apply(name, body, logic):
     body = common(body)
+    if name == 'Portfolio':   # ข้อมูลตัวอย่างล้วน (ยี่ห้อ/จังหวัดสมมติ) — ว่างไว้จนกว่าจะมีรถที่ซื้อจริงจากหลังบ้าน; หน้านี้ noindex + ไม่อยู่ใน sitemap (build.py HIDDEN)
+        logic, n = re.subn(r'var ITEMS = \[.*?\];', 'var ITEMS = [];', logic, count=1, flags=re.S)
+        assert n == 1, 'portfolio items'
     if name not in ('Main', 'Brand', 'Province'):
         return body, logic
     m = re.search(r'(<svg[^>]*>(?:(?!</svg>).)*</svg>)\s*<span>แอดไลน์', body, re.S)   # โลโก้ LINE จากดีไซน์ (ก่อนตัดการ์ดขอบคุณ)
