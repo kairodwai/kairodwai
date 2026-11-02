@@ -253,7 +253,7 @@ function render(){
   if (REF) { const ready = done >= REQ && !busy; btn.innerHTML = (VIA_LIFF ? '' : LINE_ICO) + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม' + (VIA_LIFF ? ' แล้วส่งให้ทีมงาน' : ' แล้วแอดไลน์ได้เลย') : !ready ? 'กำลังโหลดรูป กรุณารอสักครู่' : VIA_LIFF ? 'ส่งให้ทีมงานแล้ว ✓' : 'Add LINE : <span class="at">@</span>KAIRODWAI') + '</span>'; $('doneNote').hidden = !ready;
     $('readyBtn').innerHTML = LINE_ICO + '<span>Add LINE : @KAIRODWAI</span>';
     $('demoMsg').textContent = LINE_MSG;
-    $('laterBtn').hidden = ready;
+    $('laterBtn').hidden = ready || VIA_LIFF;   // เปิดในไลน์: ไม่มีทางเลือกให้คิด ออกได้เลย เดี๋ยวบอททักเอง
     if (ready) postDone();   // รูปครบ = แจ้งทีมทันที ไม่ต้องรอกดแอดไลน์
     if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) { show('doneView'); setTimeout(() => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); } catch (e) {} }, 2500); } else show('readyView'); } }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
@@ -333,12 +333,13 @@ tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e)
 if (VIA_LIFF && window.liff) { liff.init({ liffId: LIFF_WEB_ID }).catch(() => {}); }   // ให้ liff.closeWindow() ใช้ได้ตอนจบ
 let leaving = false, panelShown = false, armed = false, doneSent = false, doneSending = false;
 const allIn = () => st.slice(0, REQ).filter(x => x.state === 'done').length >= REQ && !st.some(x => x.state === 'up');
-const arm = () => { if (!REF || armed) return; try { history.pushState({ kr: 1 }, ''); armed = true; } catch (e) {} };
+const arm = () => { if (!REF || armed || VIA_LIFF) return; try { history.pushState({ kr: 1 }, ''); armed = true; } catch (e) {} };
 const openLater = () => { $('laterOv').hidden = false; $('laterPanel').hidden = false; document.body.style.overflow = 'hidden'; panelShown = true; };
 const closeLater = () => { $('laterOv').hidden = true; $('laterPanel').hidden = true; document.body.style.overflow = ''; panelShown = false; arm(); };
-window.addEventListener('popstate', () => { if (!REF || leaving || allIn()) return; if (!panelShown) { openLater(); try { history.pushState({ kr: 1 }, ''); } catch (e) {} } else { armed = false; } });   // กด back ครั้งแรก = ขึ้นแผ่น 'ถ่ายทีหลัง' ก่อน กดอีกทีค่อยออก
+window.addEventListener('popstate', () => { if (!REF || VIA_LIFF || leaving || allIn()) return; if (!panelShown) { openLater(); try { history.pushState({ kr: 1 }, ''); } catch (e) {} } else { armed = false; } });   // กด back ครั้งแรก = ขึ้นแผ่น 'ถ่ายทีหลัง' ก่อน กดอีกทีค่อยออก
 window.addEventListener('beforeunload', (e) => { if (!REF || VIA_LIFF || leaving || allIn()) return; e.preventDefault(); e.returnValue = ''; });   // เปิดในไลน์ไม่ต้องขู่ — บอททักกลับในแชทได้   // ปิดแท็บ/รีเฟรชตอนยังไม่ครบ browser จะถามยืนยัน
 if (navigator.share) { $('shareBtn').hidden = false; $('shareBtn').onclick = () => navigator.share({ title: 'ขายรถไว ถ่ายรูปรถต่อ', text: 'ลิงก์ถ่ายรูปรถต่อ ขายรถไว รหัส ' + REF, url: location.href }).catch(() => {}); }
+window.addEventListener('pagehide', () => { if (!REF || !VIA_LIFF || !token || doneSent || allIn()) return; try { navigator.sendBeacon(API, new Blob([JSON.stringify({ type: 'left', t: token })], { type: 'text/plain;charset=utf-8' })); } catch (e) {} });
 async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
 $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterClose').onclick = closeLater;
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };
@@ -346,7 +347,7 @@ if (REF && VIA_LIFF) {
   document.querySelector('#doneView h2').textContent = 'ส่งข้อมูลและรูปครบแล้ว';
   document.querySelector('#doneView p').innerHTML = 'กลับไปที่แชทไลน์ได้เลย <b class="ok">การ์ดประเมินราคารออยู่แล้ว</b><br>ทีมงานจะตอบในแชทภายใน 5 นาที (8:00–20:00)';
   document.querySelector('#laterPanel p + p').innerHTML = 'ถ้ายังไม่ครบ <b class="ok">เราจะทักเตือนในแชทไลน์ให้เอง</b> กดปุ่มในแชทแล้วถ่ายต่อได้ทุกเมื่อ';
-  ['keepBtn', 'shareBtn', 'copyBtn'].forEach(id => { const el = $(id); if (el) el.hidden = true; });
+  ['keepBtn', 'shareBtn', 'copyBtn'].forEach(id => { const el = $(id); if (el) { el.hidden = true; el.style.display = 'none'; } });
 }
 if (REF) {
   remember(); arm();
