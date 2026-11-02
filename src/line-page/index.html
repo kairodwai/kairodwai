@@ -94,7 +94,6 @@ input[type=file]{display:none}
   </div>
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
-    <small>รูปที่ 6 รอย/ตำหนิ ไม่บังคับ ถ้าไม่มีข้ามได้เลย</small>
   </div></div>
 </div>
 
@@ -126,7 +125,7 @@ const SLOTS = [
   {lbl:'ภายใน', hint:'ถ่ายจากเบาะหลังมาข้างหน้า'},
   {lbl:'หน้าปัดเลขไมล์', hint:'ติดเครื่องก่อน ให้เห็นเลขชัด'},
   {lbl:'ห้องเครื่อง', hint:'เปิดฝากระโปรง ถ่ายจากด้านหน้า'},
-  {lbl:'รอย/ตำหนิ', hint:'ถ้ามี ถ่ายใกล้ๆ ให้เห็นชัด', opt:true}
+  {lbl:'รอย/ตำหนิ', hint:'ไม่บังคับ ถ้ามีถ่ายใกล้ๆ ให้ชัด ไม่มีข้ามได้', opt:true}
 ];
 const G = [[321.34,2.08,15.73,1.745],[325.42,49.81,16.53,1.723],[325.42,98.12,10.53,1.249],[326.81,1.88,89.74,1.119],[320,50,97.36,0.972],[326.81,97.94,89.58,1.146]];
 SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัวอย่างแต่ละมุมในรูปไกด์
@@ -154,7 +153,7 @@ function render(){
     b.setAttribute('aria-label', (i+1) + ' ' + s.lbl + ' ' + hint);
     b.innerHTML = '<div class="ph' + (x.preview ? '' : ' ex-on') + '">' + (x.preview ? '<img alt="" src="' + x.preview + '">' : '<div class="ex" style="width:' + Math.min(80, 70 * 0.75 * s.g[3]).toFixed(1) + '%;aspect-ratio:' + s.g[3] + ';background-size:' + s.g[0] + '% auto;background-position:' + s.g[1] + '% ' + s.g[2] + '%"></div><span class="tap">' + cam + '</span>') + (x.state === 'up' ? '<span class="spin"></span>' : '') + '</div>'
       + '<div class="meta"><div class="lbl">' + s.lbl + '</div><div class="hint">' + hint + '</div></div>'
-      + '<span class="num">' + (i+1) + '</span>' + (s.opt ? '<span class="opt">ถ้ามี</span>' : '');
+      + '<span class="num">' + (i+1) + '</span>' + (s.opt ? '<span class="opt">ไม่บังคับ</span>' : '');
     b.onclick = () => {
       if (x.state === 'fail' && data[i]) { upload(i); return; }
       if (x.state === 'up') return;
