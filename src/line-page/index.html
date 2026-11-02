@@ -105,7 +105,12 @@ header p{margin:0;font-size:14px}
 .err{background:var(--err-soft);color:var(--err);border-radius:10px;padding:10px 12px;font-size:13px;margin-top:12px}
 input[type=file]{display:none}
 .ghost{height:48px;padding:0 24px;border:1.5px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
-@media (prefers-reduced-motion:reduce){.bar i{transition:none}.ph .spin::after{animation:none}}
+.going{width:100%;display:grid;gap:8px;justify-items:center;margin-top:4px}
+.going .lead{font-family:var(--f-display);font-weight:600;color:var(--ink);font-size:16px}
+.going .track{width:160px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+.going .track i{display:block;height:100%;width:0;background:var(--green);border-radius:2px;transition:width 2.4s linear}
+.going.run .track i{width:100%}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}.ph .spin::after{animation:none}.going .track i{transition:none;width:100%}}
 </style>
 </head>
 <body>
@@ -171,6 +176,7 @@ input[type=file]{display:none}
   <div class="big"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
   <h2>ส่งรูปครบแล้ว</h2>
   <p>ทีมได้รับรูปแล้ว จะประเมินราคาแล้วตอบกลับในแชทไลน์</p>
+  <div class="going" id="going" hidden><span class="lead">กำลังพาคุณไปที่แชท…</span><span class="track"><i></i></span></div>
   <button class="ghost" id="closeBtn" type="button">กลับไปที่แชท</button>
 </div></div></div>
 
@@ -255,7 +261,7 @@ function render(){
     $('demoMsg').textContent = LINE_MSG;
     $('laterBtn').hidden = ready || VIA_LIFF;   // เปิดในไลน์: ไม่มีทางเลือกให้คิด ออกได้เลย เดี๋ยวบอททักเอง
     if (ready) postDone();   // รูปครบ = แจ้งทีมทันที ไม่ต้องรอกดแอดไลน์
-    if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) { show('doneView'); setTimeout(() => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); } catch (e) {} }, 2500); } else show('readyView'); } }
+    if (ready && !editing && $('app').hidden === false) { if (VIA_LIFF) liffDone(); else show('readyView'); } }
   else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
@@ -305,7 +311,7 @@ async function sendAll(btn, errEl){
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
-    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } show('doneView'); return; }
+    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } if (REF && VIA_LIFF) liffDone(); else show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
@@ -343,9 +349,15 @@ window.addEventListener('pagehide', () => { if (!REF || !VIA_LIFF || !token || d
 async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
 $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterClose').onclick = closeLater;
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };
+// เปิดในไลน์: จบแล้วพากลับแชทเอง — โชว์ "กำลังพาคุณไปที่แชท…" + แถบวิ่ง 2.4 วิ แล้ว closeWindow; ถ้ายังค้างอยู่ (ปิดเองไม่ได้) ค่อยโผล่ปุ่มให้กดกลับ
+let doneShown = false;
+function liffDone(){ if (doneShown) return; doneShown = true; show('doneView'); const g = $('going'); g.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add('run')));
+  setTimeout(() => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); } catch (e) {} }, 2500);
+  setTimeout(() => { g.hidden = true; $('closeBtn').hidden = false; }, 3600); }
 if (REF && VIA_LIFF) {
   document.querySelector('#doneView h2').textContent = 'ส่งข้อมูลและรูปครบแล้ว';
-  document.querySelector('#doneView p').innerHTML = 'กลับไปที่แชทไลน์ได้เลย <b class="ok">การ์ดประเมินราคารออยู่แล้ว</b><br>ทีมงานจะตอบในแชทภายใน 5 นาที (8:00–20:00)';
+  document.querySelector('#doneView p').innerHTML = '<b class="ok">การ์ดประเมินราคารออยู่ในแชทแล้ว</b><br>ทีมงานจะตอบภายใน 5 นาที (8:00–20:00)';
+  $('closeBtn').hidden = true;
   document.querySelector('#laterPanel p + p').innerHTML = 'ถ้ายังไม่ครบ <b class="ok">เราจะทักเตือนในแชทไลน์ให้เอง</b> กดปุ่มในแชทแล้วถ่ายต่อได้ทุกเมื่อ';
   ['keepBtn', 'shareBtn', 'copyBtn'].forEach(id => { const el = $(id); if (el) { el.hidden = true; el.style.display = 'none'; } });
 }
