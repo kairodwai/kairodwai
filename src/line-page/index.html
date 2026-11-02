@@ -32,7 +32,7 @@ header p{margin:0;font-size:14px}
 .prog-top span{color:var(--ink-2);font-size:13px}
 .bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;width:0;background:var(--green);border-radius:999px;transition:width .3s ease}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:14px 160px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding-block:14px 132px}
 .slot{position:relative;display:grid;grid-template-rows:auto 1fr;background:var(--card);border:1.5px dashed #b9c4be;border-radius:14px;padding:0;overflow:hidden;cursor:pointer;text-align:left;font:inherit;color:inherit}
 .slot:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 .ph{position:relative;aspect-ratio:4/3;background:var(--green-soft);display:grid;place-items:center;color:var(--green-d)}
@@ -57,16 +57,14 @@ header p{margin:0;font-size:14px}
 .slot.fail .hint{color:var(--err);font-weight:500}
 .send{position:fixed;z-index:10;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
 .send .wrap{padding-block:12px;display:grid;gap:6px}
-.send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer}
+.send button{height:52px;border:0;border-radius:12px;background:var(--green);color:#fff;font-family:var(--f-display);font-weight:600;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:10px}
 .send button:disabled{background:#c9d2cd;cursor:not-allowed}
 .send small{text-align:center;color:var(--ink-2);font-size:12px}
-.send .next{display:none;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:#05A647}
-.send .next svg{width:18px;height:18px;flex-shrink:0}
 .journey{display:none;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:8px}
 .journey span{display:grid;justify-items:center;gap:4px;font-size:11px;line-height:1.2;color:rgba(255,255,255,.75);text-align:center}
 .journey i{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-family:var(--f-display);font-weight:600;font-size:12px;background:rgba(255,255,255,.25);color:#fff}
 .journey .done i{background:#fff;color:var(--green)}.journey .now{color:#fff}.journey .now i{background:#141414;color:#fff}
-.web .journey{display:grid}.web .send .next{display:flex}
+.web .journey{display:grid}
 .screen{min-height:100vh;display:grid;place-items:center;padding-block:48px}
 .card{display:grid;gap:12px;justify-items:center;text-align:center;max-width:360px}
 .big{width:72px;height:72px;border-radius:50%;background:var(--green);display:grid;place-items:center}
@@ -97,7 +95,6 @@ input[type=file]{display:none}
   <div class="send"><div class="wrap">
     <button id="sendBtn" disabled>ถ่ายให้ครบ 5 มุมก่อน</button>
     <small>รูปที่ 6 รอย/ตำหนิ ไม่บังคับ ถ้าไม่มีข้ามได้เลย</small>
-    <div class="next"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg><span>ขั้นสุดท้ายแล้ว ส่งเสร็จเปิดไลน์ให้เลย ทีมตอบราคาในไลน์</span></div>
   </div></div>
 </div>
 
@@ -136,6 +133,7 @@ SLOTS.forEach((s, i) => s.g = G[i]); // ตำแหน่งรูปตัว�
 const REQ = SLOTS.filter(s => !s.opt).length;
 let token = new URLSearchParams(location.search).get('t') || '';
 const REF = new URLSearchParams(location.search).get('ref') || '';   // มาจากเว็บ: หลังส่งครบพาไปคุยต่อในไลน์ทันที
+const LINE_ICO = '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:22px;height:22px;flex-shrink:0"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg>';
 const LINE_URL = 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent('ส่งข้อมูลจากเว็บแล้ว รหัส ' + REF);
 const st = SLOTS.map(() => ({ preview:null, state:'empty' })); // empty | up | done | fail
 const data = SLOTS.map(() => null);
@@ -171,7 +169,8 @@ function render(){
   $('barfill').style.width = (got / REQ * 100) + '%';
   const btn = $('sendBtn');
   btn.disabled = got < REQ || busy;
-  btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : (REF ? 'ส่งทั้งหมด แล้วคุยต่อในไลน์' : 'ส่งรูปให้ทีมประเมิน');
+  if (REF) btn.innerHTML = LINE_ICO + '<span>' + (got < REQ ? 'อีก ' + (REQ - got) + ' มุม แล้วแอดไลน์ได้เลย' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งทั้งหมด แล้วแอดไลน์') + '</span>';
+  else btn.textContent = got < REQ ? 'ถ่ายให้ครบ ' + REQ + ' มุมก่อน' : busy ? 'รอรูปส่งเสร็จก่อน...' : 'ส่งรูปให้ทีมประเมิน';
 }
 
 // ย่อรูปให้ด้านยาวไม่เกิน 1600px ส่งผ่านเน็ตมือถือได้เร็ว
@@ -216,7 +215,7 @@ $('picker').onchange = async () => {
 $('closeBtn').onclick = () => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); else history.back(); } catch (e) {} };
 
 $('sendBtn').onclick = async () => {
-  const btn = $('sendBtn'); btn.disabled = true; btn.textContent = 'กำลังส่ง...'; $('sendErr').hidden = true;
+  const btn = $('sendBtn'); btn.disabled = true; btn.textContent = REF ? 'กำลังส่ง แล้วเปิดไลน์...' : 'กำลังส่ง...'; $('sendErr').hidden = true;
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
