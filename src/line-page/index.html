@@ -377,8 +377,12 @@ $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterCl
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };
 // เปิดในไลน์: จบแล้วพากลับแชทเอง — โชว์ "กำลังพาคุณไปที่แชท…" + แถบวิ่ง 2.4 วิ แล้ว closeWindow; ถ้ายังค้างอยู่ (ปิดเองไม่ได้) ค่อยโผล่ปุ่มให้กดกลับ
 let doneShown = false;
+const DONE_MSG = 'ส่งรูปรถครบแล้ว (รหัส ' + REF + ')';
+function goChat(){ const close = () => { try { liff.closeWindow(); } catch (e) {} };
+  try { if (window.liff && liff.isInClient() && liff.sendMessages) { liff.sendMessages([{ type: 'text', text: DONE_MSG }]).then(close).catch(() => { leaving = true; location.href = 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent(DONE_MSG); }); return; } } catch (e) {}
+  leaving = true; location.href = 'https://line.me/R/oaMessage/%40kairodwai/?' + encodeURIComponent(DONE_MSG); }
 function liffDone(){ if (doneShown) return; doneShown = true; show('doneView'); const g = $('going'); g.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => g.classList.add('run')));
-  setTimeout(() => { try { if (window.liff && liff.isInClient()) liff.closeWindow(); } catch (e) {} }, 2500);
+  setTimeout(goChat, 2500);
   setTimeout(() => { g.hidden = true; $('closeBtn').hidden = false; }, 3600); }
 if (REF && VIA_LIFF) {
   document.querySelector('#doneView h2').textContent = 'ส่งข้อมูลและรูปครบแล้ว';
