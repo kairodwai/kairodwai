@@ -29,13 +29,12 @@
 
   function store(k, v) { try { if (v == null) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
 
-  // จำที่มาครั้งแรก (first touch) ไว้ 30 วัน
+  // จำที่มาจากคลิกแอดล่าสุด (last paid click — แบบที่ Google/Meta นับ) ไว้ 30 วัน; เปิดตรงๆ ไม่มีพารามิเตอร์ = ไม่ทับ
   var q = new URLSearchParams(location.search), src = {};
   KEYS.forEach(function (k) { if (q.get(k)) src[k] = q.get(k).slice(0, 200); });
   if (Object.keys(src).length) {
     src.landing = location.pathname; src.ref = document.referrer.slice(0, 200); src.at = Date.now(); if (VIA_LIFF) src.via = 'liff';
-    var old = null; try { old = JSON.parse(store('kr_src') || 'null'); } catch (e) {}
-    if (!old || Date.now() - old.at > 30 * 864e5) store('kr_src', JSON.stringify(src));
+    store('kr_src', JSON.stringify(src));
   } else if (!store('kr_src') && document.referrer && document.referrer.indexOf(location.host) < 0) {
     store('kr_src', JSON.stringify({ ref: document.referrer.slice(0, 200), landing: location.pathname, at: Date.now() }));
   }
