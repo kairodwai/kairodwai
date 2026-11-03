@@ -16,7 +16,7 @@ const SDK = "window.liff={init:()=>Promise.resolve(),isLoggedIn:()=>true,isInCli
  const f=p.locator('form'); await f.getByRole('button',{name:/รถพร้อมขายทันที/}).click(); await p.waitForTimeout(200);
  const sels=p.locator('form select'); await sels.nth(0).selectOption('2020'); await sels.nth(1).selectOption('Toyota'); await sels.nth(2).selectOption('Yaris ATIV'); await p.waitForTimeout(100); if(await sels.count()>4) await sels.nth(3).selectOption({index:1}); await sels.last().selectOption({index:3});
  await f.getByRole('button',{name:'ต่อไป'}).click(); await p.waitForTimeout(150); await f.getByRole('button',{name:'ต่อไป'}).click(); await p.waitForTimeout(150);
- await p.locator('form input').last().fill('0812345678'); await f.getByRole('button',{name:'ยืนยัน'}).click();
+ await p.evaluate(()=>{const o=window.fbq;window.fbq=function(){const l=JSON.parse(sessionStorage.getItem('fbqlog')||'[]');l.push([...arguments]);sessionStorage.setItem('fbqlog',JSON.stringify(l));return o.apply(this,arguments)};}); await p.locator('form input').last().fill('0812345678'); await f.getByRole('button',{name:'ยืนยัน'}).click();
  await p.waitForURL(/\/line\//,{timeout:5000}); await p.waitForTimeout(500);
  console.log('lead uid/lname:', lead && lead.uid, lead && lead.lname, '| src:', lead && lead.src, '| url:', new URL(p.url()).pathname+new URL(p.url()).search);
  for (let i=0;i<5;i++){ const [fc]=await Promise.all([p.waitForEvent('filechooser'), p.locator('#slot'+(i+1)).click()]); await fc.setFiles(path.join(__dirname,'car.jpg')); await p.waitForTimeout(250); }
@@ -25,6 +25,7 @@ const SDK = "window.liff={init:()=>Promise.resolve(),isLoggedIn:()=>true,isInCli
  await p.screenshot({path:'shots/liff-2-done.png'}); console.log('going visible:', await p.locator('#going').isVisible(), '| closeBtn hidden:', await p.locator('#closeBtn').isHidden()); await p.waitForTimeout(2600); console.log('after 3.6s closeBtn visible:', await p.locator('#closeBtn').isVisible()); await p.screenshot({path:'shots/liff-3-done-fallback.png'});
  console.log('ads conversion:', await p.evaluate(()=>(window.dataLayer||[]).some(a=>a[0]==='event'&&a[1]==='conversion'&&a[2]&&a[2].send_to===window.KR_AW)));
  console.log('meta pixel:', await p.evaluate(()=>!!(window.fbq&&(window.fbq.queue||[]).some(a=>a[0]==='track'&&a[1]==='CompleteRegistration'))));
+ console.log('meta lead match:', await p.evaluate(()=>{const q=JSON.parse(sessionStorage.getItem('fbqlog')||'[]');return q.some(a=>a[0]==='init'&&a[2]&&a[2].ph==='66812345678')&&q.some(a=>a[0]==='track'&&a[1]==='Lead'&&a[3]&&a[3].eventID)}));
  console.log('sent to chat:', await p.evaluate(()=>JSON.stringify(window.__sent||null)));
  console.log('closeWindow called:', await p.evaluate(()=>!!window.__closed), '| posts:', posts.join(' '), '| errors:', errs);
  await b.close(); srv.close();})();

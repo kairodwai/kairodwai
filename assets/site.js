@@ -41,9 +41,16 @@
   }
 
   var STD = ['Lead', 'Contact', 'ViewContent', 'CompleteRegistration', 'SubmitApplication'];
-  function track(name, data) {
-    try { if (window.fbq) window.fbq(STD.indexOf(name) >= 0 ? 'track' : 'trackCustom', name, data || {}); } catch (e) {}
+  function track(name, data, eid) {
+    try { if (window.fbq) window.fbq(STD.indexOf(name) >= 0 ? 'track' : 'trackCustom', name, data || {}, eid ? { eventID: eid } : undefined); } catch (e) {}
     try { if (window.gtag) window.gtag('event', name, data || {}); } catch (e) {}
+  }
+
+  // Advanced matching (Meta) + Enhanced conversions (Google): ส่งเบอร์ให้แพลตฟอร์มจับคู่ผู้ใช้ — ตัว SDK hash (SHA-256) ก่อนส่งเอง
+  function matchUser(phone) {
+    var d = String(phone || '').replace(/\D/g, ''); if (d.charAt(0) === '0') d = '66' + d.slice(1); if (d.length < 11) return;
+    try { if (window.fbq && window.KR_PX) window.fbq('init', window.KR_PX, { ph: d, country: 'th' }); } catch (e) {}
+    try { if (window.gtag) window.gtag('set', 'user_data', { phone_number: '+' + d }); } catch (e) {}
   }
 
   function lead(st, MILES) {
@@ -61,7 +68,7 @@
     var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json(); })
-      .then(function (r) { clearTimeout(timer); if (r && r.ok) track('Lead', { content_name: car }); return r; })
+      .then(function (r) { clearTimeout(timer); if (r && r.ok) { matchUser(st.phone); track('Lead', { content_name: car }, r.t ? 'lead_' + r.t : undefined); } return r; })
       .catch(function () { clearTimeout(timer); return null; });
   }
 
