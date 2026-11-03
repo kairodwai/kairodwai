@@ -37,6 +37,12 @@ HIDDEN = {'Portfolio'}   # หน้าที่ยังไม่มีข้�
 ROBOTS_NOINDEX = '\n<meta name="robots" content="noindex">'
 PLACEHOLDER = re.compile(r'\[[^\]{}"<>0-9,\'\[]*[\u0e00-\u0e7f][^\]{}"<>]{0,60}\]')   # ข้อความในวงเล็บเหลี่ยมภาษาไทย = placeholder ที่ยังไม่ได้ใส่ข้อมูลจริง
 
+# Google Ads (บัญชี ขายรถไว · kairodwai 861-119-9182): โหลด tag ทุกหน้า (/, /go, /line/) — gclid จากแอดถูกเก็บเป็นคุกกี้ในเบราว์เซอร์ไลน์ตอนเปิดหน้าแรก แล้ว /line/ ยิง conversion "ส่งรูปครบ" ตอนรูปครบ
+AW_ID = 'AW-11123976879'
+AW_PHOTOS_DONE = AW_ID + '/I3aICJOklrEdEK_Vqbgp'   # conversion "ส่งรูปครบ (photos complete)" — primary, Submit lead form, 1,666 บาท/ครั้ง, นับครั้งเดียวต่อคลิก
+GTAG = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={AW_ID}"></script>'
+        f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}');window.KR_AW='{AW_PHOTOS_DONE}';</script>")
+
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
 
 # รูปประกอบหน้าเว็บ: jpg ต้นฉบับอยู่ <repo>/img → build ทำ .webp (เบากว่า ~3 เท่า ภาพเท่าเดิม) + ตัวย่อ 800px สำหรับมือถือ แล้วใส่ srcset/lazy ให้ทุก <img>
@@ -217,6 +223,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {helmet.strip()}
 <style>{SHEET_CSS}</style>
+{GTAG}
 <script>window.KR_LIFF_ID='{LIFF_WEB_ID}';</script>
 <script src="/assets/preact.min.js" defer></script>
 <script src="/assets/site.js" defer></script>
@@ -270,7 +277,7 @@ def main():
 def build_line():
     s = open(os.path.join(SRC, 'line-page/index.html'), encoding='utf-8').read()
     os.makedirs(os.path.join(OUT, 'line'), exist_ok=True)
-    open(os.path.join(OUT, 'line/index.html'), 'w', encoding='utf-8').write(s.replace('__LIFF_WEB_ID__', LIFF_WEB_ID))
+    open(os.path.join(OUT, 'line/index.html'), 'w', encoding='utf-8').write(s.replace('__LIFF_WEB_ID__', LIFF_WEB_ID).replace('</head>', GTAG + '\n</head>', 1))
 
 
 def extras():
@@ -281,7 +288,7 @@ def extras():
     shutil.copy(os.path.join(HERE, 'richmenu-wait.png'), os.path.join(OUT, 'img/richmenu-wait.png'))
     shutil.copy(os.path.join(HERE, 'richmenu-lead.png'), os.path.join(OUT, 'img/richmenu-lead.png'))   # เมนูล่าง "รอรูปรถของคุณ | โทรหาเรา" (กรอกฟอร์มแล้ว ยังไม่ส่งรูป — setupLeadMenu)
     os.makedirs(os.path.join(OUT, 'go'), exist_ok=True)
-    open(os.path.join(OUT, 'go/index.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'go.html'), encoding='utf-8').read().replace('__LIFF_WEB_ID__', LIFF_WEB_ID))   # ลิงก์โฆษณา kairodwai.com/go → เด้งเข้า LIFF (มือถือ) / เว็บธรรมดา (คอม)  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
+    open(os.path.join(OUT, 'go/index.html'), 'w', encoding='utf-8').write(open(os.path.join(HERE, 'go.html'), encoding='utf-8').read().replace('__LIFF_WEB_ID__', LIFF_WEB_ID).replace('</head>', GTAG + '</head>', 1))   # ลิงก์โฆษณา kairodwai.com/go → เด้งเข้า LIFF (มือถือ) / เว็บธรรมดา (คอม)  # เมนูล่าง LINE "รอประเมินราคา" (Apps Script setupWaitMenu ดึงจาก URL นี้)
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))

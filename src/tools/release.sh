@@ -9,6 +9,7 @@ out=$(node src/tools/liff.js 2>&1); echo "$out" | tail -4
 echo "$out" | grep -q "doneView shown: true" || { echo "FAIL: ทางแอด (LIFF) ไม่จบ"; exit 1; }
 echo "$out" | grep -q "closeWindow called: true" || { echo "FAIL: ไม่กลับแชท"; exit 1; }
 echo "$out" | grep -q "posts: lead photo photo photo photo photo done" || { echo "FAIL: ส่งลีด/รูปไม่ครบ"; exit 1; }
+echo "$out" | grep -q "ads conversion: true" || { echo "FAIL: Google Ads conversion ไม่ยิง"; exit 1; }
 echo "$out" | grep -q "errors: \[\]" || { echo "FAIL: มี JavaScript error"; exit 1; }
 h=$(node src/tools/handoff.js 2>&1); echo "$h" | tail -3
 echo "$h" | grep -q "desktop qr svg: 1" || { echo "FAIL: QR คอม"; exit 1; }

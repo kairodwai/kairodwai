@@ -125,6 +125,7 @@ input[type=file]{display:none}
 .going.run .track i{width:100%}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}.ph .spin::after{animation:none}.going .track i{transition:none;width:100%}}
 </style>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11123976879"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','AW-11123976879');window.KR_AW='AW-11123976879/I3aICJOklrEdEK_Vqbgp';</script>
 </head>
 <body>
 <div id="app" hidden>
@@ -335,7 +336,7 @@ async function sendAll(btn, errEl){
   try {
     await tokenReady;
     const r = await post({ type:'done', t:token });
-    if (r && r.ok) { doneSent = true; forget(); if (REF && !VIA_LIFF && !NOLINE) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; location.href = LINE_URL; return; } if (REF && VIA_LIFF) liffDone(); else show('doneView'); return; }
+    if (r && r.ok) { doneSent = true; adConv(); forget(); if (REF && !VIA_LIFF && !NOLINE) { leaving = true; btn.textContent = 'กำลังเปิดไลน์...'; setTimeout(() => { location.href = LINE_URL; }, 400); return; } if (REF && VIA_LIFF) liffDone(); else show('doneView'); return; }
     if (r && r.err === 'link') { show('badView'); return; }
     throw new Error();
   } catch (e) {
@@ -371,7 +372,8 @@ window.addEventListener('popstate', () => { if (!REF || VIA_LIFF || leaving || a
 window.addEventListener('beforeunload', (e) => { if (!REF || VIA_LIFF || leaving || allIn()) return; e.preventDefault(); e.returnValue = ''; });   // เปิดในไลน์ไม่ต้องขู่ — บอททักกลับในแชทได้   // ปิดแท็บ/รีเฟรชตอนยังไม่ครบ browser จะถามยืนยัน
 if (navigator.share) { $('shareBtn').hidden = false; $('shareBtn').onclick = () => navigator.share({ title: 'ขายรถไว ถ่ายรูปรถต่อ', text: 'ลิงก์ถ่ายรูปรถต่อ ขายรถไว รหัส ' + REF, url: location.href }).catch(() => {}); }
 window.addEventListener('pagehide', () => { if (!REF || !VIA_LIFF || !token || doneSent || allIn()) return; try { navigator.sendBeacon(API, new Blob([JSON.stringify({ type: 'left', t: token })], { type: 'text/plain;charset=utf-8' })); } catch (e) {} });
-async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
+function adConv(){ try { if (window.gtag && window.KR_AW) gtag('event', 'conversion', { send_to: window.KR_AW, transaction_id: token }); } catch (e) {} }   // Google Ads "ส่งรูปครบ" (token = กันนับซ้ำ)
+async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; adConv(); forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
 $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterClose').onclick = closeLater;
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };
 // เปิดในไลน์: จบแล้วพากลับแชทเอง — โชว์ "กำลังพาคุณไปที่แชท…" + แถบวิ่ง 2.4 วิ แล้ว closeWindow; ถ้ายังค้างอยู่ (ปิดเองไม่ได้) ค่อยโผล่ปุ่มให้กดกลับ
