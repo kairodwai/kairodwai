@@ -63,6 +63,10 @@
     var s = null; try { s = JSON.parse(store('kr_src') || 'null'); } catch (e) {}
     var body = { type: 'lead', car: car, year: st.year, mile: mile, finance: fin, when: when, phone: st.phone,
       page: location.pathname, src: s ? JSON.stringify(s) : '' };
+    try {   // Meta CAPI: ส่ง _fbp/_fbc + user agent ให้หลังบ้านใช้จับคู่ (เพิ่ม Event Match Quality)
+      var ck = function (n) { var m = document.cookie.match('(?:^|; )' + n + '=([^;]*)'); return m ? decodeURIComponent(m[1]) : ''; };
+      body.fbp = ck('_fbp'); body.fbc = ck('_fbc') || (s && s.fbclid ? 'fb.1.' + (s.at || Date.now()) + '.' + s.fbclid : ''); body.ua = navigator.userAgent;
+    } catch (e) {}
     if (LINE_ME && LINE_ME.uid) { body.uid = LINE_ME.uid; body.lname = LINE_ME.name; }   // เปิดในไลน์: ผูกลีดกับไลน์เค้าตั้งแต่กรอกฟอร์ม
     var ctl = window.AbortController ? new AbortController() : null;
     var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
