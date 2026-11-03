@@ -125,7 +125,7 @@ input[type=file]{display:none}
 .going.run .track i{width:100%}
 @media (prefers-reduced-motion:reduce){.bar i{transition:none}.ph .spin::after{animation:none}.going .track i{transition:none;width:100%}}
 </style>
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11123976879"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','AW-11123976879');window.KR_AW='AW-11123976879/I3aICJOklrEdEK_Vqbgp';</script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11123976879"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','AW-11123976879');window.KR_AW='AW-11123976879/I3aICJOklrEdEK_Vqbgp';</script><script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','4292793881011346');fbq('track','PageView');</script>
 </head>
 <body>
 <div id="app" hidden>
@@ -372,7 +372,7 @@ window.addEventListener('popstate', () => { if (!REF || VIA_LIFF || leaving || a
 window.addEventListener('beforeunload', (e) => { if (!REF || VIA_LIFF || leaving || allIn()) return; e.preventDefault(); e.returnValue = ''; });   // เปิดในไลน์ไม่ต้องขู่ — บอททักกลับในแชทได้   // ปิดแท็บ/รีเฟรชตอนยังไม่ครบ browser จะถามยืนยัน
 if (navigator.share) { $('shareBtn').hidden = false; $('shareBtn').onclick = () => navigator.share({ title: 'ขายรถไว ถ่ายรูปรถต่อ', text: 'ลิงก์ถ่ายรูปรถต่อ ขายรถไว รหัส ' + REF, url: location.href }).catch(() => {}); }
 window.addEventListener('pagehide', () => { if (!REF || !VIA_LIFF || !token || doneSent || allIn()) return; try { navigator.sendBeacon(API, new Blob([JSON.stringify({ type: 'left', t: token })], { type: 'text/plain;charset=utf-8' })); } catch (e) {} });
-function adConv(){ try { if (window.gtag && window.KR_AW) gtag('event', 'conversion', { send_to: window.KR_AW, transaction_id: token }); } catch (e) {} }   // Google Ads "ส่งรูปครบ" (token = กันนับซ้ำ)
+function adConv(){ try { if (window.gtag && window.KR_AW) gtag('event', 'conversion', { send_to: window.KR_AW, transaction_id: token }); } catch (e) {} try { if (window.fbq) fbq('track', 'CompleteRegistration', { content_name: 'ส่งรูปครบ' }, { eventID: token }); } catch (e) {} }   // Google Ads "ส่งรูปครบ" (token = กันนับซ้ำ)
 async function postDone(){ if (doneSent || doneSending) return; doneSending = true; try { await tokenReady; const r = await post({ type:'done', t:token }); if (r && r.ok) { doneSent = true; adConv(); forget(); } else if (r && r.err === 'link') show('badView'); } catch (e) {} doneSending = false; }
 $('laterBtn').onclick = openLater; $('laterOv').onclick = closeLater; $('laterClose').onclick = closeLater;
 $('copyBtn').onclick = async () => { const b = $('copyBtn'); try { await navigator.clipboard.writeText(location.href); b.textContent = 'คัดลอกแล้ว ✓'; } catch (e) { try { const ta = document.createElement('textarea'); ta.value = location.href; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); b.textContent = 'คัดลอกแล้ว ✓'; } catch (x) { b.textContent = 'คัดลอกไม่ได้ กด Share ของ browser แทน'; } } setTimeout(() => { b.textContent = 'คัดลอกลิงก์ไว้ถ่ายต่อ'; }, 2500); };

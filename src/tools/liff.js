@@ -24,6 +24,7 @@ const SDK = "window.liff={init:()=>Promise.resolve(),isLoggedIn:()=>true,isInCli
  console.log('doneView shown:', !(await p.locator('#doneView').isHidden()), '| readyView hidden:', await p.locator('#readyView').isHidden(), '| h2:', await p.locator('#doneView h2').textContent());
  await p.screenshot({path:'shots/liff-2-done.png'}); console.log('going visible:', await p.locator('#going').isVisible(), '| closeBtn hidden:', await p.locator('#closeBtn').isHidden()); await p.waitForTimeout(2600); console.log('after 3.6s closeBtn visible:', await p.locator('#closeBtn').isVisible()); await p.screenshot({path:'shots/liff-3-done-fallback.png'});
  console.log('ads conversion:', await p.evaluate(()=>(window.dataLayer||[]).some(a=>a[0]==='event'&&a[1]==='conversion'&&a[2]&&a[2].send_to===window.KR_AW)));
+ console.log('meta pixel:', await p.evaluate(()=>!!(window.fbq&&(window.fbq.queue||[]).some(a=>a[0]==='track'&&a[1]==='CompleteRegistration'))));
  console.log('sent to chat:', await p.evaluate(()=>JSON.stringify(window.__sent||null)));
  console.log('closeWindow called:', await p.evaluate(()=>!!window.__closed), '| posts:', posts.join(' '), '| errors:', errs);
  await b.close(); srv.close();})();
