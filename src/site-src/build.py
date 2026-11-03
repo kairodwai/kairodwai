@@ -210,6 +210,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <html lang="th">
 <head>
 <meta charset="utf-8">
+<meta name="facebook-domain-verification" content="6qio2m0h19tu6rmc24q9r7ozlmnm6x" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{html.escape(title)}</title>
 <meta name="description" content="{html.escape(desc)}">
