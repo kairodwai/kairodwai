@@ -5,6 +5,7 @@
   // ลิงก์เก่าจากปุ่มในไลน์ (index.html?v=9) และลิงก์ "ถ่ายรูปต่อ" (t=…) ส่งไปหน้าถ่ายรูป
   if (isRoot && !liffState && /[?&](v=|t=)/.test(location.search)) { location.replace('/line/' + location.search); return; }
   var API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
+  window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); });   // ลูกค้าไม่ต้องเห็นป๊อปอัป 'ติดตั้งแอป' — ทีมติดตั้งได้ที่ /app/
   var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid'];
   // เปิดในไลน์ผ่าน LIFF app "kairodwai-web" (endpoint = https://kairodwai.com/) → รู้ตัวตนไลน์ตั้งแต่จอแรก ไม่ต้อง Add LINE/ส่งรหัสทีหลัง
   var LIFF_WEB_ID = window.KR_LIFF_ID || '';   // ค่าจริงใส่ใน build.py (KR_LIFF_ID) — ว่าง = โหมดเว็บธรรมดา

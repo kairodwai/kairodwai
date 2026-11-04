@@ -300,8 +300,10 @@ def extras():
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))
-    for f in ('manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'):   # ไอคอนหน้าจอมือถือ (Add to Home screen)
+    for f in ('manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png', 'sw.js'):   # ไอคอน + service worker = ติดตั้งเป็นแอปจริง (WebAPK)
         shutil.copy(os.path.join(HERE, f), os.path.join(OUT, f))
+    os.makedirs(os.path.join(OUT, 'app'), exist_ok=True)   # /app/ = หน้าลับไว้ติดตั้งแอป (noindex ไม่อยู่ใน sitemap)
+    shutil.copy(os.path.join(HERE, 'app.html'), os.path.join(OUT, 'app', 'index.html'))
     open(os.path.join(OUT, 'CNAME'), 'w').write('kairodwai.com\n')
     urls = [DOMAIN + v[0] for k, v in PAGES.items() if k not in HIDDEN]
     open(os.path.join(OUT, 'sitemap.xml'), 'w').write(

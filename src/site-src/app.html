@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="th"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>ติดตั้งแอปขายรถไว</title>
+<meta name="theme-color" content="#141312">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}html,body{margin:0;height:100%}
+body{background:#141312;color:#F5F4F0;font-family:Kanit,'Noto Sans Thai',system-ui,sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px max(24px,env(safe-area-inset-right)) calc(24px + env(safe-area-inset-bottom)) max(24px,env(safe-area-inset-left));text-align:center}
+img{width:132px;height:132px;border-radius:30px}
+h1{font-size:24px;font-weight:600;margin:0}
+p{margin:0;color:#B9B6AE;font-size:16px;line-height:1.5;max-width:320px}
+button{width:100%;max-width:320px;height:56px;border:0;border-radius:14px;background:#06C755;color:#fff;font:600 18px Kanit,system-ui,sans-serif}
+button[hidden]{display:none}
+.ok{color:#06C755}
+</style></head><body>
+<img src="/icon-512.png" alt="ขายรถไว">
+<h1>แอปขายรถไว</h1>
+<p id="msg">กำลังเตรียม…</p>
+<button id="btn" hidden>ติดตั้งลงมือถือ</button>
+<script>
+// หน้านี้ลับ ไว้ให้ทีมติดตั้งเว็บเป็นแอป — หน้าอื่นของเว็บปิดป๊อปอัปติดตั้งไว้ (ลูกค้าจากแอดไม่เห็น)
+var msg = document.getElementById('msg'), btn = document.getElementById('btn'), ev = null;
+var standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+if (standalone) { location.replace('/'); }
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {});
+addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); ev = e; btn.hidden = false; msg.textContent = 'กดปุ่มด้านล่าง ไอคอนขายรถไวจะอยู่หน้าจอมือถือ เปิดแล้วเต็มจอเหมือนแอป'; });
+btn.onclick = function () { if (!ev) return; ev.prompt(); ev.userChoice.then(function (c) { if (c.outcome === 'accepted') { btn.hidden = true; msg.innerHTML = '<span class="ok">ติดตั้งแล้ว ✓</span> ไอคอนขายรถไวอยู่หน้าจอมือถือแล้ว'; } ev = null; }); };
+addEventListener('appinstalled', function () { btn.hidden = true; msg.innerHTML = '<span class="ok">ติดตั้งแล้ว ✓</span> ไอคอนขายรถไวอยู่หน้าจอมือถือแล้ว'; });
+setTimeout(function () { if (!ev && !standalone) msg.textContent = /iPhone|iPad/.test(navigator.userAgent) ? 'ใน Safari กดปุ่มแชร์ แล้วเลือก "เพิ่มไปยังหน้าจอโฮม"' : 'ถ้าไม่มีปุ่มขึ้น กด ⋮ มุมขวาบนของ Chrome แล้วเลือก "ติดตั้งแอป" (ถ้าติดตั้งไว้แล้วจะไม่มีปุ่ม)'; }, 4000);
+</script>
+</body></html>
