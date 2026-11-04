@@ -224,6 +224,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <meta name="theme-color" content="#F5F4F0">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {helmet.strip()}
@@ -299,6 +300,8 @@ def extras():
     shutil.copy(os.path.join(HERE, 'favicon.png'), os.path.join(OUT, 'favicon.png'))
     shutil.copy(os.path.join(HERE, 'favicon.ico'), os.path.join(OUT, 'favicon.ico'))  # browsers that ask /favicon.ico by default
     shutil.copy(os.path.join(HERE, 'apple-touch-icon.png'), os.path.join(OUT, 'apple-touch-icon.png'))
+    for f in ('manifest.webmanifest', 'icon-192.png', 'icon-512.png', 'icon-maskable-512.png'):   # ไอคอนหน้าจอมือถือ (Add to Home screen)
+        shutil.copy(os.path.join(HERE, f), os.path.join(OUT, f))
     open(os.path.join(OUT, 'CNAME'), 'w').write('kairodwai.com\n')
     urls = [DOMAIN + v[0] for k, v in PAGES.items() if k not in HIDDEN]
     open(os.path.join(OUT, 'sitemap.xml'), 'w').write(
