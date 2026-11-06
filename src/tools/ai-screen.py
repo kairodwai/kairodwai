@@ -13,7 +13,7 @@ SKIP = {'Portfolio', 'Privacy'}
 TELLS = ['อย่างไรก็ตาม', 'นอกจากนี้', 'ไม่ว่าจะเป็น', 'ครบวงจร', 'ยกระดับ', 'ในยุคปัจจุบัน', 'ในยุคนี้', 'มั่นใจได้เลย', 'ตอบโจทย์',
          'หลากหลาย', 'อย่างมืออาชีพ', 'ไม่ต้องกังวล', 'ที่ดีที่สุด', 'ง่ายๆ เพียง', 'เพียงแค่คลิก', 'ไม่ว่าคุณจะ', 'สิ่งสำคัญคือ',
          'กล่าวโดยสรุป', 'โดยสรุปแล้ว', 'ปลดล็อก', 'เหนือระดับ', 'อย่างไร้รอยต่อ', 'ไร้กังวล', 'สุดคุ้ม', 'ราคาดีที่สุด',
-         'อันดับ 1', 'เบอร์ 1', 'ทุกความต้องการ', 'ประสบการณ์ที่ดี', 'คุณภาพสูง', 'อย่างแท้จริง', 'อย่างครอบคลุม']
+         'อันดับหนึ่ง', 'เบอร์ 1', 'ทุกความต้องการ', 'ประสบการณ์ที่ดี', 'คุณภาพสูง', 'อย่างแท้จริง', 'อย่างครอบคลุม']
 
 
 def main_text(path):
@@ -45,7 +45,7 @@ from collections import Counter
 cnt = Counter(t for n, xs in pages.items() for t in set(tmpl(n, x) for x in xs))
 common = {t for t, c in cnt.items() if c >= len(pages) * 0.6}
 
-fail = []
+fail, warns = [], []
 print(f'{"หน้า":<16}{"ตัวอักษร":>8}{"ของตัวเอง":>10}{"ซ้ำแม่แบบ":>10}  คำติดปาก AI')
 for n, xs in pages.items():
     body = [x for x in xs if tmpl(n, x) not in common]
@@ -54,13 +54,16 @@ for n, xs in pages.items():
     dup = 1 - own / total
     tells = sorted({t for t in TELLS for x in xs if t in x})
     dash = sum(x.count('—') for x in xs)
-    flag = []
-    if own < 600: flag.append('เนื้อหาเฉพาะหน้าน้อย')
-    if dup > 0.6 and (n.startswith('Province') or n.startswith('Brand')): flag.append('ซ้ำแม่แบบเกิน 60%')
+    flag, warn = [], []   # flag = ห้ามขึ้น · warn = ขึ้นได้ แต่ควรเติมข้อมูลจริง
+    loc = n.startswith('Province') or n.startswith('Brand')
+    if loc and dup > 0.7: flag.append('ซ้ำแม่แบบเกิน 70% (หน้าปั๊ม)')
+    elif loc and dup > 0.55: warn.append('ซ้ำแม่แบบเกิน 55%')
+    if own < 500: warn.append('เนื้อหาเฉพาะหน้าน้อย')
     if tells: flag.append('คำ AI')
     if dash: flag.append(f'ขีดยาว — {dash}')
-    print(f'{PAGES[n]:<16}{total:>8}{own:>10}{dup:>9.0%}  {" ".join(tells)}  {"⚠ " + ", ".join(flag) if flag else "ok"}')
+    print(f'{PAGES[n]:<16}{total:>8}{own:>10}{dup:>9.0%}  {" ".join(tells)}  {"✗ " + ", ".join(flag) if flag else ("⚠ " + ", ".join(warn) if warn else "ok")}')
     if flag: fail.append((PAGES[n], flag))
+    if warn: warns.append(PAGES[n])
 print()
-print('ผ่าน' if not fail else f'ไม่ผ่าน {len(fail)} หน้า')
+print(('ผ่าน' if not fail else f'ไม่ผ่าน {len(fail)} หน้า') + (f' · ควรเติมข้อมูลจริง {len(warns)} หน้า: ' + ' '.join(warns) if warns else ''))
 sys.exit(1 if fail and '--warn' not in sys.argv else 0)

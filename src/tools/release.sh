@@ -21,6 +21,7 @@ echo "$h" | grep -q "desktop qr svg: 1" || { echo "FAIL: QR คอม"; exit 1; 
 echo "$h" | grep -q "done shown: true" || { echo "FAIL: ทางไม่มีไลน์"; exit 1; }
 grep -q "application/ld+json" index.html || { echo "FAIL: ไม่มี structured data"; exit 1; }
 [ "$(sed 's/<[^>]*>//g' index.html | grep -c 'ขายรถไว')" -gt 3 ] || { echo "FAIL: เนื้อหาไม่อยู่ใน HTML (prerender)"; exit 1; }
+python3 src/tools/ai-screen.py | tail -1 || { echo "FAIL: เนื้อหาซ้ำแม่แบบ/คำติดปาก AI (python3 src/tools/ai-screen.py)"; exit 1; }
 grep -q "fbq\|trackCustom" assets/site.js || { echo "FAIL: tracking หาย"; exit 1; }
 git add -A
 git diff --cached --quiet && { echo "ไม่มีอะไรเปลี่ยน"; exit 0; }
