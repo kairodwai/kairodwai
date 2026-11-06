@@ -346,6 +346,7 @@ def extras():
     os.makedirs(os.path.join(OUT, 'app'), exist_ok=True)   # /app/ = หน้าลับไว้ติดตั้งแอป (noindex ไม่อยู่ใน sitemap)
     shutil.copy(os.path.join(HERE, 'app.html'), os.path.join(OUT, 'app', 'index.html'))
     open(os.path.join(OUT, 'CNAME'), 'w').write('kairodwai.com\n')
+    open(os.path.join(OUT, 'googlef54c075a0606bad3.html'), 'w').write('google-site-verification: googlef54c075a0606bad3.html')   # ไฟล์ยืนยัน Google Search Console (Moss อนุมัติ 6 พ.ย. 69) ห้ามลบ
     urls = [(DOMAIN + v[0], lastmod(k)) for k, v in PAGES.items() if k not in HIDDEN]
     open(os.path.join(OUT, 'sitemap.xml'), 'w').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
