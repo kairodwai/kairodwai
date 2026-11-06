@@ -7,6 +7,9 @@ import json, os, datetime
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 audit = json.load(open(os.path.join(ROOT, 'shots', 'seo-audit.json')))
 A = {c['name']: c for c in audit['checks']}
+def chk_ai():   # ผลสกรีนเนื้อหา (src/tools/ai-screen.py)
+    import subprocess
+    return 'done' if subprocess.run(['python3', os.path.join(ROOT, 'src/tools/ai-screen.py')], capture_output=True).returncode == 0 else 'todo'
 def chk(name):  # สถานะจากผลตรวจจริง
     return 'done' if A[name]['pass'] else 'todo'
 
@@ -87,7 +90,7 @@ ITEMS = [
 
  # ---------- Social ----------
  ('Social', 'Open Graph title + รูป ทุกหน้า', chk('Open Graph title + image on every page'), 'Claude', 'P2', 'แชร์ลง LINE/Facebook ขึ้นรูปสวย', 'og', True),
- ('Social', 'รูป og แยกต่อหน้า (Toyota/เชียงใหม่/ไฟแนนซ์)', 'todo', 'Claude', 'P3', 'ตอนนี้ทุกหน้าใช้รูปเดียวกัน', 'og', False),
+ ('Social', 'รูป og แยกต่อหน้า (Toyota/เชียงใหม่/ไฟแนนซ์)', 'done', 'Claude', 'P3', 'ทุกหน้ามีรูปแชร์ชื่อหน้าของตัวเอง (src/tools/og.js)', 'og', False),
 
  # ---------- Mobile & speed ----------
  ('Speed', 'Mobile viewport + favicon', chk('Mobile viewport + favicon'), 'Claude', 'P1', '', 'mobile', True),
@@ -100,7 +103,7 @@ ITEMS = [
  # ---------- Links ----------
  ('Links', 'ไม่มีลิงก์ภายในเสีย', chk('No broken internal links'), 'Claude', 'P1', '', 'links', True),
  ('Links', 'ทุกหน้ามีลิงก์จากหน้าอื่น (ไม่มีหน้ากำพร้า)', chk('Every indexable page linked from another page'), 'Claude', 'P1', (A['Every indexable page linked from another page']['detail'] + ' ไม่มีลิงก์เข้า') if A['Every indexable page linked from another page']['detail'] else 'ผ่าน', 'links', True),
- ('Links', 'Footer ลิงก์ไปหน้าแบรนด์/จังหวัดทั้งหมด', 'partly', 'Claude', 'P2', 'หน้าแรกลิงก์ครบ 14 จังหวัด + 6 ยี่ห้อ หน้ายี่ห้อ/จังหวัดลิงก์หากัน แต่ footer ยังไม่มี', 'links', False),
+ ('Links', 'Footer ลิงก์ไปหน้าแบรนด์/จังหวัดทั้งหมด', 'done', 'Claude', 'P2', 'ท้ายเว็บทุกหน้าลิงก์ครบ 14 จังหวัด + 9 ยี่ห้อ', 'links', False),
  ('Links', 'Backlink จากเว็บ/เพจรถยนต์ไทยจริง', 'todo', 'ทีม', 'P3', 'ห้ามซื้อลิงก์ — PR, คลิปรีวิว, กลุ่มรถ, พาร์ทเนอร์ไฟแนนซ์', 'spam', False),
 
  # ---------- Local ----------
@@ -112,14 +115,15 @@ ITEMS = [
  # ---------- Content ----------
  ('Content', 'หน้าแรก: บอกครบว่าทำอะไร ที่ไหน ยังไง ได้เงินเมื่อไหร่', 'done', 'Claude', 'P1', '', 'help', False),
  ('Content', 'หน้า Toyota', 'done', 'Claude', 'P2', '', 'help', False),
- ('Content', 'หน้าแบรนด์ยอดค้นสูงอื่นๆ (Honda, Isuzu, Mazda, Nissan, Ford, MG…)', 'partly', 'Claude', 'P2', 'มีแล้ว Toyota Honda Benz BMW MG Porsche ยังขาด Mazda Nissan Ford Hyundai ฯลฯ', 'spam', False),
+ ('Content', 'หน้าแบรนด์ยอดค้นสูงอื่นๆ (Honda, Isuzu, Mazda, Nissan, Ford, MG…)', 'done', 'Claude', 'P2', '9 ยี่ห้อ: Toyota Honda Benz BMW MG Porsche Mazda Nissan Hyundai — ไม่ทำ Isuzu/Ford เพราะรุ่นหลักเป็นกระบะ', 'spam', False),
  ('Content', 'หน้าเชียงใหม่: intro ข้อมูลจริง', 'done', 'Claude', 'P2', 'เขียนใหม่ (6 พ.ย.) ไม่อ้างทุกอำเภอ', 'help', False),
  ('Content', 'หน้าไฟแนนซ์: ขั้นที่ 3 ข้อมูลจริง', 'done', 'Claude', 'P2', 'เพิ่มขายดาวน์ vs ปิดยอด + ส่วนลดดอกเบี้ย สคบ.', 'help', False),
  ('Content', 'หน้าเอกสาร: เนื้อหาเพิ่ม (ตอนนี้ 671 ตัวอักษร)', 'done', 'Claude', 'P2', 'คู่มือโอนรถ อ้างอิงกรมการขนส่งทางบก (2,147 ตัวอักษร)', 'help', False),
  ('Content', 'หน้า Portfolio: รถที่รับซื้อจริง', 'partly', 'mOs', 'P1', 'การ์ดยังเป็น placeholder — ต้องการรูป+รุ่น+ปี+วันที่ของจริง (ห้าม gen รูป)', 'eeat', False),
  ('Content', 'รีวิวลูกค้าจริงบนหน้าแรก', 'todo', 'mOs', 'P1', 'ตอนนี้ placeholder ห้ามแต่งรีวิว — ใช้รีวิวจริงจาก GBP/LINE (ขออนุญาตลูกค้า)', 'rev', False),
- ('Content', 'บทความคำถามจริง: ขายรถติดไฟแนนซ์, โอนรถ, ปิดบัญชี, ภาษีรถ, ประเมินราคาเอง', 'partly', 'Claude', 'P2', 'ไฟแนนซ์ โอนรถ ประเมินราคา มีเป็นหน้าแล้ว ภาษีรถ/ต่อทะเบียน ยังไม่มี', 'help', False),
+ ('Content', 'บทความคำถามจริง: ขายรถติดไฟแนนซ์, โอนรถ, ปิดบัญชี, ภาษีรถ, ประเมินราคาเอง', 'done', 'Claude', 'P2', 'ไฟแนนซ์ โอนรถ ปิดบัญชี ภาษีรถขาด ประเมินราคา ครบ อ้างอิงหน่วยงานรัฐ', 'help', False),
  ('Content', 'ราคาตัวอย่าง/ช่วงราคาที่รับซื้อจริงต่อรุ่นยอดนิยม', 'todo', 'ทีม', 'P3', 'ข้อมูลที่เว็บอื่นไม่มี = เหตุผลให้ Google/AI อ้างถึงเรา', 'help', False),
+ ('Content', 'สกรีนเนื้อหาซ้ำแม่แบบ + คำติดปาก AI ก่อนขึ้นเว็บ', chk_ai(), 'Claude', 'P1', 'src/tools/ai-screen.py ใน release.sh — Google ลงโทษเนื้อหาผลิตซ้ำเยอะๆ ไม่ใช่ลงโทษเพราะ AI เขียน', 'spam', True),
  ('Content', 'Content gate ก่อนขึ้นเว็บ (กันข้อความซ้ำ/placeholder/หน้าบาง)', 'done', 'Claude', 'P2', 'release.sh ไม่ผ่าน = ไม่ขึ้น', 'spam', False),
 
  # ---------- Trust (E-E-A-T) ----------
@@ -149,7 +153,7 @@ ITEMS = [
  ('Keywords', 'แผนที่ keyword → หน้า (ไม่ให้สองหน้าแย่งคำเดียวกัน)', 'done', 'Claude', 'P1', 'หน้าแรก/ประเมินราคา/ไฟแนนซ์/โอนรถ/จังหวัด/ยี่ห้อ แยกคำกันชัด', 'kp', False),
  ('Keywords', 'ดึงซ้ำทุกเดือน + ใช้ query จริงจาก Search Console', 'todo', 'mOs', 'P3', '', 'gsc', False),
  ('Indexing', 'หน้าที่ไม่มีอยู่ตอบ 404 จริง (ไม่ใช่ 200)', 'done', 'Claude', 'P3', 'GitHub Pages ส่ง 404.html พร้อมสถานะ 404', 'noindex', False),
- ('On-page', 'ข้อความลิงก์บอกว่าไปหน้าอะไร (ไม่ใช่ "คลิกที่นี่")', 'partly', 'Claude', 'P3', 'ปุ่มหลักโอเค ลิงก์ในเนื้อหาบางจุดยังกว้าง', 'links', False),
+ ('On-page', 'ข้อความลิงก์บอกว่าไปหน้าอะไร (ไม่ใช่ "คลิกที่นี่")', 'done', 'Claude', 'P3', 'ลิงก์ใช้ชื่อหน้า/จังหวัด/ยี่ห้อ', 'links', False),
  ('Speed', 'JS+CSS ทั้งหน้าเล็ก (< 50 KB)', 'done', 'Claude', 'P3', 'preact 12k + site.js 7k + dc.js 3k', 'cwv', False),
  ('Speed', 'Cache รูป/ไฟล์นานขึ้น (ตอนนี้ 10 นาที)', 'todo', 'mOs', 'P3', 'เปิด Cloudflare proxy (ส้ม) + cache rule ให้ /img/ /assets/', 'cwv', False),
  ('Speed', 'ปุ่ม/ช่องกรอกบนมือถือใหญ่พอกด (≥ 44pt)', 'done', 'Claude', 'P2', 'ตรวจตอน /setperfect', 'mobile', False),
@@ -172,8 +176,8 @@ BACKEND = [
  ('SMS', 'ชื่อผู้ส่ง "Kairodwai" อนุมัติ + ตั้ง SMS_SENDER', 'partly', 'mOs', 'รออนุมัติ 1–2 วันทำการ', 'tbs'),
  ('SMS', 'เติมเครดิต SMS + เตือนก่อนหมด 1–2 วัน', 'done', 'mOs', 'เช็กทุกวัน 9 โมง', 'tbs'),
  ('Ops', 'ตามลีดค้างรูปอัตโนมัติ (2 ชม. / 1 วัน)', 'done', 'Claude', 'trigger รายชั่วโมง', 'flex'),
- ('Ops', 'ฟอร์มเน็ตหลุดแล้วปุ่มค้าง "กำลังส่ง…"', 'todo', 'Claude', 'ต้องให้ลองใหม่ได้', 'js'),
- ('Ops', 'ลบฟังก์ชันอัปรูปชั่วคราว saveSiteImg (หมดอายุ 3 พ.ย.)', 'todo', 'Claude', '', 'js'),
+ ('Ops', 'ฟอร์มเน็ตหลุดแล้วปุ่มค้าง "กำลังส่ง…"', 'done', 'Claude', 'หมดเวลา 20 วิ บอกให้กดใหม่ได้', 'js'),
+ ('Ops', 'ลบฟังก์ชันอัปรูปชั่วคราว saveSiteImg (หมดอายุ 3 พ.ย.)', 'done', 'Claude', 'ลบแล้ว 6 พ.ย.', 'js'),
  ('Ops', 'ชีทลีด: สถานะตามงานจริง → ซื้อแล้วส่ง Purchase ให้ Meta', 'done', 'Claude', '6 พ.ย. เลิกช่องติ๊ก ใช้สถานะช่องเดียว', 'gads'),
  ('Ops', 'นโยบายลบข้อมูลลีด (PDPA) ตามระยะที่ประกาศ', 'done', 'Claude', 'ลบอัตโนมัติครบ 30 วัน ยกเว้นคันที่ซื้อ', 'pdpa'),
  ('Ops', 'เตือนกลุ่มเมื่อลีดไม่มีคนโทรเกิน 1 / 3 ชม. (8:00–20:00)', 'done', 'Claude', '', 'flex'),

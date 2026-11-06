@@ -24,6 +24,15 @@ B = [
     dict(slug='porsche', key='Porsche', name='Porsche', th='ปอร์เช่',
          intro='Cayenne, Macan, Panamera, 911, Taycan, 718 และ Porsche รุ่นอื่นๆ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
          q=('Porsche Taycan หรือ Macan Electric รับไหม', 'รับ ทั้ง Taycan และ Macan Electric ตามปีในรายการด้านบน')),
+    dict(slug='mazda', key='Mazda', name='Mazda', th='มาสด้า',
+         intro='Mazda2, Mazda3, CX-3, CX-30, CX-5, CX-8 และ Mazda รุ่นอื่นๆ รวมรุ่นไฟฟ้า Mazda 6e และ CX-6e รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('Mazda BT-50 รับไหม', 'ไม่รับ BT-50 และรถกระบะทุกรุ่น รับเฉพาะรุ่นในรายการด้านบน')),
+    dict(slug='nissan', key='Nissan', name='Nissan', th='นิสสัน',
+         intro='Almera, Kicks e-POWER, X-Trail, Terra, Note, Sylphy และ Nissan รุ่นอื่นๆ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('Nissan Navara รับไหม', 'ไม่รับ Navara และรถกระบะทุกรุ่น ส่วน Terra ที่เป็นรถอเนกประสงค์ 7 ที่นั่ง รับตามปีในรายการด้านบน')),
+    dict(slug='hyundai', key='Hyundai', name='Hyundai', th='ฮุนได',
+         intro='Staria, H-1, Grand Starex, Creta, Stargazer, Ioniq 5 และ Hyundai รุ่นอื่นๆ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('Hyundai H-1 หรือ Staria รับไหม', 'รับ H-1, Grand Starex และ Staria ที่จดทะเบียนเป็นรถส่วนบุคคล (ป้ายขาว) ไม่รับรถตู้ป้ายเหลืองหรือรถสาธารณะ')),
 ]
 BY = {d['slug']: d for d in B}
 BY_KEY = {d['key']: d for d in B}
@@ -44,6 +53,27 @@ def models(key):
     return sorted(out, key=lambda x: x[0].lower())
 
 
+GREEN = re.compile(r'e:HEV|\bHEV\b|Hybrid|PHEV|\bEV\b|Electric|electric|e-POWER|e-Power|\d{3} ?e\b|\be\b|^EQ|^i\d|^iX|Taycan|Leaf|Ioniq|e:N|bZ|6e$|S5 EV|Cyberster|^IM\d')
+
+
+DIESEL = re.compile(r'\bXD|\b\d{3}d\b|\b\d{3} d\b|[A-Z] \d{3} d\b|Diesel|diesel|CRDi|dCi|\b2\.2 ?D\b|VGS')
+
+
+def facts(key):   # ข้อมูลเฉพาะยี่ห้อ ดึงจากรายชื่อรุ่นจริงของฟอร์ม (ไม่ใช่ข้อความแม่แบบ): รุ่นไฮบริด/ไฟฟ้า + รุ่นที่เลิกขายรถใหม่แล้ว
+    cars = _cars()[key]
+    green, old, diesel = [], [], []
+    for m, trims in cars.items():
+        ys = [y for v in trims.values() for y in v]
+        g = sorted({t for t in trims if t and GREEN.search(t)})
+        if GREEN.search(m): green.append(m)
+        elif g: green.append(f'{m} ({", ".join(g[:3])}{" ฯลฯ" if len(g) > 3 else ""})')
+        dz = sorted({t for t in trims if t and DIESEL.search(t)})
+        if dz: diesel.append(f'{m} ({", ".join(dz[:2])}{" ฯลฯ" if len(dz) > 2 else ""})')
+        if max(ys) <= 2024: old.append(f'{m} (ถึงปี {max(ys)})')
+    ntrim = sum(len([t for t in v if t]) for v in cars.values())
+    return sorted(green, key=str.lower), sorted(old, key=str.lower), ntrim, sorted(diesel, key=str.lower)
+
+
 def pages():
     out = {}
     for d in B:
@@ -53,6 +83,23 @@ def pages():
         out['Brand@' + d['slug']] = (f'/{d["slug"]}/', f'รับซื้อรถ {d["key"]} มือสอง ({th}) ให้ราคาสูง | ขายรถไว',
                                      f'รับซื้อรถ {d["key"]} ({th}) มือสองทุกรุ่น {top} ถึงหน้าบ้าน ประเมินราคาไว รับรถติดไฟแนนซ์ จ่ายเงินทันที')
     return out
+
+
+def _facts_block(body, d):
+    green, old, ntrim, diesel = facts(d['key'])
+    n = d['name']
+    H3 = '<h3 style="margin: 8px 0 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.35;">{}</h3>'
+    P = '<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3D3B37; max-width: 760px;">{}</p>'
+    add = P.format(f'ในรายการของเรามี {n} ทั้งหมด {ntrim} รุ่นย่อย ตั้งแต่ปี 2016 เลือกรุ่นย่อยได้ในฟอร์มด้านบน ราคาที่ได้คิดจากรุ่นย่อยจริง ไม่ใช่ราคากลางของรุ่น')
+    if green:
+        add += H3.format(f'{n} ไฮบริดและไฟฟ้าที่รับซื้อ') + P.format(', '.join(green))
+    if diesel:
+        add += H3.format(f'{n} ดีเซลที่รับซื้อ') + P.format(', '.join(diesel))
+    if old:
+        add += H3.format('รุ่นที่ไม่มีขายรถใหม่แล้ว ก็ยังรับ') + P.format(', '.join(old) + ' ขอแค่ปี 2016 ขึ้นไป ไมล์ไม่เกิน 150,000 กม.')
+    i = body.index('รุ่นที่รับซื้อ</h2>')
+    a = body.index('</ul>', i) + len('</ul>')
+    return body[:a] + add + body[a:]
 
 
 def transform(body, slug):
@@ -78,6 +125,7 @@ def transform(body, slug):
     body = body[:a] + '<div style="display: flex; flex-wrap: wrap; gap: 8px;">' + ''.join(chip(nm) for nm in linked + rest) + body[b:]
     k = 'ประเมินราคา Toyota ของคุณ ฟรี'   # กัน "ฟรี" ตกบรรทัดเดี่ยวบนมือถือ
     rep(k, 'ประเมินราคา Toyota <span style="white-space: nowrap;">ของคุณ ฟรี</span>')
+    body = _facts_block(body, d)
     if slug == 'toyota':
         return body
     n = d['name']

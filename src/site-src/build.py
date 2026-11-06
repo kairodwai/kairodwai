@@ -224,7 +224,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 <meta property="og:title" content="{html.escape(title)}">
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="{DOMAIN}/img/og.jpg">
+<meta property="og:image" content="{DOMAIN}/img/{og_img(name)}">
 <meta name="theme-color" content="#F5F4F0">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
@@ -283,6 +283,11 @@ def json_ld(name, pre_html):
             {'@type': 'ListItem', 'position': 2, 'name': crumb, 'item': url}]})
     data = json.dumps({'@context': 'https://schema.org', '@graph': g}, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
     return '<script type="application/ld+json">' + data + '</script>\n'
+
+
+def og_img(name):   # รูปแชร์แยกต่อหน้า (src/tools/og.js) ถ้ามี ไม่งั้นใช้รูปกลาง
+    slug = PAGES[name][0].strip('/')
+    return f'og/{slug}.jpg' if slug and os.path.exists(os.path.join(ROOT, 'img', 'og', slug + '.jpg')) else 'og.jpg'
 
 
 def lastmod(name):   # วันที่แก้หน้าจริงล่าสุด (git) — Google ใช้ lastmod เมื่อมันตรงกับความจริงเท่านั้น
