@@ -15,8 +15,6 @@ PAGES = {
                   'ขายรถไว รับซื้อรถยนต์มือสองถึงหน้าบ้านคุณ กรอกข้อมูลรถ ส่งรูป ได้ราคาไว จ่ายเงินทันทีใน 1 ชั่วโมง รถติดไฟแนนซ์ก็ขายได้'),
     'Brand':     ('/toyota/',     'รับซื้อรถ Toyota มือสอง ให้ราคาสูง | ขายรถไว',
                   'รับซื้อรถ Toyota มือสองทุกรุ่น Yaris, Vios, Altis, Camry, Fortuner ถึงหน้าบ้าน ประเมินราคาไว จ่ายเงินทันที'),
-    'Province':  ('/chiang-mai/', 'รับซื้อรถมือสอง เชียงใหม่ ถึงหน้าบ้าน | ขายรถไว',
-                  'รับซื้อรถยนต์มือสองในเชียงใหม่ ทีมเข้าดูรถถึงบ้าน ประเมินราคาไว จ่ายเงินทันที รถติดไฟแนนซ์ก็ขายได้'),
     'Portfolio': ('/portfolio/',  'ผลงานรับซื้อรถ | ขายรถไว',
                   'ตัวอย่างรถที่ขายรถไวรับซื้อมาแล้ว'),
     'Price':     ('/check-price/', 'ประเมินราคารถมือสองฟรี รู้ราคาจริงใน 5 นาที | ขายรถไว',
@@ -28,8 +26,11 @@ PAGES = {
     'Privacy':   ('/privacy/',    'นโยบายความเป็นส่วนตัว | ขายรถไว',
                   'นโยบายความเป็นส่วนตัวของขายรถไว เราเก็บข้อมูลอะไร ใช้ทำอะไร เก็บนานแค่ไหน และคุณขอดูหรือขอลบข้อมูลของตัวเองได้อย่างไร'),
 }
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import provinces
+PAGES.update(provinces.pages())   # หน้าจังหวัด (Province = เชียงใหม่, Province@<slug> = จังหวัดอื่น)
 LINKS = {'Mobile.dc.html': '/', 'Main.dc.html': '/'}
-LINKS.update({k + '.dc.html': v[0] for k, v in PAGES.items()})
+LINKS.update({k + '.dc.html': v[0] for k, v in PAGES.items() if '@' not in k})
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
 ATTR_RE = re.compile(r'''\s([^\s=/>"']+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>]+))?''')
 WHOLE = re.compile(r'^\s*\{\{\s*([^}]*?)\s*\}\}\s*$')
@@ -246,7 +247,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 '''
 
 
-CRUMB = {'Price': 'ประเมินราคารถมือสอง', 'Brand': 'รับซื้อรถ Toyota', 'Province': 'รับซื้อรถมือสอง เชียงใหม่', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ · โอนรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
+CRUMB = {'Price': 'ประเมินราคารถมือสอง', 'Brand': 'รับซื้อรถ Toyota', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ · โอนรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
 
 
 def json_ld(name, pre_html):
@@ -258,28 +259,31 @@ def json_ld(name, pre_html):
            'logo': DOMAIN + '/icon-512.png', 'areaServed': {'@type': 'Country', 'name': 'Thailand'}}
     g = [org, {'@type': 'WebSite', '@id': DOMAIN + '/#site', 'url': DOMAIN + '/', 'name': 'ขายรถไว', 'inLanguage': 'th', 'publisher': {'@id': DOMAIN + '/#org'}},
          {'@type': 'WebPage', '@id': url + '#page', 'url': url, 'name': title, 'description': desc, 'inLanguage': 'th', 'isPartOf': {'@id': DOMAIN + '/#site'}}]
-    if name in ('Main', 'Price', 'Brand', 'Province', 'Finance'):
+    base = name.split('@')[0]
+    if base in ('Main', 'Price', 'Brand', 'Province', 'Finance'):
         svc = {'@type': 'Service', '@id': url + '#service', 'serviceType': 'รับซื้อรถยนต์มือสอง', 'name': title.split(' | ')[0], 'description': desc,
                'provider': {'@id': DOMAIN + '/#org'}, 'areaServed': {'@type': 'Country', 'name': 'Thailand'}, 'url': url}
-        if name == 'Province':
-            svc['areaServed'] = {'@type': 'AdministrativeArea', 'name': 'เชียงใหม่'}
+        if base == 'Province':
+            pd = provinces.BY[path.strip('/')]
+            svc['areaServed'] = {'@type': 'AdministrativeArea', 'name': pd['prov']}
         g.append(svc)
     qa = re.findall(r'<summary[^>]*>\s*<span>(.*?)</span>.*?</summary>\s*<p[^>]*>(.*?)</p>', pre_html or '', re.S)
     clean = lambda t: html.unescape(re.sub(r'<[^>]+>', '', t)).strip()
     if qa:
         g.append({'@type': 'FAQPage', '@id': url + '#faq', 'mainEntity': [
             {'@type': 'Question', 'name': clean(q), 'acceptedAnswer': {'@type': 'Answer', 'text': clean(a)}} for q, a in qa]})
-    if name in CRUMB:
+    crumb = CRUMB.get(name) or (('รับซื้อรถมือสอง ' + provinces.BY[path.strip('/')]['h1']) if base == 'Province' else None)
+    if crumb:
         g.append({'@type': 'BreadcrumbList', 'itemListElement': [
             {'@type': 'ListItem', 'position': 1, 'name': 'ขายรถไว', 'item': DOMAIN + '/'},
-            {'@type': 'ListItem', 'position': 2, 'name': CRUMB[name], 'item': url}]})
+            {'@type': 'ListItem', 'position': 2, 'name': crumb, 'item': url}]})
     data = json.dumps({'@context': 'https://schema.org', '@graph': g}, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
     return '<script type="application/ld+json">' + data + '</script>\n'
 
 
 def lastmod(name):   # วันที่แก้หน้าจริงล่าสุด (git) — Google ใช้ lastmod เมื่อมันตรงกับความจริงเท่านั้น
     import subprocess
-    files = [os.path.join(DESIGN, 'project', name + '.dc.html'), os.path.join(HERE, 'patches.py')]
+    files = [os.path.join(DESIGN, 'project', name.split('@')[0] + '.dc.html'), os.path.join(HERE, 'patches.py'), os.path.join(HERE, 'provinces.py')]
     try:
         out = subprocess.run(['git', 'log', '-1', '--format=%cs', '--'] + files, cwd=ROOT, capture_output=True, text=True).stdout.strip()
         return out or None
@@ -296,8 +300,11 @@ def main():
     make_webp()
     patches = __import__('patches')
     for name in PAGES:
-        helmet, body, logic = split_page(os.path.join(DESIGN, 'project', name + '.dc.html'))
-        body, logic = patches.apply(name, body, logic)
+        base = name.split('@')[0]
+        helmet, body, logic = split_page(os.path.join(DESIGN, 'project', base + '.dc.html'))
+        if base == 'Province':
+            body = provinces.transform(body, PAGES[name][0].strip('/'))
+        body, logic = patches.apply(base, body, logic)
         c = Compiler(); c.feed(body); c.close()
         strip_ws(c.root)
         d = os.path.join(OUT, PAGES[name][0].strip('/'))
@@ -318,6 +325,7 @@ def main():
     shutil.copy(os.path.join(SRC, 'vendor/qrcode.min.js'), os.path.join(OUT, 'assets/qrcode.min.js'))   # QR บนหน้า /line/ (เปิดจากคอม → สแกนไปส่งรูปในไลน์) — qrcode-generator 1.4.4 MIT
     for f in os.listdir(DESIGN):  # page photos live in <repo>/img; design/*.jpg only if re-exported from Claude Design
         if f.endswith('.jpg'): shutil.copy(os.path.join(DESIGN, f), os.path.join(OUT, 'img', f))
+    json.dump({k: v[0] for k, v in PAGES.items()}, open(os.path.join(HERE, 'pages.json'), 'w'), ensure_ascii=False)
     print('built', OUT)
 
 

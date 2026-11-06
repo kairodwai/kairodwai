@@ -182,6 +182,17 @@ def apply(name, body, logic):
     if name == 'Portfolio':   # ข้อมูลตัวอย่างล้วน (ยี่ห้อ/จังหวัดสมมติ) — ว่างไว้จนกว่าจะมีรถที่ซื้อจริงจากหลังบ้าน; หน้านี้ noindex + ไม่อยู่ใน sitemap (build.py HIDDEN)
         logic, n = re.subn(r'var ITEMS = \[.*?\];', 'var ITEMS = [];', logic, count=1, flags=re.S)
         assert n == 1, 'portfolio items'
+    if name == 'Main':   # ลิงก์ภายในไปหน้าจังหวัด (SEO ขั้น 2): ให้ Google เจอทุกหน้าจังหวัดจากหน้าแรก
+        import provinces
+        chip = 'height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 1px solid #DEDBD3; display: inline-flex; align-items: center; font-size: 15px; white-space: nowrap; text-decoration: none; color: #141414;'
+        areas = ('<section aria-labelledby="area-h" style="max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center;">'
+                 '<h2 id="area-h" style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(28px, 3.5vw, 36px);">พื้นที่ให้บริการ</h2>'
+                 '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้านในกรุงเทพฯ ปริมณฑล และหัวเมืองหลัก</p>'
+                 '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">'
+                 + ''.join(f'<a href="/{d["slug"]}/" style="{chip}">{d["h1"]}</a>' for d in provinces.P) + '</div></section>\n')
+        faq = '<section aria-labelledby="faq-h"'
+        assert body.count(faq) == 1, 'main faq anchor'
+        body = body.replace(faq, areas + faq)
     if name in ('Main', 'Price'):   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
         b_old = 'Tesla, Toyota, Volvo'
         assert body.count(b_old) == 1, 'brand list toyota'
@@ -237,13 +248,6 @@ def apply(name, body, logic):
         faq_h = '<section style=""><div style="max-width: 1120px; margin: 0 auto; padding: 56px 20px; display: flex; flex-direction: column; gap: 24px;"><h2 style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(26px, 3.5vw, 32px); line-height: 1.3; ">คำถามเรื่องขายรถติดไฟแนนซ์</h2>'
         assert body.count(faq_h) == 1, 'finance faq anchor'
         body = body.replace(faq_h, down + close + faq_h)
-    if name == 'Province':   # Moss 6 พ.ย. 69: ไปหัวเมือง/อำเภอที่เดินทางสะดวก เกาะและพื้นที่ทุรกันดารไม่ไป
-        q_old = 'ทีมไปถึงอำเภอไกลๆ อย่างอมก๋อยหรือเวียงแหงไหม'
-        assert body.count(q_old) == 1, 'province far-district faq'
-        body = body.replace(q_old, 'ทีมไปดูรถได้ทุกอำเภอไหม')
-        a_old = 'ไปทุกอำเภอ ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที'
-        assert body.count(a_old) == 1, 'province far-district answer'
-        body = body.replace(a_old, 'ไปในตัวเมืองและอำเภอที่เดินทางสะดวก ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที ส่วนพื้นที่ห่างไกลหรือบนเกาะยังไม่รับ ส่งข้อมูลรถมาก่อน ทีมโทรแจ้งว่าไปได้ไหม')
     if name not in ('Main', 'Price', 'Brand', 'Province'):
         return body, logic
     m = re.search(r'(<svg[^>]*>(?:(?!</svg>).)*</svg>)\s*<span>แอดไลน์', body, re.S)   # โลโก้ LINE จากดีไซน์ (ก่อนตัดการ์ดขอบคุณ)
