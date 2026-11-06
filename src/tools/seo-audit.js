@@ -62,7 +62,8 @@ const checks = []; const add = (group, name, pass, detail, count) => checks.push
   add('On-page', 'Meta description 70–160 characters', idx.every(([, r]) => r.desc.length >= 70 && r.desc.length <= 160), idx.filter(([, r]) => r.desc.length < 70 || r.desc.length > 160).map(([p, r]) => p + '=' + r.desc.length).join(' '), idx.length);
   add('On-page', 'Page language set to Thai', idx.every(([, r]) => /^th/.test(r.lang)), '', idx.length);
   add('On-page', 'Images have alt text', idx.every(([, r]) => r.imgNoAlt === 0), idx.map(([p, r]) => p + ' ' + r.imgNoAlt + '/' + r.imgs).join(' · '), idx.reduce((s, [, r]) => s + r.imgs, 0));
-  add('On-page', 'Thin content (fewer than 1,500 characters)', idx.every(([, r]) => r.words >= 1500), idx.filter(([, r]) => r.words < 1500).map(([p, r]) => p + ' ' + r.words).join(' · '), idx.length);
+  const content = idx.filter(([p]) => p !== '/privacy/');   // หน้านโยบายไม่ใช่หน้าที่ต้องติดอันดับ
+  add('On-page', 'Thin content (fewer than 1,500 characters)', content.every(([, r]) => r.words >= 1500), content.filter(([, r]) => r.words < 1500).map(([p, r]) => p + ' ' + r.words).join(' · '), idx.length);
   add('Structured data', 'Structured data (JSON-LD) on pages', idx.every(([, r]) => r.ld.length > 0), idx.map(([p, r]) => p + ':' + (r.ld.join('|') || 'none')).join(' · '), idx.length);
   add('Structured data', 'Organization / LocalBusiness schema', idx.some(([, r]) => r.ld.some(t => /Organization|LocalBusiness|AutoDealer/.test(t))), '', 1);
   add('Structured data', 'FAQPage schema where page has FAQ', !idx.some(([, r]) => r.faqHtml) || idx.some(([, r]) => r.ld.some(t => /FAQPage/.test(t))), idx.filter(([, r]) => r.faqHtml).map(([p]) => p).join(' '), idx.filter(([, r]) => r.faqHtml).length);
