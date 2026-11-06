@@ -74,8 +74,8 @@ class Component extends DCLogic {
     const trimList = entry && st.model && entry[st.model] ? Object.keys(entry[st.model]).filter((t) => t && fits(entry[st.model][t])).sort(byName) : [];
     const noYear = !st.year;
     const mileHigh = st.mile === '150up';
-    const PICK_RE = /กระบะ|pick ?-?up|d ?-?max|ดี ?แม็?ก|ดี ?แม็?ค|ดี ?แม็?ซ|hilux|ไฮลักซ์|revo|รีโว่|vigo|วีโก้|ranger|แรนเจอร์|เรนเจอร์|triton|ไทรทัน|navara|นาวาร่า|bt ?-?50|colorado|โคโลราโด|extender|เอ็กซ์เทนเดอร์|cannon|แคนนอน|strada|สตราด้า|hi ?-?lander|ไฮแลนเดอร์|v ?-?cross|วีครอส|space ?cab|cab\b|แคป|ตอนเดียว|ตอนครึ่ง/i;
-    const isPick = (brand, model, txt) => { txt = String(txt || ''); const free = brand === 'ยี่ห้ออื่น' || model === 'รุ่นอื่น'; return free && (PICK_RE.test(txt) || (brand === 'Isuzu' && !/mu ?-?x|มิว/i.test(txt))); };
+    const PICK_RE = /กระบะ|pick ?-?up|d ?-?max|ดี ?แม็?ก|ดี ?แม็?ค|ดี ?แม็?ซ|hilux|ไฮลักซ์|revo|รีโว่|vigo|วีโก้|ranger|แรนเจอร์|เรนเจอร์|triton|ไทรทัน|navara|นาวาร่า|bt ?-?50|colorado|โคโลราโด|extender|เอ็กซ์เทนเดอร์|cannon|แคนนอน|strada|สตราด้า|hi ?-?lander|ไฮแลนเดอร์|v ?-?cross|วีครอส|space ?cab|cab\b|แคป|ตอนเดียว|ตอนครึ่ง|raptor|แร็พเตอร์|wildtrak|ไวลด์แทร็ก|rocco|ร็อคโค่|champ|แชมป์|travo|carry|แครี่|shark|tunland|poer|hi ?-?racer|ไฮเรเซอร์|pre ?-?runner|พรีรันเนอร์|frontier|ฟรอนเทียร์/i;
+    const isPick = (brand, model, txt) => { txt = String(txt || ''); const free = brand === 'ยี่ห้ออื่น' || model === 'รุ่นอื่น'; return free && (PICK_RE.test(txt) || (brand === 'Isuzu' && !/mu ?-?x|mu ?-?7|มิว ?เอ็กซ์|มิว ?เซเว่น|มิว ?7|มิวx|มิว ?x/i.test(txt))); };
     const pickup = isPick(st.brand, st.model, st.other) && !!String(st.other || '').trim();
     const blocked = yearOld || mileHigh || pickup;
     const otherBrand = st.brand === 'ยี่ห้ออื่น';

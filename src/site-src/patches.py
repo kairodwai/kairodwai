@@ -257,11 +257,11 @@ def apply(name, body, logic):
     # นอกเกณฑ์ (ปีก่อน 2016 / ไมล์เกิน 150,000): คงตัวเลือกไว้ให้คนตอบตามจริง -> หน้า "ไม่ผ่านเกณฑ์" สุภาพ + ยิง event Disqualified ให้แอดเอาไปกันคนกลุ่มนี้ออก
     rep("pickMile: (e) => this.setState({ mile: e.target.value || null, missing: false }),",
         "pickMile: (e) => { const v = e.target.value || null; this.setState({ mile: v, missing: false }); if (v === '150up') trk('Disqualified'); },")
-    # ไม่รับกระบะทุกรุ่น (Moss 6 พ.ย. 69 "กูไม่รับกระบะ"): ในรายการไม่มีกระบะอยู่แล้ว แต่คนเลือก "รุ่นอื่น/ยี่ห้ออื่น" แล้วพิมพ์เอง (เช่น Isuzu "1.9" = D-Max)
+    # ไม่รับกระบะทุกรุ่นในไทย; MU-X / MU-7 อนุโลม (Moss 6 พ.ย. 69 "กูไม่รับกระบะ" · "MUx MU7 อนุโลม"): ในรายการไม่มีกระบะอยู่แล้ว แต่คนเลือก "รุ่นอื่น/ยี่ห้ออื่น" แล้วพิมพ์เอง (เช่น Isuzu "1.9" = D-Max)
     # -> ถ้าพิมพ์ชื่อกระบะ หรือ Isuzu รุ่นอื่นที่ไม่ใช่ MU-X = หน้า "ไม่ผ่านเกณฑ์" + ยิง Disqualified (แอดตัดคนกลุ่มนี้ออก)
     rep("const blocked = yearOld || mileHigh;",
-        "const PICK_RE = /กระบะ|pick ?-?up|d ?-?max|ดี ?แม็?ก|ดี ?แม็?ค|ดี ?แม็?ซ|hilux|ไฮลักซ์|revo|รีโว่|vigo|วีโก้|ranger|แรนเจอร์|เรนเจอร์|triton|ไทรทัน|navara|นาวาร่า|bt ?-?50|colorado|โคโลราโด|extender|เอ็กซ์เทนเดอร์|cannon|แคนนอน|strada|สตราด้า|hi ?-?lander|ไฮแลนเดอร์|v ?-?cross|วีครอส|space ?cab|cab\\b|แคป|ตอนเดียว|ตอนครึ่ง/i;\n"
-        "    const isPick = (brand, model, txt) => { txt = String(txt || ''); const free = brand === 'ยี่ห้ออื่น' || model === 'รุ่นอื่น'; return free && (PICK_RE.test(txt) || (brand === 'Isuzu' && !/mu ?-?x|มิว/i.test(txt))); };\n"
+        "const PICK_RE = /กระบะ|pick ?-?up|d ?-?max|ดี ?แม็?ก|ดี ?แม็?ค|ดี ?แม็?ซ|hilux|ไฮลักซ์|revo|รีโว่|vigo|วีโก้|ranger|แรนเจอร์|เรนเจอร์|triton|ไทรทัน|navara|นาวาร่า|bt ?-?50|colorado|โคโลราโด|extender|เอ็กซ์เทนเดอร์|cannon|แคนนอน|strada|สตราด้า|hi ?-?lander|ไฮแลนเดอร์|v ?-?cross|วีครอส|space ?cab|cab\\b|แคป|ตอนเดียว|ตอนครึ่ง|raptor|แร็พเตอร์|wildtrak|ไวลด์แทร็ก|rocco|ร็อคโค่|champ|แชมป์|travo|carry|แครี่|shark|tunland|poer|hi ?-?racer|ไฮเรเซอร์|pre ?-?runner|พรีรันเนอร์|frontier|ฟรอนเทียร์/i;\n"
+        "    const isPick = (brand, model, txt) => { txt = String(txt || ''); const free = brand === 'ยี่ห้ออื่น' || model === 'รุ่นอื่น'; return free && (PICK_RE.test(txt) || (brand === 'Isuzu' && !/mu ?-?x|mu ?-?7|มิว ?เอ็กซ์|มิว ?เซเว่น|มิว ?7|มิวx|มิว ?x/i.test(txt))); };\n"
         "    const pickup = isPick(st.brand, st.model, st.other) && !!String(st.other || '').trim();\n"
         "    const blocked = yearOld || mileHigh || pickup;")
     rep("rejectReason: yearOld && mileHigh ?", "rejectReason: pickup ? 'ตอนนี้เรายังไม่รับซื้อรถกระบะทุกรุ่น' : yearOld && mileHigh ?")
