@@ -194,9 +194,12 @@ def apply(name, body, logic):
         assert body.count(faq) == 1, 'main faq anchor'
         body = body.replace(faq, areas + faq)
     if name in ('Main', 'Price'):   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
-        b_old = 'Tesla, Toyota, Volvo'
-        assert body.count(b_old) == 1, 'brand list toyota'
-        body = body.replace(b_old, 'Tesla, <a href="/toyota/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">Toyota</a>, Volvo')
+        import brands
+        lk = lambda nm, sl: f'<a href="/{sl}/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">{nm}</a>'
+        for d in brands.B:
+            b_old = f', {d["key"]}, '
+            assert body.count(b_old) == 1, ('brand list', d['key'])
+            body = body.replace(b_old, ', ' + lk(d['key'], d['slug']) + ', ')
     if name == 'Docs':   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "โอนรถ" ~3,600/เดือน -> ขยายเป็นคู่มือโอนรถมือสอง อ้างอิงกรมการขนส่งทางบก
         H2 = '<h2 style="margin: 24px 0 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(24px, 3.5vw, 30px); line-height: 1.3;">{}</h2>'
         P = '<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #3D3B37;">{}</p>'
