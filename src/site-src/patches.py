@@ -181,6 +181,17 @@ def apply(name, body, logic):
     if name == 'Portfolio':   # ข้อมูลตัวอย่างล้วน (ยี่ห้อ/จังหวัดสมมติ) — ว่างไว้จนกว่าจะมีรถที่ซื้อจริงจากหลังบ้าน; หน้านี้ noindex + ไม่อยู่ใน sitemap (build.py HIDDEN)
         logic, n = re.subn(r'var ITEMS = \[.*?\];', 'var ITEMS = [];', logic, count=1, flags=re.S)
         assert n == 1, 'portfolio items'
+    if name == 'Main':   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
+        b_old = 'Tesla, Toyota, Volvo'
+        assert body.count(b_old) == 1, 'brand list toyota'
+        body = body.replace(b_old, 'Tesla, <a href="/toyota/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">Toyota</a>, Volvo')
+    if name == 'Province':   # Moss 6 พ.ย. 69: ไปหัวเมือง/อำเภอที่เดินทางสะดวก เกาะและพื้นที่ทุรกันดารไม่ไป
+        q_old = 'ทีมไปถึงอำเภอไกลๆ อย่างอมก๋อยหรือเวียงแหงไหม'
+        assert body.count(q_old) == 1, 'province far-district faq'
+        body = body.replace(q_old, 'ทีมไปดูรถได้ทุกอำเภอไหม')
+        a_old = 'ไปทุกอำเภอ ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที'
+        assert body.count(a_old) == 1, 'province far-district answer'
+        body = body.replace(a_old, 'ไปในตัวเมืองและอำเภอที่เดินทางสะดวก ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที ส่วนพื้นที่ห่างไกลหรือบนเกาะยังไม่รับ ส่งข้อมูลรถมาก่อน ทีมโทรแจ้งว่าไปได้ไหม')
     if name not in ('Main', 'Brand', 'Province'):
         return body, logic
     m = re.search(r'(<svg[^>]*>(?:(?!</svg>).)*</svg>)\s*<span>แอดไลน์', body, re.S)   # โลโก้ LINE จากดีไซน์ (ก่อนตัดการ์ดขอบคุณ)

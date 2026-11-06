@@ -24,7 +24,7 @@ PAGES = {
     'Docs':      ('/documents/',  'เอกสารที่ต้องใช้ขายรถ | ขายรถไว',
                   'เตรียมเอกสารขายรถให้ครบ เล่มทะเบียน บัตรประชาชน และเอกสารกรณีรถติดไฟแนนซ์'),
     'Privacy':   ('/privacy/',    'นโยบายความเป็นส่วนตัว | ขายรถไว',
-                  'นโยบายความเป็นส่วนตัวของขายรถไว'),
+                  'นโยบายความเป็นส่วนตัวของขายรถไว เราเก็บข้อมูลอะไร ใช้ทำอะไร เก็บนานแค่ไหน และคุณขอดูหรือขอลบข้อมูลของตัวเองได้อย่างไร'),
 }
 LINKS = {'Mobile.dc.html': '/', 'Main.dc.html': '/'}
 LINKS.update({k + '.dc.html': v[0] for k, v in PAGES.items()})
@@ -202,7 +202,7 @@ SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-inde
     '.via-liff .kr-line{display:none!important}')   # เปิดในไลน์ (LIFF): เป็นเพื่อนกันแล้ว ไม่ต้องมีปุ่มแอดไลน์
 
 
-def page_html(name, helmet, tree, logic, prerender=''):
+def page_html(name, helmet, tree, logic, prerender='', ld=''):
     path, title, desc = PAGES[name]
     url = DOMAIN + path
     helmet = re.sub(r'<link rel="preconnect" href="https://fonts.googleapis.com">\s*', '', helmet)
@@ -229,7 +229,7 @@ def page_html(name, helmet, tree, logic, prerender=''):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 {helmet.strip()}
 <style>{SHEET_CSS}</style>
-{GTAG}
+{ld}{GTAG}
 <script>window.KR_LIFF_ID='{LIFF_WEB_ID}';</script>
 <script src="/assets/preact.min.js" defer></script>
 <script src="/assets/site.js" defer></script>
@@ -242,6 +242,47 @@ def page_html(name, helmet, tree, logic, prerender=''):
 </body>
 </html>
 '''
+
+
+CRUMB = {'Brand': 'รับซื้อรถ Toyota', 'Province': 'รับซื้อรถมือสอง เชียงใหม่', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
+
+
+def json_ld(name, pre_html):
+    """structured data (Google + AI อ่านว่าเราเป็นใคร ทำอะไร): Organization, WebSite, Service, FAQPage (จากคำถามในหน้า), BreadcrumbList
+    ไม่ใส่ชื่อบริษัท/ที่อยู่ (Moss 5 พ.ย. 69 ไม่เอา) · FAQ อ่านจากหน้าที่ prerender แล้ว = ตรงกับที่คนเห็นเป๊ะ (กฎ Google: schema ต้องตรงกับเนื้อหาบนหน้า)"""
+    path, title, desc = PAGES[name]
+    url = DOMAIN + path
+    org = {'@type': 'Organization', '@id': DOMAIN + '/#org', 'name': 'ขายรถไว', 'alternateName': 'Kairodwai', 'url': DOMAIN + '/',
+           'logo': DOMAIN + '/icon-512.png', 'areaServed': {'@type': 'Country', 'name': 'Thailand'}}
+    g = [org, {'@type': 'WebSite', '@id': DOMAIN + '/#site', 'url': DOMAIN + '/', 'name': 'ขายรถไว', 'inLanguage': 'th', 'publisher': {'@id': DOMAIN + '/#org'}},
+         {'@type': 'WebPage', '@id': url + '#page', 'url': url, 'name': title, 'description': desc, 'inLanguage': 'th', 'isPartOf': {'@id': DOMAIN + '/#site'}}]
+    if name in ('Main', 'Brand', 'Province', 'Finance'):
+        svc = {'@type': 'Service', '@id': url + '#service', 'serviceType': 'รับซื้อรถยนต์มือสอง', 'name': title.split(' | ')[0], 'description': desc,
+               'provider': {'@id': DOMAIN + '/#org'}, 'areaServed': {'@type': 'Country', 'name': 'Thailand'}, 'url': url}
+        if name == 'Province':
+            svc['areaServed'] = {'@type': 'AdministrativeArea', 'name': 'เชียงใหม่'}
+        g.append(svc)
+    qa = re.findall(r'<summary[^>]*>\s*<span>(.*?)</span>.*?</summary>\s*<p[^>]*>(.*?)</p>', pre_html or '', re.S)
+    clean = lambda t: html.unescape(re.sub(r'<[^>]+>', '', t)).strip()
+    if qa:
+        g.append({'@type': 'FAQPage', '@id': url + '#faq', 'mainEntity': [
+            {'@type': 'Question', 'name': clean(q), 'acceptedAnswer': {'@type': 'Answer', 'text': clean(a)}} for q, a in qa]})
+    if name in CRUMB:
+        g.append({'@type': 'BreadcrumbList', 'itemListElement': [
+            {'@type': 'ListItem', 'position': 1, 'name': 'ขายรถไว', 'item': DOMAIN + '/'},
+            {'@type': 'ListItem', 'position': 2, 'name': CRUMB[name], 'item': url}]})
+    data = json.dumps({'@context': 'https://schema.org', '@graph': g}, ensure_ascii=False, separators=(',', ':')).replace('</', '<\\/')
+    return '<script type="application/ld+json">' + data + '</script>\n'
+
+
+def lastmod(name):   # วันที่แก้หน้าจริงล่าสุด (git) — Google ใช้ lastmod เมื่อมันตรงกับความจริงเท่านั้น
+    import subprocess
+    files = [os.path.join(DESIGN, 'project', name + '.dc.html'), os.path.join(HERE, 'patches.py')]
+    try:
+        out = subprocess.run(['git', 'log', '-1', '--format=%cs', '--'] + files, cwd=ROOT, capture_output=True, text=True).stdout.strip()
+        return out or None
+    except Exception:
+        return None
 
 
 def main():
@@ -259,7 +300,7 @@ def main():
         strip_ws(c.root)
         d = os.path.join(OUT, PAGES[name][0].strip('/'))
         os.makedirs(d, exist_ok=True)
-        out_html = page_html(name, helmet, c.root['kids'], logic, pre.get(name, ''))
+        out_html = page_html(name, helmet, c.root['kids'], logic, pre.get(name, ''), '' if name in HIDDEN else json_ld(name, pre.get(name, '')))
         # content gate: placeholder ภาษาไทยในวงเล็บเหลี่ยม = ข้อมูลที่ยังไม่ได้ใส่ — หน้าแรก (หน้าที่แอดพามา) ห้ามมีเลย, หน้าอื่นเตือน
         ph = sorted(set(m for m in PLACEHOLDER.findall(out_html) if not m.startswith("['")))
         if ph:
@@ -305,10 +346,10 @@ def extras():
     os.makedirs(os.path.join(OUT, 'app'), exist_ok=True)   # /app/ = หน้าลับไว้ติดตั้งแอป (noindex ไม่อยู่ใน sitemap)
     shutil.copy(os.path.join(HERE, 'app.html'), os.path.join(OUT, 'app', 'index.html'))
     open(os.path.join(OUT, 'CNAME'), 'w').write('kairodwai.com\n')
-    urls = [DOMAIN + v[0] for k, v in PAGES.items() if k not in HIDDEN]
+    urls = [(DOMAIN + v[0], lastmod(k)) for k, v in PAGES.items() if k not in HIDDEN]
     open(os.path.join(OUT, 'sitemap.xml'), 'w').write(
         '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' +
-        ''.join(f'  <url><loc>{u}</loc></url>\n' for u in urls) + '</urlset>\n')
+        ''.join(f'  <url><loc>{u}</loc>' + (f'<lastmod>{d}</lastmod>' if d else '') + '</url>\n' for u, d in urls) + '</urlset>\n')
     open(os.path.join(OUT, 'robots.txt'), 'w').write(f'User-agent: *\nDisallow: /line/\nSitemap: {DOMAIN}/sitemap.xml\n')
     open(os.path.join(OUT, '404.html'), 'w', encoding='utf-8').write(
         '<!doctype html><html lang="th"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'

@@ -4,6 +4,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/../.."
 python3 src/site-src/build.py
+node src/tools/pre.js >/dev/null   # เนื้อหาจริงลง HTML (บอท AI ที่ไม่รัน JS อ่านได้) + FAQ schema อ่านจากตรงนี้
+python3 src/site-src/build.py --prerender
 (curl -s -o /dev/null localhost:8090 || (python3 -m http.server 8090 >/dev/null 2>&1 &)); sleep 1
 out=$(node src/tools/liff.js 2>&1); echo "$out" | tail -4
 echo "$out" | grep -q "doneView shown: true" || { echo "FAIL: ทางแอด (LIFF) ไม่จบ"; exit 1; }
@@ -17,6 +19,8 @@ echo "$out" | grep -q "errors: \[\]" || { echo "FAIL: มี JavaScript error"; 
 h=$(node src/tools/handoff.js 2>&1); echo "$h" | tail -3
 echo "$h" | grep -q "desktop qr svg: 1" || { echo "FAIL: QR คอม"; exit 1; }
 echo "$h" | grep -q "done shown: true" || { echo "FAIL: ทางไม่มีไลน์"; exit 1; }
+grep -q "application/ld+json" index.html || { echo "FAIL: ไม่มี structured data"; exit 1; }
+[ "$(sed 's/<[^>]*>//g' index.html | grep -c 'ขายรถไว')" -gt 3 ] || { echo "FAIL: เนื้อหาไม่อยู่ใน HTML (prerender)"; exit 1; }
 grep -q "fbq\|trackCustom" assets/site.js || { echo "FAIL: tracking หาย"; exit 1; }
 git add -A
 git diff --cached --quiet && { echo "ไม่มีอะไรเปลี่ยน"; exit 0; }
