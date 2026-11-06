@@ -186,6 +186,39 @@ def apply(name, body, logic):
         b_old = 'Tesla, Toyota, Volvo'
         assert body.count(b_old) == 1, 'brand list toyota'
         body = body.replace(b_old, 'Tesla, <a href="/toyota/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">Toyota</a>, Volvo')
+    if name == 'Docs':   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "โอนรถ" ~3,600/เดือน -> ขยายเป็นคู่มือโอนรถมือสอง อ้างอิงกรมการขนส่งทางบก
+        H2 = '<h2 style="margin: 24px 0 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(24px, 3.5vw, 30px); line-height: 1.3;">{}</h2>'
+        P = '<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #3D3B37;">{}</p>'
+        CARD = '<li style="background: #FFFFFF; border: 1px solid #DEDBD3; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;"><strong style="font-weight: 600; font-size: 17px;">{}</strong><span style="font-size: 15px; line-height: 1.6; color: #3D3B37;">{}</span></li>'
+        UL = lambda items: '<ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px;">' + ''.join(CARD.format(a, b) for a, b in items) + '</ul>'
+        OL = lambda items: '<ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px;">' + ''.join(
+            '<li style="display: flex; gap: 14px; align-items: flex-start;"><span style="flex-shrink: 0; width: 32px; height: 32px; border-radius: 16px; background: #141414; color: #FFFFFF; display: flex; align-items: center; justify-content: center; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 15px;">' + str(i + 1) + '</span><span style="font-size: 16px; line-height: 1.7; color: #3D3B37; padding-top: 3px;"><strong style="font-weight: 600; color: #141414;">' + a + '</strong> ' + b + '</span></li>' for i, (a, b) in enumerate(items)) + '</ol>'
+        guide = (H2.format('โอนรถมือสอง มี 2 แบบ')
+            + UL([('โอนต่อหน้านายทะเบียน', 'ผู้ขายและผู้ซื้อไปยื่นเรื่องที่สำนักงานขนส่งด้วยกัน ชื่อในเล่มเปลี่ยนเป็นของผู้ซื้อวันนั้นเลย'),
+                  ('โอนลอย', 'ผู้ขายเซ็นแบบคำขอโอนและหนังสือมอบอำนาจไว้ให้ผู้ซื้อไปโอนเอง ถ้าผู้ซื้อไม่ไปโอนให้เสร็จ ชื่อในเล่มยังเป็นของผู้ขาย และผู้ขายอาจต้องรับผิดเรื่องที่เกิดจากรถคันนั้น')])
+            + P.format('ขายรถกับขายรถไว คุณไม่ต้องไปขนส่งเอง ทีมเตรียมเอกสารโอนมาให้เซ็นที่บ้าน แล้วดำเนินเรื่องโอนให้')
+            + H2.format('เอกสารที่ขนส่งใช้โอนรถ')
+            + UL([('เล่มทะเบียนรถตัวจริง', 'ถ้ารถยังผ่อนอยู่ เล่มอยู่กับไฟแนนซ์ ต้องปิดยอดก่อนจึงได้เล่มมาโอน'),
+                  ('แบบคำขอโอนและรับโอน', 'ลงลายมือชื่อทั้งผู้โอนและผู้รับโอน'),
+                  ('สำเนาบัตรประชาชน', 'ของผู้โอนและผู้รับโอน ถ้าเป็นบริษัท ใช้หนังสือรับรองการจดทะเบียนนิติบุคคลเพิ่ม'),
+                  ('หลักฐานการซื้อขาย', 'สัญญาซื้อขาย ใบเสร็จ หรือใบกำกับภาษี'),
+                  ('หนังสือมอบอำนาจ', 'ใช้เมื่อมีคนไปทำเรื่องแทน พร้อมสำเนาบัตรประชาชนของผู้รับมอบอำนาจ')])
+            + H2.format('ขั้นตอนโอนที่สำนักงานขนส่ง')
+            + OL([('ตรวจสภาพรถ', 'เจ้าหน้าที่ตรวจเลขตัวถัง เลขเครื่องยนต์ และสีรถให้ตรงกับเล่มทะเบียน'),
+                  ('ยื่นเอกสารและชำระค่าธรรมเนียม', 'ที่ช่องงานทะเบียน'),
+                  ('รับเล่มทะเบียนคืน', 'พร้อมใบเสร็จ ชื่อในเล่มเปลี่ยนเป็นเจ้าของใหม่')])
+            + H2.format('ค่าธรรมเนียมโอนรถ')
+            + UL([('ค่าคำขอ', '5 บาท'), ('ค่าธรรมเนียมโอน', '100 บาท'),
+                  ('ค่าอากรแสตมป์', 'ร้อยละ 0.5 ของราคารถที่เจ้าหน้าที่ประเมิน เช่น ราคาประเมิน 400,000 บาท ค่าอากร 2,000 บาท')])
+            + P.format('ต้องแจ้งนายทะเบียนภายใน 15 วันนับจากวันโอน ถ้าแจ้งช้ามีโทษปรับตามกฎหมาย อัตราค่าธรรมเนียมอาจเปลี่ยน เช็กล่าสุดได้ที่กรมการขนส่งทางบก สายด่วน 1584')
+            + '<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #55534E;">ข้อมูลอ้างอิง: กรมการขนส่งทางบก · ปรับปรุงล่าสุด พฤศจิกายน 2569</p>')
+        end_ul = '</ul>\n</div></section>'
+        assert body.count(end_ul) == 1, 'docs list end'
+        body = body.replace(end_ul, '</ul>\n' + guide + '\n</div></section>')
+        for a, b in (('aria-current="page" style="color: #141414;">เอกสารที่ต้องใช้ขายรถ</span>', 'aria-current="page" style="color: #141414;">เอกสารขายรถ · โอนรถ</span>'),
+                     ('line-height: 1.2;">เอกสารที่ต้องใช้ขายรถ</h1>', 'line-height: 1.2;"><span style="white-space: nowrap;">เอกสารขายรถ</span><br><span style="white-space: nowrap;">และโอนรถมือสอง</span></h1>'),
+                     ('>เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง</p>', '>ขายรถกับเรา เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง ด้านล่างคือขั้นตอน เอกสาร และค่าธรรมเนียมโอนรถมือสองที่ขนส่ง</p>')):
+            assert body.count(a) == 1, ('docs', a[:40]); body = body.replace(a, b)
     if name == 'Province':   # Moss 6 พ.ย. 69: ไปหัวเมือง/อำเภอที่เดินทางสะดวก เกาะและพื้นที่ทุรกันดารไม่ไป
         q_old = 'ทีมไปถึงอำเภอไกลๆ อย่างอมก๋อยหรือเวียงแหงไหม'
         assert body.count(q_old) == 1, 'province far-district faq'
