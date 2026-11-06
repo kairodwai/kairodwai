@@ -219,6 +219,24 @@ def apply(name, body, logic):
                      ('line-height: 1.2;">เอกสารที่ต้องใช้ขายรถ</h1>', 'line-height: 1.2;"><span style="white-space: nowrap;">เอกสารขายรถ</span><br><span style="white-space: nowrap;">และโอนรถมือสอง</span></h1>'),
                      ('>เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง</p>', '>ขายรถกับเรา เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง ด้านล่างคือขั้นตอน เอกสาร และค่าธรรมเนียมโอนรถมือสองที่ขนส่ง</p>')):
             assert body.count(a) == 1, ('docs', a[:40]); body = body.replace(a, b)
+    if name == 'Finance':   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "ขายดาวน์รถ" ~390 + "ปิดไฟแนนซ์รถ" ~210 -> เพิ่ม 2 ส่วน อ้างอิงประกาศ สคบ.
+        SEC = '<section style="{bg}"><div style="max-width: 1120px; margin: 0 auto; padding: 56px 20px; display: flex; flex-direction: column; gap: 24px;"><h2 style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(26px, 3.5vw, 32px); line-height: 1.3; ">{h}</h2>{body}</div></section>'
+        P = '<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3D3B37; max-width: 760px;">{}</p>'
+        GRID = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 12px;">{}</div>'
+        CARD = '<div style="background: #FFFFFF; border: 1px solid #DEDBD3; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 6px;"><h3 style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 19px;">{}</h3><p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3D3B37;">{}</p></div>'
+        down = SEC.format(bg='', h='<span style="white-space: nowrap;">ขายดาวน์รถ</span> <span style="white-space: nowrap;">กับขายแบบปิดยอด</span> <span style="white-space: nowrap;">ต่างกันยังไง</span>', body=GRID.format(
+            CARD.format('ขายดาวน์ (ให้คนอื่นผ่อนต่อ)', 'ผู้ซื้อจ่ายเงินดาวน์ให้คุณ แล้วรับภาระผ่อนต่อ ต้องให้ไฟแนนซ์อนุมัติผู้ซื้อคนใหม่และทำเรื่องโอนสัญญาเช่าซื้อ มีค่าธรรมเนียมตามที่ไฟแนนซ์กำหนด ถ้าส่งรถให้คนอื่นผ่อนต่อโดยไฟแนนซ์ไม่อนุมัติ ชื่อในสัญญายังเป็นของคุณ ถ้าเขาไม่จ่าย คุณต้องรับผิดชอบ')
+            + CARD.format('ขายแบบปิดยอด (แบบที่เราทำ)', 'เราจ่ายยอดปิดให้ไฟแนนซ์ทั้งหมด รับเล่มทะเบียนออกมา แล้วโอนรถ ส่วนที่เหลือจ่ายให้คุณ สัญญาเช่าซื้อจบ ชื่อคุณหลุดจากไฟแนนซ์ ไม่ต้องรอไฟแนนซ์อนุมัติใคร')))
+        close = SEC.format(bg='background: #FFFFFF; border-top: 1px solid #DEDBD3; border-bottom: 1px solid #DEDBD3;', h='<span style="white-space: nowrap;">ปิดไฟแนนซ์ก่อนกำหนด</span> <span style="white-space: nowrap;">ได้ส่วนลดดอกเบี้ยเท่าไหร่</span>',
+            body=P.format('ตามประกาศ สคบ. สัญญาเช่าซื้อรถที่ทำตั้งแต่ 10 มกราคม 2566 ถ้าปิดบัญชีก่อนครบสัญญา ต้องได้ส่วนลดดอกเบี้ยส่วนที่ยังไม่ถึงกำหนด ตามจำนวนงวดที่ผ่อนไปแล้ว')
+            + GRID.format(CARD.format('ผ่อนไปไม่เกิน 1 ใน 3', 'ส่วนลดอย่างน้อย 60% ของดอกเบี้ยที่ยังไม่ถึงกำหนด')
+                          + CARD.format('ผ่อนไปเกิน 1 ใน 3 แต่ไม่ถึง 2 ใน 3', 'ส่วนลดอย่างน้อย 70% ของดอกเบี้ยที่ยังไม่ถึงกำหนด')
+                          + CARD.format('ผ่อนไปตั้งแต่ 2 ใน 3', 'ส่วนลดดอกเบี้ยที่ยังไม่ถึงกำหนดทั้งหมด'))
+            + P.format('สัญญาที่ทำก่อนวันนั้นใช้เงื่อนไขเดิมตามสัญญา ยอดปิดจริงขอได้จากไฟแนนซ์ของคุณ ขายกับเรา ทีมเช็คยอดปิดกับไฟแนนซ์ให้ก่อนเสนอราคา')
+            + '<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #55534E;">ข้อมูลอ้างอิง: ประกาศคณะกรรมการว่าด้วยสัญญา (สคบ.) เรื่องให้ธุรกิจให้เช่าซื้อรถยนต์และรถจักรยานยนต์เป็นธุรกิจที่ควบคุมสัญญา พ.ศ. 2565 · ปรับปรุงล่าสุด พฤศจิกายน 2569</p>')
+        faq_h = '<section style=""><div style="max-width: 1120px; margin: 0 auto; padding: 56px 20px; display: flex; flex-direction: column; gap: 24px;"><h2 style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(26px, 3.5vw, 32px); line-height: 1.3; ">คำถามเรื่องขายรถติดไฟแนนซ์</h2>'
+        assert body.count(faq_h) == 1, 'finance faq anchor'
+        body = body.replace(faq_h, down + close + faq_h)
     if name == 'Province':   # Moss 6 พ.ย. 69: ไปหัวเมือง/อำเภอที่เดินทางสะดวก เกาะและพื้นที่ทุรกันดารไม่ไป
         q_old = 'ทีมไปถึงอำเภอไกลๆ อย่างอมก๋อยหรือเวียงแหงไหม'
         assert body.count(q_old) == 1, 'province far-district faq'
