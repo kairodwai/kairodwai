@@ -60,9 +60,9 @@ for n, xs in pages.items():
     dash = sum(x.count('—') for x in xs)
     flag, warn = [], []   # flag = ห้ามขึ้น · warn = ขึ้นได้ แต่ควรเติมข้อมูลจริง
     loc = n.startswith('Province') or n.startswith('Brand')
-    if loc and dup > 0.7: flag.append('ซ้ำแม่แบบเกิน 70% (หน้าปั๊ม)')
-    elif loc and dup > 0.55: warn.append('ซ้ำแม่แบบเกิน 55%')
-    if own < 500: warn.append('เนื้อหาเฉพาะหน้าน้อย')
+    # Moss 7 พ.ย. 69 "เอาให้ได้ 100%": เกณฑ์เข้ม = ห้ามขึ้นเลยถ้าเสี่ยง
+    if loc and dup > 0.55: flag.append(f'ซ้ำแม่แบบ {dup:.0%} (เกิน 55%)')
+    if loc and own < 500: flag.append('เนื้อหาเฉพาะหน้าน้อย')
     if tells: flag.append('คำ AI')
     if dash: flag.append(f'ขีดยาว — {dash}')
     print(f'{PAGES[n]:<16}{total:>8}{own:>10}{dup:>9.0%}  {" ".join(tells)}  {"✗ " + ", ".join(flag) if flag else ("⚠ " + ", ".join(warn) if warn else "ok")}')

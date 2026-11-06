@@ -91,6 +91,11 @@ P = [
          near=['bangkok']),
 ]
 import provinces_all
+# Moss 7 พ.ย. 69 ลบหน้าที่เสี่ยงออก: 3 จังหวัดปริมณฑลนี้ไม่มีตัวเลขรถ (ข้อมูลขนส่งต่ำผิดปกติ) → เนื้อหาซ้ำแม่แบบเกิน 55% · ยังยิงแอดได้ตามปกติ
+HOLD_HUBS = {'nonthaburi', 'samut-prakan', 'samut-sakhon'}
+P = [d for d in P if d['slug'] not in HOLD_HUBS]
+for _d in P:
+    _d['near'] = [x for x in _d['near'] if x not in HOLD_HUBS]
 for _d in P:
     _d.update(hub=True, region=provinces_all.REGION_OF_HUB[_d['slug']])
 P += provinces_all.build(P)

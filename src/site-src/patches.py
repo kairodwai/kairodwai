@@ -152,7 +152,7 @@ def common(body):
         row = lambda head, links: ('<div style="display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; line-height: 1.6;">'
                                    f'<span style="font-weight: 600; color: #F5F4F0;">{head}</span>' + ''.join(links) + '</div>')
         foot = ('<div class="kr-foot-links" style="max-width: 1120px; margin: 0 auto; padding: 0 20px 48px; display: flex; flex-direction: column; gap: 12px; border-top: 1px solid #2A2A2A; padding-top: 24px;">'
-                + row('พื้นที่ให้บริการ', [L(f'/{d["slug"]}/', d['h1']) for d in provinces.HUBS] + [L('/#area-h', 'ดูทุกจังหวัด')])
+                + row('พื้นที่ให้บริการ', [L(f'/{d["slug"]}/', d['h1']) for d in provinces.HUBS] + ([L('/#area-h', 'ดูทุกจังหวัด')] if len(provinces.P) > len(provinces.HUBS) else []))
                 + row('รับซื้อตามยี่ห้อ', [L(f'/{d["slug"]}/', d['key']) for d in brands.B]) + '</div>\n')
         body = body.replace('</footer>', foot + '</footer>', 1).replace('padding: 48px 20px 56px;', 'padding: 48px 20px 32px;', 1)
     body = body.replace('<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', '<a href="Price.dc.html" style="color: #D6D3CC;">ประเมินราคารถมือสองฟรี</a>\n<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', 1)   # ลิงก์ภายในไปหน้าประเมินราคา (ทุกหน้า)
@@ -197,13 +197,14 @@ def apply(name, body, logic):
         chip = 'height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 1px solid #DEDBD3; display: inline-flex; align-items: center; font-size: 15px; white-space: nowrap; text-decoration: none; color: #141414;'
         areas = ('<section aria-labelledby="area-h" style="max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center;">'
                  '<h2 id="area-h" style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(28px, 3.5vw, 36px);">พื้นที่ให้บริการ</h2>'
-                 '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้านในกรุงเทพฯ ปริมณฑล และหัวเมืองหลัก จังหวัดอื่นส่งรูปให้ประเมินราคาก่อน แล้วนัดวันดูรถ ไม่รวมพื้นที่บนเกาะ</p>'
+                 '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้านในกรุงเทพฯ ปริมณฑล และหัวเมืองหลัก</p>'
                  '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">'
                  + ''.join(f'<a href="/{d["slug"]}/" style="{chip}">{d["h1"]}</a>' for d in provinces.HUBS) + '</div>'
                  + '<div style="display: flex; flex-direction: column; gap: 10px; max-width: 900px; font-size: 15px; line-height: 1.8;">'
                  + ''.join('<p style="margin: 0; color: #3D3B37;"><span style="font-weight: 600; color: #141414;">' + rn + '</span> '
                            + ' · '.join(f'<a href="/{d["slug"]}/" style="color: #3D3B37;">{d["h1"]}</a>' for d in provinces.P if not d['hub'] and d['region'] == rg) + '</p>'
-                           for rg, rn in (('c', 'ภาคกลางและตะวันออก'), ('n', 'ภาคเหนือ'), ('ne', 'ภาคอีสาน'), ('s', 'ภาคใต้')))
+                           for rg, rn in (('c', 'ภาคกลางและตะวันออก'), ('n', 'ภาคเหนือ'), ('ne', 'ภาคอีสาน'), ('s', 'ภาคใต้'))
+                           if any(not d['hub'] and d['region'] == rg for d in provinces.P))
                  + '</div></section>\n')
         faq = '<section aria-labelledby="faq-h"'
         assert body.count(faq) == 1, 'main faq anchor'

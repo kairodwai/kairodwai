@@ -44,10 +44,15 @@ HOLD = {'phichit', 'mukdahan', 'amnat-charoen', 'nong-khai', 'nong-bua-lamphu', 
         'sing-buri', 'nakhon-nayok', 'samut-songkhram', 'prachin-buri', 'sa-kaeo', 'ranong'}   # มีสำนักงานจังหวัด 2 แห่ง
 
 
+# Moss 7 พ.ย. 69: "อันไหนเสี่ยงต้องลบออก เอาให้ได้ 100%" → ปิดทั้งชุดไว้ก่อน (ทุกหน้าซ้ำแม่แบบ 55–74%)
+# เปิดทีละจังหวัดเมื่อได้ข้อมูลจริงจากทีม (ย่านที่ไปรับรถ คำถามที่ลูกค้าถาม) แล้วผ่าน ai-screen แบบเข้ม
+ENABLED = set()
+
+
 def build(P):
     out = []
     for slug, prov, rg in NEW:
-        if slug in HOLD: continue
+        if slug in HOLD or slug not in ENABLED: continue
         short = SHORT.get(prov, prov)
         br = OFF.get(prov, [])
         offices = [f'สำนักงานขนส่งจังหวัด{prov}' + (' แห่งที่ 1 และ 2' if prov in TWO else '')] + [f'สาขา{b}' for b in br]
