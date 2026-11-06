@@ -4,7 +4,7 @@ const { chromium, devices } = require('playwright');
 const fs = require('fs'), path = require('path');
 const BASE = process.argv[2] || 'http://localhost:8090';
 const ROOT = path.join(__dirname, '..', '..');
-const INDEXABLE = ['/', '/toyota/', '/chiang-mai/', '/finance/', '/documents/', '/privacy/'];   // /portfolio/ = noindex จนกว่าจะมีรถที่ซื้อจริง
+const INDEXABLE = ['/', '/check-price/', '/toyota/', '/chiang-mai/', '/finance/', '/documents/', '/privacy/'];   // /portfolio/ = noindex จนกว่าจะมีรถที่ซื้อจริง
 const NOINDEX = ['/line/', '/go/'];
 
 const checks = []; const add = (group, name, pass, detail, count) => checks.push({ group, name, pass: !!pass, detail: detail || '', count: count || 0 });

@@ -145,6 +145,7 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
 
 
 def common(body):
+    body = body.replace('<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', '<a href="Price.dc.html" style="color: #D6D3CC;">ประเมินราคารถมือสองฟรี</a>\n<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', 1)   # ลิงก์ภายในไปหน้าประเมินราคา (ทุกหน้า)
     body = body.replace('รูปรถ 4 มุม เลขไมล์ หน้าเล่มทะเบียน ทีมแจ้งช่วงราคาภายใน [กี่ชั่วโมง]', 'ถ่ายรูปรถ 5 มุมผ่านเว็บ ทีมโทรกลับพร้อมราคาภายใน 5 นาที (8:00–20:00)')
     body = re.sub(r'<span[^>]*>ตัวอย่าง · รอรูปจริง</span>', '', body)
     body = body.replace('ส่งรูปทางไลน์ได้ 24 ชม.', 'ส่งข้อมูลผ่านไลน์ได้ 24 ชม.')
@@ -181,7 +182,7 @@ def apply(name, body, logic):
     if name == 'Portfolio':   # ข้อมูลตัวอย่างล้วน (ยี่ห้อ/จังหวัดสมมติ) — ว่างไว้จนกว่าจะมีรถที่ซื้อจริงจากหลังบ้าน; หน้านี้ noindex + ไม่อยู่ใน sitemap (build.py HIDDEN)
         logic, n = re.subn(r'var ITEMS = \[.*?\];', 'var ITEMS = [];', logic, count=1, flags=re.S)
         assert n == 1, 'portfolio items'
-    if name == 'Main':   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
+    if name in ('Main', 'Price'):   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
         b_old = 'Tesla, Toyota, Volvo'
         assert body.count(b_old) == 1, 'brand list toyota'
         body = body.replace(b_old, 'Tesla, <a href="/toyota/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">Toyota</a>, Volvo')
@@ -192,7 +193,7 @@ def apply(name, body, logic):
         a_old = 'ไปทุกอำเภอ ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที'
         assert body.count(a_old) == 1, 'province far-district answer'
         body = body.replace(a_old, 'ไปในตัวเมืองและอำเภอที่เดินทางสะดวก ไม่มีค่าเดินทาง นัดล่วงหน้า 1 วัน ตรวจรถไม่ถึง 30 นาที ส่วนพื้นที่ห่างไกลหรือบนเกาะยังไม่รับ ส่งข้อมูลรถมาก่อน ทีมโทรแจ้งว่าไปได้ไหม')
-    if name not in ('Main', 'Brand', 'Province'):
+    if name not in ('Main', 'Price', 'Brand', 'Province'):
         return body, logic
     m = re.search(r'(<svg[^>]*>(?:(?!</svg>).)*</svg>)\s*<span>แอดไลน์', body, re.S)   # โลโก้ LINE จากดีไซน์ (ก่อนตัดการ์ดขอบคุณ)
     assert m, (name, 'line svg')
@@ -210,7 +211,7 @@ def apply(name, body, logic):
     body = re.sub(r'(<button type="button" onClick="\{\{ goForm \}\}" aria-label=")[^"]*("[^>]*>)\s*<svg.*?</svg>\s*<span>แอดไลน์</span>',
                   lambda m: m.group(1) + 'แอดไลน์ (กรอกข้อมูลรถก่อน)' + m.group(2).replace('background: #E4E1DA;', 'background: #06C755;').replace('color: #4A4843;', 'color: #0B1A10;') + line_svg + '<span>แอดไลน์</span>', body, count=1, flags=re.S)
     sec_old = 'font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">กรอกข้อมูลรถก่อน</button>'
-    assert body.count(sec_old) == (1 if name == 'Main' else 0), (name, 'section line button')
+    assert body.count(sec_old) == (1 if name in ('Main', 'Price') else 0), (name, 'section line button')
     body = body.replace(sec_old, 'gap: 10px; font-family: \'Kanit\', sans-serif; font-size: 18px; font-weight: 500;">' + line_svg.replace('width="20" height="20"', 'width="22" height="22"') + '<span>แอดไลน์ ขายรถไว</span></button>')
     body = body.replace('ส่งรูปทางไลน์ รับราคา', 'กรอกข้อมูลรถ ส่งรูป คุยต่อในไลน์')
     body = body.replace('ส่งรูปมาทางไลน์ ทีมตอบกลับเร็วในเวลาทำการ', 'คุยกับทีมทางไลน์ ตอบไวในเวลาทำการ')

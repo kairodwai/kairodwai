@@ -19,6 +19,8 @@ PAGES = {
                   'รับซื้อรถยนต์มือสองในเชียงใหม่ ทีมเข้าดูรถถึงบ้าน ประเมินราคาไว จ่ายเงินทันที รถติดไฟแนนซ์ก็ขายได้'),
     'Portfolio': ('/portfolio/',  'ผลงานรับซื้อรถ | ขายรถไว',
                   'ตัวอย่างรถที่ขายรถไวรับซื้อมาแล้ว'),
+    'Price':     ('/check-price/', 'ประเมินราคารถมือสองฟรี รู้ราคาจริงใน 5 นาที | ขายรถไว',
+                  'ประเมินราคารถมือสองฟรี กรอกรุ่น ปี ไมล์ ส่งรูป 5 มุม ทีมรับซื้อแจ้งราคาจริงจากสภาพรถคุณภายใน 5 นาที พร้อมวิธีเช็คราคาเองให้แม่น'),
     'Finance':   ('/finance/',    'ขายรถติดไฟแนนซ์ ทำยังไง | ขายรถไว',
                   'คู่มือขายรถที่ยังผ่อนไม่หมด ปิดไฟแนนซ์ยังไง ได้เงินส่วนต่างเท่าไหร่ ขายรถไวจัดการให้ครบ'),
     'Docs':      ('/documents/',  'เอกสารที่ต้องใช้ขายรถ | ขายรถไว',
@@ -244,7 +246,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 '''
 
 
-CRUMB = {'Brand': 'รับซื้อรถ Toyota', 'Province': 'รับซื้อรถมือสอง เชียงใหม่', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
+CRUMB = {'Price': 'ประเมินราคารถมือสอง', 'Brand': 'รับซื้อรถ Toyota', 'Province': 'รับซื้อรถมือสอง เชียงใหม่', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
 
 
 def json_ld(name, pre_html):
@@ -256,7 +258,7 @@ def json_ld(name, pre_html):
            'logo': DOMAIN + '/icon-512.png', 'areaServed': {'@type': 'Country', 'name': 'Thailand'}}
     g = [org, {'@type': 'WebSite', '@id': DOMAIN + '/#site', 'url': DOMAIN + '/', 'name': 'ขายรถไว', 'inLanguage': 'th', 'publisher': {'@id': DOMAIN + '/#org'}},
          {'@type': 'WebPage', '@id': url + '#page', 'url': url, 'name': title, 'description': desc, 'inLanguage': 'th', 'isPartOf': {'@id': DOMAIN + '/#site'}}]
-    if name in ('Main', 'Brand', 'Province', 'Finance'):
+    if name in ('Main', 'Price', 'Brand', 'Province', 'Finance'):
         svc = {'@type': 'Service', '@id': url + '#service', 'serviceType': 'รับซื้อรถยนต์มือสอง', 'name': title.split(' | ')[0], 'description': desc,
                'provider': {'@id': DOMAIN + '/#org'}, 'areaServed': {'@type': 'Country', 'name': 'Thailand'}, 'url': url}
         if name == 'Province':
