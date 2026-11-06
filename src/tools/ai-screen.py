@@ -43,7 +43,11 @@ def tmpl(n, x):
 # ประโยคที่อยู่แทบทุกหน้า (ปุ่ม, เกณฑ์รับซื้อ, แถบเครดิต) = ส่วนกลางของเว็บ ไม่นับ
 from collections import Counter
 cnt = Counter(t for n, xs in pages.items() for t in set(tmpl(n, x) for x in xs))
-common = {t for t, c in cnt.items() if c >= len(pages) * 0.6}
+# ส่วนกลางของเว็บ (เมนู ฟอร์ม เกณฑ์รับซื้อ) = ประโยคที่อยู่ในหน้าหลักเกิน 60% — วัดจากหน้าหลักเท่านั้น
+# (ถ้าวัดรวมหน้าจังหวัด ประโยคแม่แบบที่ซ้ำกัน 60 หน้าจะถูกนับเป็น "ส่วนกลาง" แล้วหลุดการตรวจ)
+core = [n for n in pages if not (n.startswith('Province') or n.startswith('Brand'))]
+ccnt = Counter(t for n in core for t in set(tmpl(n, x) for x in pages[n]))
+common = {t for t, c in ccnt.items() if c >= len(core) * 0.6}
 
 fail, warns = [], []
 print(f'{"หน้า":<16}{"ตัวอักษร":>8}{"ของตัวเอง":>10}{"ซ้ำแม่แบบ":>10}  คำติดปาก AI')

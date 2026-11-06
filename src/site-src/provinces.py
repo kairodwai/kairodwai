@@ -90,7 +90,12 @@ P = [
          q=('รถจดทะเบียนสงขลา ต้องไปโอนที่หาดใหญ่หรือตัวเมือง', 'ไม่ต้องไปเอง ทีมเตรียมเอกสารโอนมาให้เซ็นที่บ้าน แล้วดำเนินเรื่องโอนให้'),
          near=['bangkok']),
 ]
+import provinces_all
+for _d in P:
+    _d.update(hub=True, region=provinces_all.REGION_OF_HUB[_d['slug']])
+P += provinces_all.build(P)
 BY = {d['slug']: d for d in P}
+HUBS = [d for d in P if d['hub']]
 
 
 def page_name(slug):
@@ -101,6 +106,10 @@ def pages():
     """รายการหน้าให้ build.PAGES: name -> (path, title, desc)"""
     out = {}
     for d in P:
+        if not d['hub']:
+            out[page_name(d['slug'])] = ('/' + d['slug'] + '/', f"รับซื้อรถมือสอง {d['h1']} นัดดูรถถึงที่ | ขายรถไว",
+                f"รับซื้อรถยนต์มือสองใน{d['short']} ส่งรูปให้ทีมประเมินราคาก่อน แล้วนัดวันดูรถถึงที่ รับรถติดไฟแนนซ์ ขายง่ายไม่ต้องไปเต็นท์")
+            continue
         out[page_name(d['slug'])] = ('/' + d['slug'] + '/',
             f"รับซื้อรถมือสอง {d['h1']} ถึงหน้าบ้าน | ขายรถไว",
             f"รับซื้อรถยนต์มือสองใน{d['short']} ({d['prov']}) ทีมเข้าดูรถถึงบ้าน ประเมินราคาไว จ่ายเงินทันที รถติดไฟแนนซ์ก็ขายได้"
@@ -113,12 +122,13 @@ def pages():
 # STATS: รถยนต์นั่งส่วนบุคคลไม่เกิน 7 คน (รย.1) จดทะเบียนสะสม ณ 28 ก.พ. 2569 จาก gdcatalog.dlt.go.th (stt_car_fuel_at_25690228.csv)
 #   all, ev (ไฟฟ้า), hyb (ไฮบริด + ปลั๊กอิน), rank ใน 77 จังหวัด · ทั้งประเทศ 12,610,527 คัน ไฟฟ้า 317,268 · นนทบุรี/สมุทรปราการ/สมุทรสาคร ตัวเลขในชุดนี้ต่ำผิดปกติ ไม่โชว์
 NAT = dict(all=12610527, ev=317268)
-STATS = {
-    'bangkok': (5894114, 217854, 495705, 1), 'chonburi': (434887, 9306, 17687, 3), 'rayong': (228350, 4073, 7699, 7),
-    'saraburi': (103769, 1236, 2742, 17), 'korat': (339572, 5015, 11416, 4), 'khon-kaen': (267219, 5706, 9264, 6),
-    'ubon': (170955, 3566, 4472, 11), 'chiang-mai': (451575, 12449, 21933, 2), 'chiang-rai': (177673, 3318, 6497, 8),
-    'phitsanulok': (149905, 3415, 6144, 14), 'hat-yai': (304608, 5853, 11997, 5),
-}
+import json as _json, os as _os
+_RAW = _json.load(open(_os.path.join(_os.path.dirname(_os.path.abspath(__file__)), 'data', 'dlt-ry1-2569-02.json'), encoding='utf-8'))
+_RANK = {p: i + 1 for i, p in enumerate(sorted(_RAW, key=lambda p: -_RAW[p]['a']))}
+NAT['dsl'] = sum(v['dsl'] for v in _RAW.values())
+_LOW = {'nonthaburi', 'samut-prakan', 'samut-sakhon', 'pathum-thani'}   # ปริมณฑล: ตัวเลขในชุดนี้ต่ำผิดปกติ (รถไปจดที่ กทม.) ไม่โชว์
+STATS = {d['slug']: (_RAW[d['prov']]['a'], _RAW[d['prov']]['ev'], _RAW[d['prov']]['hyb'], _RANK[d['prov']], _RAW[d['prov']]['dsl'])
+         for d in P if d['prov'] in _RAW and d['slug'] not in _LOW}
 # OFFICES: สำนักงานขนส่งในจังหวัด (ชื่อสำนักงาน/สาขา) — รวบรวม 6 พ.ย. 69
 OFFICES = {
     'bangkok': ['พื้นที่ 1 บางขุนเทียน', 'พื้นที่ 2 ตลิ่งชัน', 'พื้นที่ 3 พระโขนง', 'พื้นที่ 4 หนองจอก', 'พื้นที่ 5 จตุจักร'],
@@ -144,12 +154,15 @@ def local_block(slug):
     P_ = '<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3D3B37; max-width: 760px;">{}</p>'
     out = ''
     if slug in STATS:
-        a, ev, hy, rk = STATS[slug]
+        a, ev, hy, rk, dsl = STATS[slug]
         sh, nsh = ev / a * 100, NAT['ev'] / NAT['all'] * 100
         cmp = 'สูงกว่า' if sh > nsh + 0.15 else ('ต่ำกว่า' if sh < nsh - 0.15 else 'ใกล้เคียง')
         out += P_.format(f'ข้อมูลกรมการขนส่งทางบก ณ 28 ก.พ. 2569 จังหวัด{d["prov"]}มีรถยนต์นั่งส่วนบุคคลไม่เกิน 7 คน จดทะเบียนสะสม {a:,} คัน '
                          f'มากเป็นอันดับ {rk} จาก 77 จังหวัด ในจำนวนนี้เป็นรถไฟฟ้า {ev:,} คัน ({sh:.1f}%) {cmp}ค่าเฉลี่ยทั้งประเทศที่ {nsh:.1f}% และรถไฮบริดรวมปลั๊กอิน {hy:,} คัน')
-    offs = OFFICES.get(slug)
+        ds, nds = dsl / a * 100, NAT['dsl'] / NAT['all'] * 100
+        out += P_.format(f'เป็นรถเครื่องดีเซล {dsl:,} คัน หรือ {ds:.0f}% ของรถทั้งจังหวัด '
+                         + ('มากกว่า' if ds > nds + 1 else ('น้อยกว่า' if ds < nds - 1 else 'ใกล้เคียง')) + f'ค่าเฉลี่ยประเทศที่ {nds:.0f}% เรารับรถอเนกประสงค์ดีเซล แต่ไม่รับรถกระบะทุกรุ่น')
+    offs = OFFICES.get(slug) or d.get('offices')
     if offs:
         out += P_.format(f'สำนักงานขนส่งใน{d["short"]}: ' + ' · '.join(offs) + ' ขายรถกับเรา คุณเซ็นเอกสารโอนที่บ้าน ไม่ต้องไปต่อคิวที่ขนส่งเอง')
     if not out:
@@ -167,12 +180,25 @@ def transform(body, slug):
     # breadcrumb: ตัด "พื้นที่ให้บริการ" ที่ลิงก์กลับหน้าตัวเอง
     rep('<a href="Province.dc.html" style="color: #55534E;">พื้นที่ให้บริการ</a><span aria-hidden="true" style="color: #A8A49B;">›</span><span aria-current="page" style="color: #141414;">เชียงใหม่</span>',
         f'<span aria-current="page" style="color: #141414;">รับซื้อรถมือสอง {d["h1"]}</span>')
-    rep('>ทีมไปดูรถถึงบ้าน ทุกอำเภอ</span>', '>ทีมไปดูรถถึงบ้าน ไม่มีค่าเดินทาง</span>')
+    rep('>ทีมไปดูรถถึงบ้าน ทุกอำเภอ</span>', '>ทีมไปดูรถถึงบ้าน ไม่มีค่าเดินทาง</span>' if d['hub'] else '>ประเมินราคาจากรูปก่อน แล้วนัดดูรถ</span>')
     rep('<span style="white-space: nowrap;">เชียงใหม่</span></h1>', f'<span style="white-space: nowrap;">{d["h1"]}</span></h1>')
     body, n = re.subn(r'(max-width: 640px;">)ขายรถในเชียงใหม่[^<]*(</p>)', lambda m: m.group(1) + d['intro'] + m.group(2), body, count=1)
     assert n == 1, (slug, 'intro')
-    rep('ทีมไปดูรถถึงหน้าบ้าน ทุกอำเภอในเชียงใหม่', f'ทีมไปดูรถถึงหน้าบ้านใน{d["short"]}')
+    rep('ทีมไปดูรถถึงหน้าบ้าน ทุกอำเภอในเชียงใหม่', f'ทีมไปดูรถถึงหน้าบ้านใน{d["short"]}' if d['hub'] else f'นัดวันดูรถใน{d["short"]} หลังประเมินจากรูป')
     rep('ประเมินราคารถฟรี ในเชียงใหม่', f'ประเมินราคารถฟรี ใน{d["short"]}')
+    if not d['hub']:   # ไม่มีข้อมูลอำเภอที่ทีมไปจริง → ไม่โชว์รายชื่ออำเภอเลย (ไม่อ้างสิ่งที่ไม่รู้)
+        i = body.index('">อำเภอที่ทีมไปดูรถ</h2>'); sa = body.rfind('<section', 0, i); se = body.index('</section>', i) + len('</section>')
+        body = body[:sa] + local_block(slug) + body[se:]
+    else:
+        body = _areas(body, d, slug, rep)
+    return _rest(body, d, slug, rep)
+
+
+def _areas(body, d, slug, _r=None):
+    def rep(a, b, n=1):
+        nonlocal body
+        assert body.count(a) == n, (slug, a[:60], body.count(a))
+        body = body.replace(a, b)
     # อำเภอ/เขตที่ไปบ่อย (แทนรายการ "ครบทั้ง 25 อำเภอ" เดิม ที่รวมอำเภอห่างไกล)
     often = 'บ่อย' in d['area_note']
     head = 'เขตที่ทีมไปดูรถบ่อย' if d['unit'] == 'เขต' else ('อำเภอที่ทีมไปดูรถบ่อย' if often else 'อำเภอที่ทีมไปดูรถ')
@@ -188,6 +214,14 @@ def transform(body, slug):
     body = body[:a] + body[a:body.index('>', a) + 1] + ''.join(li + pre + x + '</li>' for x in d['areas']) + body[b:]
     e = body.index('</section>', a) + len('</section>')
     body = body[:e] + local_block(slug) + body[e:]
+    return body
+
+
+def _rest(body, d, slug, _r=None):
+    def rep(a, b, n=1):
+        nonlocal body
+        assert body.count(a) == n, (slug, a[:60], body.count(a))
+        body = body.replace(a, b)
     # คำถาม
     rep('">คำถามจากคนเชียงใหม่</h2>', f'">คำถามจากคน{d["short"]}</h2>')
     rep('ทีมไปถึงอำเภอไกลๆ อย่างอมก๋อยหรือเวียงแหงไหม', d['q'][0])
@@ -198,7 +232,9 @@ def transform(body, slug):
     rep('">จังหวัดใกล้เคียง</h2>', '">พื้นที่ให้บริการอื่น</h2>')
     i = body.index('พื้นที่ให้บริการอื่น'); a = body.index('<div style="display: flex; flex-wrap: wrap; gap: 8px;">', i); b = body.index('</div>', a)
     chip = re.search(r'<a href="Province\.dc\.html" (style="[^"]*")>', body[a:b]).group(1)
-    others = d['near'] + [x['slug'] for x in P if x['slug'] not in d['near'] and x['slug'] != slug]
+    same = [x['slug'] for x in P if x['region'] == d['region'] and x['slug'] != slug and x['slug'] not in d['near']]
+    hubs = [x['slug'] for x in HUBS if x['slug'] != slug and x['slug'] not in d['near'] and x['slug'] not in same]
+    others = d['near'] + same + hubs   # จังหวัดใกล้ + ภาคเดียวกัน + หัวเมือง
     body = body[:a] + '<div style="display: flex; flex-wrap: wrap; gap: 8px;">' + ''.join(
         f'<a href="/{s}/" {chip}>{BY[s]["h1"]}</a>' for s in others) + body[b:]
     rep('>รถอยู่เชียงใหม่ อยากรู้ราคา</h2>', f'>รถอยู่{d["short"]} อยากรู้ราคา</h2>')
