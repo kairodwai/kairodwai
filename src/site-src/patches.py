@@ -156,6 +156,7 @@ def common(body):
     body = body.replace(badge_old, 'height: 32px; padding: 0 14px; border-radius: 16px; background: #06C755; color: #0B1A10; font-family: \'Kanit\', sans-serif; font-size: 14px; font-weight: 500;">ยังผ่อนไม่หมดก็ขายได้</span>')
     body = body.replace('ยังผ่อนไม่หมด ก็ขายได้ถูกกฎหมาย', 'ยังผ่อนไม่หมด ก็ขายได้ถูกต้องตามกฎหมาย 100%')
     body = body.replace('>ยังไม่รับ<', '>ไม่ผ่านเกณฑ์<')
+    body = body.replace('เลือกปีหรือไมล์ผิด? กดแก้ไข', 'กรอกข้อมูลผิด? กดแก้ไข')
     # เกณฑ์รับซื้อ: "ไมล์ไม่เกิน 150,000" (ติ๊กเขียว) -> "ไม่รับรถไมล์เกิน 150,000 กม." (กากบาทแดง)
     body = body.replace('<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1E7A3C" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M5 12l5 5L20 7"></path></svg><span>ไมล์ไม่เกิน <strong style="font-weight: 600;">150,000</strong> กม.</span>',
                         '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#A33A16" stroke-width="2.4" stroke-linecap="round" aria-hidden="true" style="flex-shrink: 0;"><path d="M6 6l12 12M18 6L6 18"></path></svg><span>ไม่รับรถ<strong style="font-weight: 600;">ไมล์เกิน 150,000 กม.</strong></span>')
@@ -256,6 +257,18 @@ def apply(name, body, logic):
     # นอกเกณฑ์ (ปีก่อน 2016 / ไมล์เกิน 150,000): คงตัวเลือกไว้ให้คนตอบตามจริง -> หน้า "ไม่ผ่านเกณฑ์" สุภาพ + ยิง event Disqualified ให้แอดเอาไปกันคนกลุ่มนี้ออก
     rep("pickMile: (e) => this.setState({ mile: e.target.value || null, missing: false }),",
         "pickMile: (e) => { const v = e.target.value || null; this.setState({ mile: v, missing: false }); if (v === '150up') trk('Disqualified'); },")
+    # ไม่รับกระบะทุกรุ่น (Moss 6 พ.ย. 69 "กูไม่รับกระบะ"): ในรายการไม่มีกระบะอยู่แล้ว แต่คนเลือก "รุ่นอื่น/ยี่ห้ออื่น" แล้วพิมพ์เอง (เช่น Isuzu "1.9" = D-Max)
+    # -> ถ้าพิมพ์ชื่อกระบะ หรือ Isuzu รุ่นอื่นที่ไม่ใช่ MU-X = หน้า "ไม่ผ่านเกณฑ์" + ยิง Disqualified (แอดตัดคนกลุ่มนี้ออก)
+    rep("const blocked = yearOld || mileHigh;",
+        "const PICK_RE = /กระบะ|pick ?-?up|d ?-?max|ดี ?แม็?ก|ดี ?แม็?ค|ดี ?แม็?ซ|hilux|ไฮลักซ์|revo|รีโว่|vigo|วีโก้|ranger|แรนเจอร์|เรนเจอร์|triton|ไทรทัน|navara|นาวาร่า|bt ?-?50|colorado|โคโลราโด|extender|เอ็กซ์เทนเดอร์|cannon|แคนนอน|strada|สตราด้า|hi ?-?lander|ไฮแลนเดอร์|v ?-?cross|วีครอส|space ?cab|cab\\b|แคป|ตอนเดียว|ตอนครึ่ง/i;\n"
+        "    const isPick = (brand, model, txt) => { txt = String(txt || ''); const free = brand === 'ยี่ห้ออื่น' || model === 'รุ่นอื่น'; return free && (PICK_RE.test(txt) || (brand === 'Isuzu' && !/mu ?-?x|มิว/i.test(txt))); };\n"
+        "    const pickup = isPick(st.brand, st.model, st.other) && !!String(st.other || '').trim();\n"
+        "    const blocked = yearOld || mileHigh || pickup;")
+    rep("rejectReason: yearOld && mileHigh ?", "rejectReason: pickup ? 'ตอนนี้เรายังไม่รับซื้อรถกระบะทุกรุ่น' : yearOld && mileHigh ?")
+    rep("fixBlocked: () => this.setState({ year: yearOld ? '' : st.year, mile: mileHigh ? null : st.mile, missing: false }),",
+        "fixBlocked: () => this.setState({ year: yearOld ? '' : st.year, mile: mileHigh ? null : st.mile, other: pickup ? '' : st.other, model: pickup && st.brand === 'Isuzu' ? null : st.model, missing: false }),")
+    rep("setOther: (e) => this.setState({ other: e.target.value }),",
+        "setOther: (e) => { const v = e.target.value; this.setState({ other: v }); if (v.trim() && isPick(st.brand, st.model, v) && !this._dqPick) { this._dqPick = true; try { window.KR.track('Disqualified', { reason: 'pickup' }); } catch (x) {} } },")
     rep("this.setState({ year: v, brand, model, trim, missing: false });", "this.setState({ year: v, brand, model, trim, missing: false }); if (v === 'old') trk('Disqualified');")
     # รุ่นย่อยชื่อยาว (เช่น "A4 Avant 45 TFSI quattro S Line Black Edition"): ตัดชื่อรุ่นที่ซ้ำข้างหน้าออกตอนแสดง
     rep("trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']),", "trims: trimList.concat(['ไม่แน่ใจรุ่นย่อย']).map((t) => ({ v: t, l: st.model && t.indexOf(st.model + ' ') === 0 ? t.slice(st.model.length + 1) : t })),")
