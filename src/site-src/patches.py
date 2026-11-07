@@ -181,6 +181,7 @@ def common(body, full=None):
                         '<a href="/finance/" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">ดูขั้นตอนขายรถติดไฟแนนซ์')
     # ไม่พร้อมขาย ไม่ให้แอด: เอาไอดีไลน์ท้ายเว็บออก
     body = re.sub(r'<span>LINE @kairodwai</span>\s*', '', body)
+    body = body.replace('<a href="Privacy.dc.html" style="color: #D6D3CC;">นโยบายความเป็นส่วนตัว</a>', '<a href="/about/" style="color: #D6D3CC;">เกี่ยวกับเรา</a>\n<a href="Privacy.dc.html" style="color: #D6D3CC;">นโยบายความเป็นส่วนตัว</a>', 1)
     # ของปลอม/placeholder ห้ามขึ้นเว็บจริง: รีวิวลูกค้ายังไม่มีของจริง → ตัดทั้งเซกชัน
     # "รถที่รับซื้อล่าสุด" (หน้ายี่ห้อ/จังหวัด): มีรถจริงของยี่ห้อ/จังหวัดนั้น → ใส่การ์ดรูปจริง (portfolio.py) · ไม่มี → ตัดทั้งเซกชันเหมือนเดิม
     import portfolio

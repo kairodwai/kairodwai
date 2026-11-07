@@ -288,7 +288,7 @@ def json_ld(name, pre_html):
     if qa:
         g.append({'@type': 'FAQPage', '@id': url + '#faq', 'mainEntity': [
             {'@type': 'Question', 'name': clean(q), 'acceptedAnswer': {'@type': 'Answer', 'text': clean(a)}} for q, a in qa]})
-    if base == 'Docs' and '@' in name:   # บทความ: Article schema (ผู้เขียน วันที่ ผู้เผยแพร่) — ตรงกับบรรทัด "เขียนโดย…" บนหน้า
+    if base == 'Docs' and '@' in name and guides.BY[name.split('@')[1]].get('article', True):   # บทความ: Article schema (ผู้เขียน วันที่ ผู้เผยแพร่) — ตรงกับบรรทัด "เขียนโดย…" บนหน้า
         gd = guides.BY[name.split('@')[1]]
         g.append({'@type': 'Article', '@id': url + '#article', 'headline': title.split(' | ')[0], 'description': desc, 'inLanguage': 'th',
                   'datePublished': gd['pub'], 'dateModified': gd['mod'], 'author': {'@id': DOMAIN + '/#org'}, 'publisher': {'@id': DOMAIN + '/#org'},
