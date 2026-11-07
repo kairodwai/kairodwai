@@ -291,7 +291,7 @@ def apply(name, body, logic, full=None):
         recent = ('<section aria-labelledby="recent-h" style="max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px;">'
                   '<div style="display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center;">'
                   '<h2 id="recent-h" style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(28px, 3.5vw, 36px);">รถที่รับซื้อล่าสุด</h2>'
-                  '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">รูปจริงตอนทีมไปรับรถถึงบ้าน เบลอป้ายทะเบียนและหน้าลูกค้า</p></div>'
+                  '</div>'
                   + portfolio.grid(portfolio.CARS[:6], 'h3')
                   + '<a href="/portfolio/" style="align-self: center; display: inline-flex; align-items: center; height: 48px; padding: 0 24px; border: 1px solid #141414; border-radius: 24px; text-decoration: none; color: #141414; font-weight: 500; font-size: 16px;">ดูผลงานรับซื้อทั้ง ' + str(len(portfolio.CARS)) + ' คัน</a></section>\n')
         faq = '<section aria-labelledby="faq-h"'
