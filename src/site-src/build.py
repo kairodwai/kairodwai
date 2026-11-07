@@ -15,8 +15,8 @@ PAGES = {
                   'ขายรถไว รับซื้อรถยนต์มือสองถึงหน้าบ้านคุณ กรอกข้อมูลรถ ส่งรูป ได้ราคาไว จ่ายเงินทันทีใน 1 ชั่วโมง รถติดไฟแนนซ์ก็ขายได้'),
     'Brand':     ('/toyota/',     'รับซื้อรถ Toyota มือสอง ให้ราคาสูง | ขายรถไว',
                   'รับซื้อรถ Toyota มือสองทุกรุ่น Yaris, Vios, Altis, Camry, Fortuner ถึงหน้าบ้าน ประเมินราคาไว จ่ายเงินทันที'),
-    'Portfolio': ('/portfolio/',  'ผลงานรับซื้อรถ | ขายรถไว',
-                  'ตัวอย่างรถที่ขายรถไวรับซื้อมาแล้ว'),
+    'Portfolio': ('/portfolio/',  'ผลงานรับซื้อรถ รูปจริง 30 คัน จากทีมไปรับถึงบ้าน | ขายรถไว',
+                  'รถที่ขายรถไวไปรับซื้อถึงบ้านจริง 30 คันใน 12 จังหวัด ทั้ง Benz BMW Honda Toyota Mazda ถ่ายตอนส่งมอบ เบลอป้ายทะเบียนและหน้าลูกค้า ไม่ใช้รูปสต็อก'),
     'Price':     ('/check-price/', 'ประเมินราคารถมือสองฟรี รู้ราคาจริงใน 5 นาที | ขายรถไว',
                   'ประเมินราคารถมือสองฟรี กรอกรุ่น ปี ไมล์ ส่งรูป 5 มุม ทีมรับซื้อแจ้งราคาจริงจากสภาพรถคุณภายใน 5 นาที พร้อมวิธีเช็คราคาเองให้แม่น'),
     'Finance':   ('/finance/',    'ขายรถติดไฟแนนซ์ ขายดาวน์ ปิดยอดก่อนกำหนด ทำยังไง | ขายรถไว',
@@ -37,7 +37,7 @@ ATTR_RE = re.compile(r'''\s([^\s=/>"']+)(?:\s*=\s*("[^"]*"|'[^']*'|[^\s>]+))?'''
 WHOLE = re.compile(r'^\s*\{\{\s*([^}]*?)\s*\}\}\s*$')
 
 
-HIDDEN = {'Portfolio'}   # หน้าที่ยังไม่มีข้อมูลจริง: noindex + ไม่อยู่ใน sitemap + ไม่มีลิงก์เข้า (patches.common)
+HIDDEN = set()   # หน้าที่ยังไม่มีข้อมูลจริง: noindex + ไม่อยู่ใน sitemap (Portfolio เปิดแล้ว 7 พ.ย. 69 — รูปจริง 30 คัน)
 ROBOTS_NOINDEX = '\n<meta name="robots" content="noindex">'
 PLACEHOLDER = re.compile(r'\[[^\]{}"<>0-9,\'\[]*[\u0e00-\u0e7f][^\]{}"<>]{0,60}\]')   # ข้อความในวงเล็บเหลี่ยมภาษาไทย = placeholder ที่ยังไม่ได้ใส่ข้อมูลจริง
 
@@ -249,7 +249,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 '''
 
 
-CRUMB = {'Price': 'ประเมินราคารถมือสอง', 'Brand': 'รับซื้อรถ Toyota', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ · โอนรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
+CRUMB = {'Portfolio': 'ผลงานรับซื้อ', 'Price': 'ประเมินราคารถมือสอง', 'Brand': 'รับซื้อรถ Toyota', 'Finance': 'ขายรถติดไฟแนนซ์', 'Docs': 'เอกสารขายรถ · โอนรถ', 'Privacy': 'นโยบายความเป็นส่วนตัว'}
 
 
 def json_ld(name, pre_html):
@@ -316,7 +316,7 @@ def main():
             body = provinces.transform(body, PAGES[name][0].strip('/'))
         if base == 'Brand':
             body = brands.transform(body, PAGES[name][0].strip('/'))
-        body, logic = patches.apply(base, body, logic)
+        body, logic = patches.apply(base, body, logic, name)
         c = Compiler(); c.feed(body); c.close()
         strip_ws(c.root)
         d = os.path.join(OUT, PAGES[name][0].strip('/'))

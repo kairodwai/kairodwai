@@ -144,7 +144,12 @@ LOGIC_VALS = '''    const DOT = 'width: 34px; height: 34px; border-radius: 50%; 
       brands:'''
 
 
-def common(body):
+def _rep1(body, old, new, tag):
+    assert body.count(old) == 1, (tag, old[:60], body.count(old))
+    return body.replace(old, new)
+
+
+def common(body, full=None):
     # ท้ายเว็บทุกหน้า: ลิงก์หน้าจังหวัด + หน้ายี่ห้อ (บอทตามได้ทุกหน้า ไม่มีหน้ากำพร้า) — Moss 6 พ.ย. 69
     if '</footer>' in body and 'kr-foot-links' not in body:
         import provinces, brands
@@ -176,22 +181,58 @@ def common(body):
                         '<a href="/finance/" style="align-self: flex-start; display: inline-flex; align-items: center; height: 52px; padding: 0 24px; border-radius: 26px; background: #F5F4F0; color: #141414; text-decoration: none; font-weight: 600; font-size: 16px;">ดูขั้นตอนขายรถติดไฟแนนซ์')
     # ไม่พร้อมขาย ไม่ให้แอด: เอาไอดีไลน์ท้ายเว็บออก
     body = re.sub(r'<span>LINE @kairodwai</span>\s*', '', body)
-    # ของปลอม/placeholder ห้ามขึ้นเว็บจริง: ซ่อนจนกว่าจะมีข้อมูลจริง (รีวิวลูกค้า, รถที่รับซื้อล่าสุด, หน้าผลงาน)
-    body = re.sub(r'<a href="Portfolio\.dc\.html"[^>]*>(?:ผลงานรับซื้อ|ดูผลงานรับซื้อทั้งหมด)[^<]*</a>\s*', '', body)
+    # ของปลอม/placeholder ห้ามขึ้นเว็บจริง: รีวิวลูกค้ายังไม่มีของจริง → ตัดทั้งเซกชัน
+    # "รถที่รับซื้อล่าสุด" (หน้ายี่ห้อ/จังหวัด): มีรถจริงของยี่ห้อ/จังหวัดนั้น → ใส่การ์ดรูปจริง (portfolio.py) · ไม่มี → ตัดทั้งเซกชันเหมือนเดิม
+    import portfolio
+    cars = []
+    if full:
+        base, _, slug = full.partition('@')
+        if base == 'Brand': cars = portfolio.by_brand(slug or 'toyota')
+        if base == 'Province': cars = portfolio.by_prov(slug or 'chiang-mai')
     for marker in ('รีวิวจริงจาก Google ทุกอัน', '[เดือน ปี]'):
         i = body.find(marker)
         if i < 0: continue
         a = body.rfind('<section', 0, i); b = body.find('</section>', i)
         assert a >= 0 and b > i and '<section' not in body[a + 8:i], ('placeholder section', marker)
+        if marker == '[เดือน ปี]' and cars:
+            g0 = body.find('<div style="display: grid;', a); g1 = body.rfind('</article>', g0, b) + len('</article></div>')
+            assert a < g0 < g1 < b and body[g1 - 6:g1] == '</div>', ('recent grid', full)
+            is_prov = full.startswith('Province')
+            body = body[:g0] + portfolio.grid(cars, 'h3', portfolio.prov_meta if is_prov else portfolio.brand_meta) + body[g1:]
+            P = '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #55534E; ">{}</p>'
+            if is_prov:   # ดีไซน์มี <p> ใต้หัวข้ออยู่แล้ว → แทนข้อความ · หัวข้อยังเป็น "เชียงใหม่" จากต้นแบบ (provinces.transform ไม่แตะเซกชันนี้) → ใส่ชื่อจังหวัดจริง
+                import provinces
+                short = provinces.BY[slug or 'chiang-mai']['short']
+                h2 = 'รถที่รับซื้อในเชียงใหม่ล่าสุด'
+                h2e = body.find('</h2>', a) + len('</h2>')
+                assert body.count(h2, a, h2e) == 1, ('recent h2', full)
+                body = body[:a] + body[a:h2e].replace(h2, f'รถที่รับซื้อใน{short}ล่าสุด') + body[h2e:]
+                h2e = body.find('</h2>', a) + len('</h2>')
+                p0 = body.find('<p ', h2e); p1 = body.find('</p>', p0) + len('</p>')
+                assert h2e <= p0 < p1 < body.find('<div style="display: grid;', a), ('recent intro', full)
+                body = body[:p0] + P.format(portfolio.intro(cars, 'ใน' + short)) + body[p1:]
+            else:
+                h2e = body.find('</h2>', a) + len('</h2>')
+                body = body[:h2e] + P.format(portfolio.intro(cars, '')) + body[h2e:]
+            continue
         body = body[:a] + body[b + len('</section>'):]
     return body
 
 
-def apply(name, body, logic):
-    body = common(body)
-    if name == 'Portfolio':   # ข้อมูลตัวอย่างล้วน (ยี่ห้อ/จังหวัดสมมติ) — ว่างไว้จนกว่าจะมีรถที่ซื้อจริงจากหลังบ้าน; หน้านี้ noindex + ไม่อยู่ใน sitemap (build.py HIDDEN)
-        logic, n = re.subn(r'var ITEMS = \[.*?\];', 'var ITEMS = [];', logic, count=1, flags=re.S)
-        assert n == 1, 'portfolio items'
+def apply(name, body, logic, full=None):
+    body = common(body, full)
+    if name == 'Portfolio':   # หน้าผลงาน: รูปจริง 30 คันจากทีม (7 พ.ย. 69) แบบ static แทนตัวกรองตัวอย่าง
+        import portfolio
+        head, cards = portfolio.portfolio_sections()
+        rep = lambda old, new: _rep1(body, old, new, 'portfolio')
+        body = rep('รถที่ทีมไปรับซื้อจริง อัปเดตทุกสัปดาห์ เบลอป้ายทะเบียนทุกคัน', 'รถที่ทีมไปรับซื้อถึงบ้านจริง ถ่ายตอนส่งมอบ')
+        a = body.index('<div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px;">'); b = body.index('<span style="font-size: 14px; color: #55534E;">{{ countText }}</span>')
+        body = body[:a] + head + body[b + len('<span style="font-size: 14px; color: #55534E;">{{ countText }}</span>'):]
+        a = body.index('<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr)); gap: 16px;">\n<sc-for list="{{ items }}"')
+        b = body.index('ดูเพิ่ม</button>') + len('ดูเพิ่ม</button>')
+        body = body[:a] + cards + body[b:]
+        logic, n = re.subn(r'var ITEMS = \[.*?\];.*?class Component extends DCLogic \{.*?\n\}', 'class Component extends DCLogic { renderVals() { return {}; } }', logic, count=1, flags=re.S)
+        assert n == 1, 'portfolio logic'
     if name == 'Main':   # ลิงก์ภายในไปหน้าจังหวัด (SEO ขั้น 2): ให้ Google เจอทุกหน้าจังหวัดจากหน้าแรก
         import provinces
         chip = 'height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 1px solid #DEDBD3; display: inline-flex; align-items: center; font-size: 15px; white-space: nowrap; text-decoration: none; color: #141414;'
@@ -206,9 +247,16 @@ def apply(name, body, logic):
                            for rg, rn in (('c', 'ภาคกลางและตะวันออก'), ('n', 'ภาคเหนือ'), ('ne', 'ภาคอีสาน'), ('s', 'ภาคใต้'))
                            if any(not d['hub'] and d['region'] == rg for d in provinces.P))
                  + '</div></section>\n')
+        import portfolio
+        recent = ('<section aria-labelledby="recent-h" style="max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px;">'
+                  '<div style="display: flex; flex-direction: column; gap: 8px; align-items: center; text-align: center;">'
+                  '<h2 id="recent-h" style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(28px, 3.5vw, 36px);">รถที่รับซื้อล่าสุด</h2>'
+                  '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">รูปจริงตอนทีมไปรับรถถึงบ้าน เบลอป้ายทะเบียนและหน้าลูกค้า</p></div>'
+                  + portfolio.grid(portfolio.CARS[:6], 'h3')
+                  + '<a href="/portfolio/" style="align-self: center; display: inline-flex; align-items: center; height: 48px; padding: 0 24px; border: 1px solid #141414; border-radius: 24px; text-decoration: none; color: #141414; font-weight: 500; font-size: 16px;">ดูผลงานรับซื้อทั้ง ' + str(len(portfolio.CARS)) + ' คัน</a></section>\n')
         faq = '<section aria-labelledby="faq-h"'
         assert body.count(faq) == 1, 'main faq anchor'
-        body = body.replace(faq, areas + faq)
+        body = body.replace(faq, recent + areas + faq)
     if name in ('Main', 'Price'):   # ลิงก์ภายในไปหน้ายี่ห้อ (เดิมไม่มีหน้าไหนลิงก์ไป /toyota/ = Google หาไม่เจอ)
         import brands
         lk = lambda nm, sl: f'<a href="/{sl}/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">{nm}</a>'
