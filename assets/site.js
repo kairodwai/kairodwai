@@ -6,7 +6,7 @@
   if (isRoot && !liffState && /[?&](v=|t=)/.test(location.search)) { location.replace('/line/' + location.search); return; }
   var API = 'https://script.google.com/macros/s/AKfycbxNPhptcN66kGl4Bm6eiwsQSp-TrAnTsCn3GDosZFSn0Q5XYKdPozMqyXEBrHLWrxS_/exec';
   window.addEventListener('beforeinstallprompt', function (e) { e.preventDefault(); });   // ลูกค้าไม่ต้องเห็นป๊อปอัป 'ติดตั้งแอป' — ทีมติดตั้งได้ที่ /app/
-  var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'ttclid'];
+  var KEYS = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term', 'fbclid', 'gclid', 'gbraid', 'wbraid', 'ttclid'];   // gbraid/wbraid = รหัสคลิก Google บน iOS ที่ไม่มี gclid
   // เปิดในไลน์ผ่าน LIFF app "kairodwai-web" (endpoint = https://kairodwai.com/) → รู้ตัวตนไลน์ตั้งแต่จอแรก ไม่ต้อง Add LINE/ส่งรหัสทีหลัง
   var LIFF_WEB_ID = window.KR_LIFF_ID || '';   // ค่าจริงใส่ใน build.py (KR_LIFF_ID) — ว่าง = โหมดเว็บธรรมดา
   var VIA_LIFF = (/[?&]via=liff(&|$)/.test(location.search) || (isRoot && !!liffState)) && !!LIFF_WEB_ID;
@@ -72,7 +72,15 @@
     var timer = setTimeout(function () { if (ctl) ctl.abort(); }, 20000);
     return fetch(API, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(body), signal: ctl ? ctl.signal : undefined })
       .then(function (r) { return r.json(); })
-      .then(function (r) { clearTimeout(timer); if (r && r.ok) { matchUser(st.phone); track('Lead', { content_name: car }, r.t ? 'lead_' + r.t : undefined); } return r; })
+      .then(function (r) {
+        clearTimeout(timer);
+        if (r && r.ok) {
+          matchUser(st.phone); track('Lead', { content_name: car }, r.t ? 'lead_' + r.t : undefined);
+          // Google Ads conversion "ส่งฟอร์มให้เบอร์" — transaction_id = ลีดเดิมไม่นับซ้ำ
+          try { if (window.gtag && window.KR_AW_LEAD) window.gtag('event', 'conversion', { send_to: window.KR_AW_LEAD, value: 500, currency: 'THB', transaction_id: r.ref || r.t || '' }); } catch (e) {}
+        }
+        return r;
+      })
       .catch(function () { clearTimeout(timer); return null; });
   }
 

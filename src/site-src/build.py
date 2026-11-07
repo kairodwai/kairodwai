@@ -44,11 +44,12 @@ PLACEHOLDER = re.compile(r'\[[^\]{}"<>0-9,\'\[]*[\u0e00-\u0e7f][^\]{}"<>]{0,60}\
 # Google Ads (บัญชี ขายรถไว · kairodwai 861-119-9182): โหลด tag ทุกหน้า (/, /go, /line/) — gclid จากแอดถูกเก็บเป็นคุกกี้ในเบราว์เซอร์ไลน์ตอนเปิดหน้าแรก แล้ว /line/ ยิง conversion "ส่งรูปครบ" ตอนรูปครบ
 AW_ID = 'AW-11123976879'
 AW_PHOTOS_DONE = AW_ID + '/I3aICJOklrEdEK_Vqbgp'   # conversion "ส่งรูปครบ (photos complete)" — primary, Submit lead form, 1,666 บาท/ครั้ง, นับครั้งเดียวต่อคลิก
+AW_LEAD = AW_ID + '/_mboCLiA4LMdEK_Vqbgp'   # conversion "ส่งฟอร์มให้เบอร์ (lead)" — primary, 500 บาท, นับครั้งเดียว (7 พ.ย. 69: Google เคยนับแค่ตอนรูปครบ เลยเห็นลีดแค่ 2 จาก 8 → นับตั้งแต่กรอกฟอร์ม)
 META_PIXEL = '4292793881011346'   # Meta Pixel "ขายรถไว เว็บ" (บัญชีธุรกิจ ขายรถไว)
 META_PX = ("<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');"
            f"window.KR_PX='{META_PIXEL}';fbq('init','{META_PIXEL}');fbq('track','PageView');</script>")
 GTAG = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={AW_ID}"></script>'
-        f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}');window.KR_AW='{AW_PHOTOS_DONE}';</script>"
+        f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}');window.KR_AW='{AW_PHOTOS_DONE}';window.KR_AW_LEAD='{AW_LEAD}';</script>"
         + META_PX)
 
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
