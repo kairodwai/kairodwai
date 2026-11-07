@@ -86,3 +86,31 @@
 
   window.KR = { lead: lead, track: track, get viaLiff() { return VIA_LIFF; } };
 })();
+
+
+/* เครื่องคิดเลขในหน้าคู่มือ (/guide/transfer-fee/, /guide/car-tax/) — ฟังจาก document เพราะ dc.js วาดหน้าใหม่ทั้งหน้า */
+(function () {
+  function num(id) { var e = document.getElementById(id); return e ? Number(String(e.value).replace(/[^\d.]/g, '')) || 0 : 0; }
+  function out(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
+  function baht(n) { return Math.round(n).toLocaleString('th-TH') + ' บาท'; }
+  function calc() {
+    if (document.getElementById('kr-tf-value')) {
+      var v = num('kr-tf-value'), plate = document.getElementById('kr-tf-plate');
+      var stamp = Math.ceil(v / 200), extra = plate && plate.checked ? 200 : 0;
+      out('kr-tf-stamp', baht(stamp)); out('kr-tf-plate-out', baht(extra));
+      out('kr-tf-total', v ? baht(5 + 100 + stamp + extra) : '-');
+    }
+    if (document.getElementById('kr-tax-cc')) {
+      var cc = num('kr-tax-cc'), reg = num('kr-tax-year');
+      var base = Math.min(cc, 600) * 0.5 + Math.max(0, Math.min(cc, 1800) - 600) * 1.5 + Math.max(0, cc - 1800) * 4;
+      var now = new Date().getFullYear() + 543;
+      if (reg && reg < 2400) reg += 543;   // กรอกปี ค.ศ. มาก็รับ
+      var n = reg ? now - reg + 1 : 1, cut = n >= 10 ? 50 : n >= 6 ? (n - 5) * 10 : 0;
+      out('kr-tax-base', cc ? baht(base) : '-');
+      out('kr-tax-cut', cut ? 'ลด ' + cut + '% (ปีที่ ' + n + ')' : 'ยังไม่ได้ลด (ปีที่ ' + n + ')');
+      out('kr-tax-total', cc ? baht(base * (100 - cut) / 100) : '-');
+    }
+  }
+  document.addEventListener('input', calc);
+  document.addEventListener('change', calc);
+})();

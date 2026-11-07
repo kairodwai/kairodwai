@@ -19,6 +19,20 @@ CTA = ('<div style="margin-top: 16px; background: #FFFFFF; border: 1px solid #DE
 TH_MONTH = ['', 'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม']
 th_date = lambda iso: f'{int(iso[8:10])} {TH_MONTH[int(iso[5:7])]} {int(iso[:4]) + 543}'
 
+# เครื่องคิดเลข (linkable asset — ของที่คนตอบกระทู้อยากแปะลิงก์ให้, Moss 7 พ.ย. 69 "ทำเลย") — สูตรอยู่ใน site.js (ฟัง input ทั้ง document)
+BOX = '<div style="margin-top: 8px; background: #FFFFFF; border: 1px solid #DEDBD3; border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px;">{}</div>'
+FIELD = ('<label style="display: flex; flex-direction: column; gap: 6px; font-size: 15px; font-weight: 500;">{label}'
+         '<input id="{id}" type="text" inputmode="numeric" autocomplete="off" placeholder="{ph}" style="height: 52px; padding: 0 16px; box-sizing: border-box; border: 1px solid #D6D3CC; border-radius: 12px; font-size: 18px; font-family: inherit; color: #141414; background: #F5F4F0; width: 100%;">'
+         '<span style="font-size: 13px; font-weight: 400; color: #55534E;">{hint}</span></label>')
+ROW = ('<div style="display: flex; justify-content: space-between; gap: 12px; font-size: 16px; color: #3D3B37; padding: 8px 0; border-bottom: 1px solid #ECEAE4;">'
+       '<span>{}</span><span id="{}" style="font-weight: 600; color: #141414; text-align: right;">{}</span></div>')
+TOTAL = ('<div style="display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 4px;">'
+         '<span style="font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 20px;">{}</span>'
+         '<span id="{}" style="font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 26px; color: #0B7A36;">-</span></div>')
+TABLE = lambda head, rows: ('<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 15px; line-height: 1.5;"><thead><tr>'
+                            + ''.join(f'<th style="text-align: left; padding: 10px 12px; border-bottom: 2px solid #141414; font-weight: 600;">{h}</th>' for h in head) + '</tr></thead><tbody>'
+                            + ''.join('<tr>' + ''.join(f'<td style="padding: 10px 12px; border-bottom: 1px solid #DEDBD3; color: #3D3B37;">{c}</td>' for c in r) + '</tr>' for r in rows) + '</tbody></table></div>')
+
 G = [
     dict(slug='lost-registration-book', crumb='เล่มทะเบียนหาย ขายรถได้ไหม', pub='2026-11-07', mod='2026-11-07',
          title='เล่มทะเบียนรถหาย ขายรถได้ไหม ขอใบแทนใช้อะไร กี่บาท | ขายรถไว',
@@ -73,6 +87,55 @@ G = [
              + SRC([('Motorist: เจ้าของรถเสียชีวิต โอนรถยังไง (อัปเดต 2568)', 'https://www.motorist.co.th/article/1911/how-to-transfer-car-in-the-event-its-owner-is-deceased-2025-update'),
                     ('Legardy: ถาม-ตอบทนาย เรื่องขอเป็นผู้จัดการมรดกเพื่อโอนรถ', 'https://legardy.com/free-qna/26780'),
                     ('กรมการขนส่งทางบก', 'https://www.dlt.go.th/')]))),
+    dict(slug='transfer-fee', crumb='คำนวณค่าโอนรถยนต์', pub='2026-11-07', mod='2026-11-07',
+         title='คำนวณค่าโอนรถยนต์ 2569 ค่าอากร ค่าธรรมเนียม รวมเท่าไหร่ | ขายรถไว',
+         desc='เครื่องคิดค่าโอนรถยนต์มือสอง ใส่ราคาประเมินแล้วรู้ยอดทันที ค่าคำขอ 5 บาท ค่าธรรมเนียมโอน 100 บาท ค่าอากรแสตมป์ 0.5% ของราคาประเมิน พร้อมตัวอย่างและเอกสารที่ใช้',
+         h1='<span style="white-space: nowrap;">คำนวณค่าโอนรถยนต์</span> <span style="white-space: nowrap;">มือสอง</span>',
+         lead='ค่าโอนรถยนต์ที่สำนักงานขนส่งมี 3 รายการหลัก คือค่าคำขอ 5 บาท ค่าธรรมเนียมโอน 100 บาท และค่าอากรแสตมป์ 0.5% ของราคาที่เจ้าหน้าที่ประเมิน (1 บาททุก 200 บาท) รถราคาประเมิน 400,000 บาท จ่ายรวมประมาณ 2,105 บาท ใส่ราคาประเมินด้านล่างเพื่อดูยอดของรถคุณ',
+         body=lambda: (
+             BOX.format(
+                 FIELD.format(id='kr-tf-value', label='ราคาประเมินรถ (บาท)', ph='เช่น 400000', hint='ถ้ายังไม่รู้ราคาประเมิน ใส่ราคาที่ตกลงซื้อขายไว้ก่อน ยอดจริงอาจต่างเล็กน้อย')
+                 + '<label style="display: flex; gap: 10px; align-items: center; font-size: 15px;"><input id="kr-tf-plate" type="checkbox" style="width: 22px; height: 22px; accent-color: #141414;"> เปลี่ยนป้ายทะเบียนใหม่ด้วย</label>'
+                 + '<div>' + ROW.format('ค่าคำขอ', 'kr-tf-req', '5 บาท') + ROW.format('ค่าธรรมเนียมโอน', 'kr-tf-fee', '100 บาท')
+                 + ROW.format('ค่าอากรแสตมป์ (0.5%)', 'kr-tf-stamp', '-') + ROW.format('ค่าเปลี่ยนป้าย', 'kr-tf-plate-out', '0 บาท') + '</div>'
+                 + TOTAL.format('รวมจ่ายที่ขนส่ง', 'kr-tf-total'))
+             + H2.format('ตัวอย่างค่าโอนตามราคาประเมิน')
+             + TABLE(['ราคาประเมิน', 'ค่าอากร', 'รวมค่าโอน'], [['200,000 บาท', '1,000 บาท', '1,105 บาท'], ['400,000 บาท', '2,000 บาท', '2,105 บาท'],
+                                                            ['700,000 บาท', '3,500 บาท', '3,605 บาท'], ['1,200,000 บาท', '6,000 บาท', '6,105 บาท']])
+             + P.format('ยอดในตารางยังไม่รวมค่าเปลี่ยนป้าย (200 บาท ถ้าเปลี่ยน) ค่าตรวจสภาพ และค่าใบแทนกรณีเล่มชำรุด ราคาประเมินเป็นของกรมการขนส่งทางบก ไม่ใช่ราคาที่ตกลงซื้อขายกัน')
+             + H2.format('ใครจ่ายค่าโอน')
+             + P.format('กฎหมายไม่ได้บังคับว่าฝ่ายไหนต้องจ่าย ผู้ซื้อกับผู้ขายตกลงกันเอง ถ้าขายรถให้ขายรถไว ทีมจัดการโอนและจ่ายค่าโอนเอง คุณไม่ต้องไปสำนักงานขนส่ง')
+             + H2.format('เอกสารที่ใช้โอน')
+             + P.format('เล่มทะเบียนตัวจริง บัตรประชาชนของผู้โอนและผู้รับโอน แบบคำขอโอนและรับโอนที่เซ็นทั้งสองฝ่าย และหนังสือมอบอำนาจถ้าให้คนอื่นไปแทน ดูรายละเอียดทั้งหมดที่ <a href="/documents/">เอกสารขายรถ · โอนรถ</a> ถ้าเล่มหายอ่าน <a href="/guide/lost-registration-book/">เล่มทะเบียนหาย ขายรถได้ไหม</a>')
+             + CTA.format('จะขายรถ ให้ทีมจัดการโอนให้')
+             + SRC([('เดลินิวส์: แจ้งย้ายรถ ค่าธรรมเนียม ค่าอากรแสตมป์ 0.5% ของราคาประเมิน (1 ก.ย. 2568)', 'https://www.dailynews.co.th/news/5073014/'),
+                    ('เช็คราคา.คอม: ค่าธรรมเนียมการโอนรถ ค่าคำขอ ค่าเปลี่ยนป้าย (ปรับปรุง ก.ค. 2568)', 'https://www.checkraka.com/car/article/129946'),
+                    ('กรมการขนส่งทางบก สายด่วน 1584', 'https://www.dlt.go.th/')]))),
+    dict(slug='car-tax', crumb='คำนวณภาษีรถยนต์ประจำปี', pub='2026-11-07', mod='2026-11-07',
+         title='คำนวณภาษีรถยนต์ประจำปี 2569 ตามซีซี รถเก่าลดกี่เปอร์เซ็นต์ | ขายรถไว',
+         desc='เครื่องคิดภาษีรถยนต์ประจำปี รถเก๋งและ SUV ไม่เกิน 7 ที่นั่ง ใส่ซีซีกับปีที่จดทะเบียน รู้ยอดทันที อัตรา 600 ซีซีแรก 0.50 บาท 601–1,800 ซีซี 1.50 บาท เกิน 1,800 ซีซี 4 บาท รถเกิน 5 ปีลดสูงสุด 50%',
+         h1='<span style="white-space: nowrap;">คำนวณภาษีรถยนต์</span> <span style="white-space: nowrap;">ประจำปี</span>',
+         lead='ภาษีรถเก๋ง SUV และรถตู้ส่วนบุคคลไม่เกิน 7 ที่นั่ง คิดตามซีซีเครื่องยนต์ 3 ขั้น คือ 600 ซีซีแรก ซีซีละ 0.50 บาท ซีซีที่ 601–1,800 ซีซีละ 1.50 บาท และส่วนที่เกิน 1,800 ซีซี ซีซีละ 4 บาท รถ 1,500 ซีซีเสียปีละ 1,650 บาท รถที่จดทะเบียนครบ 5 ปีขึ้นไปได้ลดตั้งแต่ 10% ถึง 50%',
+         body=lambda: (
+             BOX.format(
+                 FIELD.format(id='kr-tax-cc', label='ขนาดเครื่องยนต์ (ซีซี)', ph='เช่น 1500', hint='ดูได้ในเล่มทะเบียน ช่อง "ซี.ซี." · รถไฮบริดคิดตามซีซีเหมือนรถน้ำมัน')
+                 + FIELD.format(id='kr-tax-year', label='ปีที่จดทะเบียนครั้งแรก (พ.ศ.)', ph='เช่น 2562', hint='ดูในเล่มทะเบียน ช่องวันจดทะเบียน · นับปีที่จดเป็นปีที่ 1')
+                 + '<div>' + ROW.format('ภาษีเต็ม', 'kr-tax-base', '-') + ROW.format('ส่วนลดรถเก่า', 'kr-tax-cut', '-') + '</div>'
+                 + TOTAL.format('ภาษีที่ต้องจ่ายปีนี้', 'kr-tax-total'))
+             + H2.format('อัตราภาษีตามซีซี')
+             + TABLE(['ช่วงซีซี', 'อัตรา', 'ตัวอย่าง'], [['600 ซีซีแรก', '0.50 บาท/ซีซี', '1,000 ซีซี เสีย 900 บาท'], ['ซีซีที่ 601–1,800', '1.50 บาท/ซีซี', '1,500 ซีซี เสีย 1,650 บาท'],
+                                                       ['ส่วนที่เกิน 1,800 ซีซี', '4.00 บาท/ซีซี', '2,000 ซีซี เสีย 2,900 บาท']])
+             + H2.format('รถเก่าลดภาษีกี่เปอร์เซ็นต์')
+             + TABLE(['ปีที่ใช้รถ', 'ส่วนลด'], [['ปีที่ 1–5', 'ไม่ลด'], ['ปีที่ 6', '10%'], ['ปีที่ 7', '20%'], ['ปีที่ 8', '30%'], ['ปีที่ 9', '40%'], ['ปีที่ 10 ขึ้นไป', '50%']])
+             + P.format('รถชื่อบริษัทที่ไม่ได้เช่าซื้อเสียภาษีสองเท่า ต่อภาษีล่วงหน้าได้ไม่เกิน 90 วันก่อนครบกำหนด ถ้าเลยกำหนดเสียค่าปรับเดือนละ 1% ของค่าภาษี และถ้าค้างเกิน 3 ปี ทะเบียนถูกระงับ ยอดที่แน่นอนของรถคุณเช็คได้ในแอป DLT Vehicle Tax ของกรมการขนส่งทางบก')
+             + H2.format('รถไฟฟ้า (EV) คิดยังไง')
+             + P.format('รถไฟฟ้าส่วนบุคคลไม่ได้คิดตามซีซี แต่คิดตามน้ำหนักรถ และมักมีมาตรการลดภาษีที่ประกาศเป็นปีๆ เครื่องคิดเลขนี้เลยไม่ได้คำนวณรถไฟฟ้าให้ เช็คอัตราของปีนี้ในแอป DLT Vehicle Tax หรือสายด่วน 1584')
+             + H2.format('ภาษีขาด ขายรถได้ไหม')
+             + P.format('ขายได้ ภาษีที่ค้างเป็นค่าใช้จ่ายของรถคันนั้น บอกทีมตอนส่งข้อมูลว่าภาษีขาด ทีมหักค่าภาษีและค่าปรับออกจากราคาให้เห็นชัดก่อนตกลง อ่านเพิ่มที่ <a href="/documents/">เอกสารขายรถ · โอนรถ</a>')
+             + CTA.format('อยากรู้ว่ารถคุณขายได้เท่าไหร่')
+             + SRC([('KTC: ต่อภาษีรถยนต์ อัตราตามซีซี ส่วนลดรถเก่า ค่าปรับ', 'https://www.ktc.co.th/article/knowledge/check-renew-vehicle-tax-atpb'),
+                    ('Autospinn: วิธีคำนวณภาษีรถยนต์', 'https://www.autospinn.com/2021/03/car-tax-2021-82148'),
+                    ('กรมการขนส่งทางบก สายด่วน 1584', 'https://www.dlt.go.th/')]))),
     # หน้าเกี่ยวกับเรา (E-E-A-T): ใช้เฉพาะข้อเท็จจริงที่เว็บ/แอดใช้อยู่แล้ว + รูปส่งมอบจริง — ไม่ใส่ปีที่เปิด จำนวนทีม จนกว่า Moss ยืนยัน · ชื่อผู้ควบคุมข้อมูลอยู่หน้า privacy เท่านั้น
     dict(slug='about', path='/about/', article=False, crumb='เกี่ยวกับเรา', pub='2026-11-07', mod='2026-11-07',
          title='เกี่ยวกับขายรถไว ใครรับซื้อรถของคุณ ประเมินยังไง | ขายรถไว',
