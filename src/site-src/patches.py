@@ -245,7 +245,7 @@ def apply(name, body, logic, full=None):
         body = first_p(body, full, lambda t: _rep1(t, 'กรอกรุ่น ปี และเลขไมล์', 'ขายรถไวประเมินราคารถมือสองให้ฟรีใน 5 นาที: กรอกรุ่น ปี และเลขไมล์', 'price p1'))
     if name == 'Finance':
         body = first_p(body, full, lambda t: _rep1(t, 'รถยังผ่อนอยู่ก็ขายได้ ทีมพาไปปิดยอด', 'รถยังผ่อนอยู่ก็ขายให้ขายรถไวได้ ทีมพาไปปิดยอด', 'finance p1'))
-    if name == 'Docs':
+    if name == 'Docs' and full in (None, 'Docs'):
         body = first_p(body, full, lambda t: _rep1(t, 'เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้', 'ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้', 'docs p1'))
     if name == 'Portfolio':   # หน้าผลงาน: รูปจริง 30 คันจากทีม (7 พ.ย. 69) แบบ static แทนตัวกรองตัวอย่าง
         import portfolio
@@ -303,7 +303,7 @@ def apply(name, body, logic, full=None):
             b_old = f', {d["key"]}, '
             assert body.count(b_old) == 1, ('brand list', d['key'])
             body = body.replace(b_old, ', ' + lk(d['key'], d['slug']) + ', ')
-    if name == 'Docs':   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "โอนรถ" ~3,600/เดือน -> ขยายเป็นคู่มือโอนรถมือสอง อ้างอิงกรมการขนส่งทางบก
+    if name == 'Docs' and full in (None, 'Docs'):   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "โอนรถ" ~3,600/เดือน -> ขยายเป็นคู่มือโอนรถมือสอง อ้างอิงกรมการขนส่งทางบก
         H2 = '<h2 style="margin: 24px 0 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(24px, 3.5vw, 30px); line-height: 1.3;">{}</h2>'
         P = '<p style="margin: 0; font-size: 17px; line-height: 1.7; color: #3D3B37;">{}</p>'
         CARD = '<li style="background: #FFFFFF; border: 1px solid #DEDBD3; border-radius: 16px; padding: 16px 20px; display: flex; flex-direction: column; gap: 4px;"><strong style="font-weight: 600; font-size: 17px;">{}</strong><span style="font-size: 15px; line-height: 1.6; color: #3D3B37;">{}</span></li>'
@@ -344,7 +344,8 @@ def apply(name, body, logic, full=None):
             + '<p style="margin: 0; font-size: 14px; line-height: 1.6; color: #55534E;">ข้อมูลอ้างอิง: กรมการขนส่งทางบก, สำนักงานตำรวจแห่งชาติ · ปรับปรุงล่าสุด พฤศจิกายน 2569</p>')
         end_ul = '</ul>\n</div></section>'
         assert body.count(end_ul) == 1, 'docs list end'
-        body = body.replace(end_ul, '</ul>\n' + guide + '\n</div></section>')
+        import guides
+        body = body.replace(end_ul, '</ul>\n' + guide + guides.links_block() + '\n</div></section>')
         for a, b in (('aria-current="page" style="color: #141414;">เอกสารที่ต้องใช้ขายรถ</span>', 'aria-current="page" style="color: #141414;">เอกสารขายรถ · โอนรถ</span>'),
                      ('line-height: 1.2;">เอกสารที่ต้องใช้ขายรถ</h1>', 'line-height: 1.2;"><span style="white-space: nowrap;">เอกสารขายรถ</span><br><span style="white-space: nowrap;">และโอนรถมือสอง</span></h1>'),
                      ('>ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง</p>', '>ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง ด้านล่างคือขั้นตอน เอกสาร และค่าธรรมเนียมโอนรถมือสองที่ขนส่ง</p>')):

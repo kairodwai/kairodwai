@@ -27,9 +27,10 @@ PAGES = {
                   'นโยบายความเป็นส่วนตัวของขายรถไว เราเก็บข้อมูลอะไร ใช้ทำอะไร เก็บนานแค่ไหน และคุณขอดูหรือขอลบข้อมูลของตัวเองได้อย่างไร'),
 }
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-import provinces, brands
+import provinces, brands, guides
 PAGES.update(brands.pages())      # หน้ายี่ห้อ (Brand = Toyota, Brand@<slug> = ยี่ห้ออื่น)
-PAGES.update(provinces.pages())   # หน้าจังหวัด (Province = เชียงใหม่, Province@<slug> = จังหวัดอื่น)
+PAGES.update(provinces.pages())
+PAGES.update(guides.pages())     # บทความคู่มือ /guide/<slug>/ (สร้างจาก Docs)   # หน้าจังหวัด (Province = เชียงใหม่, Province@<slug> = จังหวัดอื่น)
 LINKS = {'Mobile.dc.html': '/', 'Main.dc.html': '/'}
 LINKS.update({k + '.dc.html': v[0] for k, v in PAGES.items() if '@' not in k})
 VOID = {'area', 'base', 'br', 'col', 'embed', 'hr', 'img', 'input', 'link', 'meta', 'source', 'track', 'wbr'}
@@ -287,7 +288,14 @@ def json_ld(name, pre_html):
     if qa:
         g.append({'@type': 'FAQPage', '@id': url + '#faq', 'mainEntity': [
             {'@type': 'Question', 'name': clean(q), 'acceptedAnswer': {'@type': 'Answer', 'text': clean(a)}} for q, a in qa]})
-    if base == 'Brand' and name != 'Brand':
+    if base == 'Docs' and '@' in name:   # บทความ: Article schema (ผู้เขียน วันที่ ผู้เผยแพร่) — ตรงกับบรรทัด "เขียนโดย…" บนหน้า
+        gd = guides.BY[name.split('@')[1]]
+        g.append({'@type': 'Article', '@id': url + '#article', 'headline': title.split(' | ')[0], 'description': desc, 'inLanguage': 'th',
+                  'datePublished': gd['pub'], 'dateModified': gd['mod'], 'author': {'@id': DOMAIN + '/#org'}, 'publisher': {'@id': DOMAIN + '/#org'},
+                  'mainEntityOfPage': url})
+    if base == 'Docs' and '@' in name:
+        crumb = guides.BY[name.split('@')[1]]['crumb']
+    elif base == 'Brand' and name != 'Brand':
         crumb = 'รับซื้อรถ ' + brands.BY[path.strip('/')]['name']
     else:
         crumb = CRUMB.get(name) or (('รับซื้อรถมือสอง ' + provinces.BY[path.strip('/')]['h1']) if base == 'Province' else None)
@@ -306,7 +314,7 @@ def og_img(name):   # รูปแชร์แยกต่อหน้า (src/t
 
 def lastmod(name):   # วันที่แก้หน้าจริงล่าสุด (git) — Google ใช้ lastmod เมื่อมันตรงกับความจริงเท่านั้น
     import subprocess
-    files = [os.path.join(DESIGN, 'project', name.split('@')[0] + '.dc.html'), os.path.join(HERE, 'patches.py'), os.path.join(HERE, 'provinces.py'), os.path.join(HERE, 'brands.py')]
+    files = [os.path.join(DESIGN, 'project', name.split('@')[0] + '.dc.html'), os.path.join(HERE, 'patches.py'), os.path.join(HERE, 'provinces.py'), os.path.join(HERE, 'brands.py'), os.path.join(HERE, 'guides.py')]
     try:
         out = subprocess.run(['git', 'log', '-1', '--format=%cs', '--'] + files, cwd=ROOT, capture_output=True, text=True).stdout.strip()
         return out or None
@@ -329,6 +337,8 @@ def main():
             body = provinces.transform(body, PAGES[name][0].strip('/'))
         if base == 'Brand':
             body = brands.transform(body, PAGES[name][0].strip('/'))
+        if base == 'Docs' and '@' in name:
+            body = guides.transform(body, name.split('@')[1])
         body, logic = patches.apply(base, body, logic, name)
         c = Compiler(); c.feed(body); c.close()
         strip_ws(c.root)
