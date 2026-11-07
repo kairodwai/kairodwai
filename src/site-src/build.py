@@ -207,10 +207,24 @@ SHEET_CSS = ('.kr-ov{position:fixed;inset:0;background:rgba(20,20,20,.55);z-inde
     '.via-liff .kr-line{display:none!important}')   # เปิดในไลน์ (LIFF): เป็นเพื่อนกันแล้ว ไม่ต้องมีปุ่มแอดไลน์
 
 
+# ฟอนต์โฮสต์เอง (7 พ.ย. 69): ไฟล์ woff2 จาก @fontsource (= ไฟล์เดียวกับ Google Fonts แยก subset ไทย/ละติน) อยู่ที่ /assets/fonts/ —
+# ไม่ต้องรอ CSS จาก fonts.googleapis.com ก่อนค่อยโหลดฟอนต์ (ประหยัด 1 รอบ DNS+TLS บนมือถือ) + preload ตัวที่ใช้บนจอแรก (Kanit 600 หัวข้อ, Noto Sans Thai 400 เนื้อหา)
+TH_RANGE = 'U+02D7,U+0303,U+0331,U+0E01-0E5B,U+200C-200D,U+25CC'
+LA_RANGE = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
+def _ff(fam, file, w, rng):
+    return f"@font-face{{font-family:'{fam}';font-style:normal;font-display:swap;font-weight:{w};src:url(/assets/fonts/{file}-{w}-normal.woff2) format('woff2');unicode-range:{rng}}}"
+FONT_CSS = ''.join(_ff('Kanit', 'kanit-' + s, w, r) for w in (500, 600) for s, r in (('thai', TH_RANGE), ('latin', LA_RANGE))) + \
+           ''.join(_ff('Noto Sans Thai', 'noto-sans-thai-' + s, w, r) for w in (400, 500, 600) for s, r in (('thai', TH_RANGE), ('latin', LA_RANGE)))
+FONT_PRELOAD = ''.join(f'<link rel="preload" as="font" type="font/woff2" crossorigin href="/assets/fonts/{f}.woff2">'
+                       for f in ('noto-sans-thai-thai-400-normal', 'kanit-thai-600-normal'))
+
+
 def page_html(name, helmet, tree, logic, prerender='', ld=''):
     path, title, desc = PAGES[name]
     url = DOMAIN + path
     helmet = re.sub(r'<link rel="preconnect" href="https://fonts.googleapis.com">\s*', '', helmet)
+    helmet, nf = re.subn(r'<link rel="stylesheet" href="https://fonts.googleapis.com/css2[^>]*>\s*', '', helmet)
+    assert nf == 1, (name, 'google fonts link')
     return f'''<!doctype html>
 <html lang="th">
 <head>
@@ -230,10 +244,9 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+{FONT_PRELOAD}
 {helmet.strip()}
-<style>{SHEET_CSS}</style>
+<style>{FONT_CSS}{SHEET_CSS}</style>
 {ld}{GTAG}
 <script>window.KR_LIFF_ID='{LIFF_WEB_ID}';</script>
 <script src="/assets/preact.min.js" defer></script>
@@ -334,7 +347,9 @@ def main():
     shutil.copy(os.path.join(SRC, 'vendor/preact.min.umd.js'), os.path.join(OUT, 'assets/preact.min.js'))
     shutil.copy(os.path.join(HERE, 'dc.js'), os.path.join(OUT, 'assets/dc.js'))
     shutil.copy(os.path.join(HERE, 'site.js'), os.path.join(OUT, 'assets/site.js'))
-    shutil.copy(os.path.join(SRC, 'vendor/qrcode.min.js'), os.path.join(OUT, 'assets/qrcode.min.js'))   # QR บนหน้า /line/ (เปิดจากคอม → สแกนไปส่งรูปในไลน์) — qrcode-generator 1.4.4 MIT
+    shutil.copy(os.path.join(SRC, 'vendor/qrcode.min.js'), os.path.join(OUT, 'assets/qrcode.min.js'))
+    os.makedirs(os.path.join(OUT, 'assets/fonts'), exist_ok=True)
+    for f in os.listdir(os.path.join(HERE, 'fonts', 'web')): shutil.copy(os.path.join(HERE, 'fonts', 'web', f), os.path.join(OUT, 'assets/fonts', f))   # ฟอนต์โฮสต์เอง (FONT_CSS)   # QR บนหน้า /line/ (เปิดจากคอม → สแกนไปส่งรูปในไลน์) — qrcode-generator 1.4.4 MIT
     for f in os.listdir(DESIGN):  # page photos live in <repo>/img; design/*.jpg only if re-exported from Claude Design
         if f.endswith('.jpg'): shutil.copy(os.path.join(DESIGN, f), os.path.join(OUT, 'img', f))
     json.dump({k: v[0] for k, v in PAGES.items()}, open(os.path.join(HERE, 'pages.json'), 'w'), ensure_ascii=False)

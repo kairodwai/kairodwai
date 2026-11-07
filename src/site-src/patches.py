@@ -219,8 +219,34 @@ def common(body, full=None):
     return body
 
 
+def first_p(body, full, fn):
+    """แก้ย่อหน้าแรกใต้ h1 (ประโยคที่ AI/Google หยิบไปอ้าง): fn(text) → text ใหม่"""
+    h = body.find('</h1>'); assert h > 0, (full, 'h1')
+    p0 = body.find('<p', h); p1 = body.find('>', p0) + 1; p2 = body.find('</p>', p1)
+    assert 0 < p0 < p1 < p2, (full, 'first p')
+    return body[:p1] + fn(body[p1:p2]) + body[p2:]   # ข้อความใน <p> อาจมี <span> (ห้ามตัดบรรทัด) — fn ต้องจับข้อความให้ตรง
+
+
 def apply(name, body, logic, full=None):
     body = common(body, full)
+    # ย่อหน้าแรกทุกหน้าตอบจบในประโยคเดียว ใคร-ทำอะไร-ที่ไหน-เร็วแค่ไหน (GEO: AI ชอบอ้างประโยคที่ตอบจบในตัว) — ตัวเลขใช้เฉพาะที่ใช้อยู่แล้วบนเว็บ/แอด
+    if name == 'Main':
+        body = first_p(body, full, lambda t: _rep1(t, 'รับซื้อเก๋ง SUV ไฮบริด และรถไฟฟ้า <span style="white-space: nowrap;">ทุกยี่ห้อ</span>',
+            'ขายรถไว รับซื้อรถมือสองถึงบ้านคุณในกรุงเทพฯ ปริมณฑล และหัวเมืองหลัก ทั้งเก๋ง SUV ไฮบริด และรถไฟฟ้า <span style="white-space: nowrap;">ทุกยี่ห้อ</span> ปี 2016 ขึ้นไป ส่งรูป 5 มุมรู้ราคาใน 5 นาที ตรวจรถเสร็จรับเงินทันที', 'main p1'))
+    if name == 'Brand':
+        import brands
+        bn = brands.BY[(full or 'Brand').partition('@')[2] or 'toyota']['name']
+        body = first_p(body, full, lambda t: f'ขายรถไว รับซื้อ {bn} มือสองถึงบ้านคุณ ทั้ง ' + _rep1(t, ' ทีมไปดูรถถึงบ้านคุณ', ' ส่งรูป 5 มุมรู้ราคาใน 5 นาที ทีมไปดูรถถึงบ้าน ตรวจเสร็จรับเงินทันที', 'brand p1'))
+    if name == 'Province':
+        import provinces
+        short = provinces.BY[(full or 'Province').partition('@')[2] or 'chiang-mai']['short']
+        body = first_p(body, full, lambda t: _rep1(t, 'ขายรถใน', 'ขายรถไว รับซื้อรถมือสองถึงบ้านใน', 'province p1').rstrip() + ' ส่งรูป 5 มุมรู้ราคาใน 5 นาที')
+    if name == 'Price':
+        body = first_p(body, full, lambda t: _rep1(t, 'กรอกรุ่น ปี และเลขไมล์', 'ขายรถไวประเมินราคารถมือสองให้ฟรีใน 5 นาที: กรอกรุ่น ปี และเลขไมล์', 'price p1'))
+    if name == 'Finance':
+        body = first_p(body, full, lambda t: _rep1(t, 'รถยังผ่อนอยู่ก็ขายได้ ทีมพาไปปิดยอด', 'รถยังผ่อนอยู่ก็ขายให้ขายรถไวได้ ทีมพาไปปิดยอด', 'finance p1'))
+    if name == 'Docs':
+        body = first_p(body, full, lambda t: _rep1(t, 'เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้', 'ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้', 'docs p1'))
     if name == 'Portfolio':   # หน้าผลงาน: รูปจริง 30 คันจากทีม (7 พ.ย. 69) แบบ static แทนตัวกรองตัวอย่าง
         import portfolio
         head, cards = portfolio.portfolio_sections()
@@ -308,7 +334,7 @@ def apply(name, body, logic, full=None):
         body = body.replace(end_ul, '</ul>\n' + guide + '\n</div></section>')
         for a, b in (('aria-current="page" style="color: #141414;">เอกสารที่ต้องใช้ขายรถ</span>', 'aria-current="page" style="color: #141414;">เอกสารขายรถ · โอนรถ</span>'),
                      ('line-height: 1.2;">เอกสารที่ต้องใช้ขายรถ</h1>', 'line-height: 1.2;"><span style="white-space: nowrap;">เอกสารขายรถ</span><br><span style="white-space: nowrap;">และโอนรถมือสอง</span></h1>'),
-                     ('>เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง</p>', '>ขายรถกับเรา เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง ด้านล่างคือขั้นตอน เอกสาร และค่าธรรมเนียมโอนรถมือสองที่ขนส่ง</p>')):
+                     ('>ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง</p>', '>ขายรถกับขายรถไว เตรียมแค่ 3 อย่าง ที่เหลือทีมจัดการให้ ไม่ต้องไปขนส่งเอง ด้านล่างคือขั้นตอน เอกสาร และค่าธรรมเนียมโอนรถมือสองที่ขนส่ง</p>')):
             assert body.count(a) == 1, ('docs', a[:40]); body = body.replace(a, b)
     if name == 'Finance':   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "ขายดาวน์รถ" ~390 + "ปิดไฟแนนซ์รถ" ~210 -> เพิ่ม 2 ส่วน อ้างอิงประกาศ สคบ.
         SEC = '<section style="{bg}"><div style="max-width: 1120px; margin: 0 auto; padding: 56px 20px; display: flex; flex-direction: column; gap: 24px;"><h2 style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(26px, 3.5vw, 32px); line-height: 1.3; ">{h}</h2>{body}</div></section>'
