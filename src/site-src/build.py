@@ -49,7 +49,7 @@ META_PIXEL = '4292793881011346'   # Meta Pixel "ขายรถไว เว็�
 META_PX = ("<script>!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');"
            f"window.KR_PX='{META_PIXEL}';fbq('init','{META_PIXEL}');fbq('track','PageView');</script>")
 GTAG = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={AW_ID}"></script>'
-        f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}');window.KR_AW='{AW_PHOTOS_DONE}';window.KR_AW_LEAD='{AW_LEAD}';</script>"
+        f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}',{{allow_enhanced_conversions:true}});window.KR_AW='{AW_PHOTOS_DONE}';window.KR_AW_LEAD='{AW_LEAD}';</script>"
         + META_PX)
 
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
