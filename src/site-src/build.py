@@ -272,7 +272,8 @@ def json_ld(name, pre_html):
     path, title, desc = PAGES[name]
     url = DOMAIN + path
     org = {'@type': 'Organization', '@id': DOMAIN + '/#org', 'name': 'ขายรถไว', 'alternateName': 'Kairodwai', 'url': DOMAIN + '/',
-           'logo': DOMAIN + '/icon-512.png', 'areaServed': {'@type': 'Country', 'name': 'Thailand'}}
+           'logo': DOMAIN + '/icon-512.png', 'areaServed': {'@type': 'Country', 'name': 'Thailand'},
+           'telephone': '+66914922662', 'sameAs': ['https://www.facebook.com/buycar24hr', 'https://line.me/R/ti/p/@kairodwai']}   # โปรไฟล์ทางการของแบรนด์ (Google/AI เชื่อมว่าเป็นธุรกิจเดียวกัน)
     g = [org, {'@type': 'WebSite', '@id': DOMAIN + '/#site', 'url': DOMAIN + '/', 'name': 'ขายรถไว', 'inLanguage': 'th', 'publisher': {'@id': DOMAIN + '/#org'}},
          {'@type': 'WebPage', '@id': url + '#page', 'url': url, 'name': title, 'description': desc, 'inLanguage': 'th', 'isPartOf': {'@id': DOMAIN + '/#site'}}]
     base = name.split('@')[0]
