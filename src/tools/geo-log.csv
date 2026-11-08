@@ -1,0 +1,19 @@
+date,engine,question,mentioned,position,cited_url,competitors
+2026-11-08,chatgpt,รับซื้อรถมือสองถึงบ้าน กรุงเทพ เจ้าไหนดี,no,,,Master Certified Used Car; Autovilla; Just Car; Carsome
+2026-11-08,chatgpt,รับซื้อรถ เชียงใหม่,no,,,ครูหนึ่งรถสวย (chiangmaiusedcar.com); KRK Autotrade; AK Car; Shalee Car (ชาลีคาร์)
+2026-11-08,chatgpt,ขายรถติดไฟแนนซ์ ทำยังไง ที่ไหนรับซื้อ,no,,,Carsome; Motorist; Just Car; 19ศรีปกรณ์; Carsbycash; ทูพีเอ็ม ยูสคาร์; เต็นท์9
+2026-11-08,chatgpt,เล่มทะเบียนรถหาย ขายรถได้ไหม,no,,,none (cited DLT/gov only)
+2026-11-08,chatgpt,เจ้าของรถเสียชีวิต ขายรถได้ไหม,no,,,none (cited info.go.th only)
+2026-11-08,chatgpt,ประเมินราคารถมือสองฟรี ออนไลน์,no,,,One2car; Motorist; ttb Bluebook; Zigwheels
+2026-11-08,perplexity,รับซื้อรถมือสองถึงบ้าน กรุงเทพ เจ้าไหนดี,no,,,Thai Lover Cars; Supreme Used Car; Perfect Car; Amorn Warranty; Kittikun Car Center; Chobrod; Motorist
+2026-11-08,perplexity,รับซื้อรถ เชียงใหม่,no,,,KRK Autotrade; ครูหนึ่งรถสวย; Just Car; CN รับซื้อรถเชียงใหม่; J.J. Auto Shop
+2026-11-08,perplexity,ขายรถติดไฟแนนซ์ ทำยังไง ที่ไหนรับซื้อ,no,,,Sawad; Just Car; Car2Gold; Tidlor; Talata; Sanook (cited)
+2026-11-08,perplexity,เล่มทะเบียนรถหาย ขายรถได้ไหม,no,,,Talata; KTC; Car-Spot; Just Car; Autospinn (cited)
+2026-11-08,perplexity,เจ้าของรถเสียชีวิต ขายรถได้ไหม,no,,,HeyGoody; OIC infocenter; Chaiyaphum DLT (cited; no buyers named)
+2026-11-08,perplexity,ประเมินราคารถมือสองฟรี ออนไลน์,no,,,ttb bluebook; Motorist; Krungsri Market; One2Car; Taladrod; Roddonjai/Carsome; Talata; Tipinsure
+2026-11-08,gemini,รับซื้อรถมือสองถึงบ้าน กรุงเทพ เจ้าไหนดี,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
+2026-11-08,gemini,รับซื้อรถ เชียงใหม่,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
+2026-11-08,gemini,ขายรถติดไฟแนนซ์ ทำยังไง ที่ไหนรับซื้อ,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
+2026-11-08,gemini,เล่มทะเบียนรถหาย ขายรถได้ไหม,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
+2026-11-08,gemini,เจ้าของรถเสียชีวิต ขายรถได้ไหม,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
+2026-11-08,gemini,ประเมินราคารถมือสองฟรี ออนไลน์,skipped,,,asks to accept Workspace (podm.club) terms - not accepted
