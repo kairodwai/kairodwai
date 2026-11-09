@@ -276,7 +276,7 @@ def apply(name, body, logic, full=None):
     if name == 'Main':   # ลิงก์ภายในไปหน้าจังหวัด (SEO ขั้น 2): ให้ Google เจอทุกหน้าจังหวัดจากหน้าแรก
         import provinces
         chip = 'height: 44px; padding: 0 16px; box-sizing: border-box; border-radius: 22px; background: #FFFFFF; border: 1px solid #DEDBD3; display: inline-flex; align-items: center; font-size: 15px; white-space: nowrap; text-decoration: none; color: #141414;'
-        areas = ('<section aria-labelledby="area-h" style="max-width: 1120px; margin: 0 auto; padding: 0 20px; display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center;">'
+        areas = ('<section aria-labelledby="area-h" style="max-width: 1120px; margin: 0 auto; padding: 64px 20px 0; display: flex; flex-direction: column; gap: 20px; align-items: center; text-align: center;">'
                  '<h2 id="area-h" style="margin: 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: clamp(28px, 3.5vw, 36px);">พื้นที่ให้บริการ</h2>'
                  '<p style="margin: 0; font-size: 16px; line-height: 1.6; color: #3D3B37;">ทีมไปดูรถถึงบ้านในกรุงเทพฯ ปริมณฑล และหัวเมืองหลัก</p>'
                  '<div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">'
