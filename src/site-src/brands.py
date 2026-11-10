@@ -33,6 +33,23 @@ B = [
     dict(slug='hyundai', key='Hyundai', name='Hyundai', th='ฮุนได',
          intro='Staria, H-1, Grand Starex, Creta, Stargazer, Ioniq 5 และ Hyundai รุ่นอื่นๆ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
          q=('Hyundai H-1 หรือ Staria รับไหม', 'รับ H-1, Grand Starex และ Staria ที่จดทะเบียนเป็นรถส่วนบุคคล (ป้ายขาว) ไม่รับรถตู้ป้ายเหลืองหรือรถสาธารณะ')),
+    dict(slug='audi', key='Audi', name='Audi', th='อาวดี้',
+         intro='A3, A4, A5, A6, Q3, Q5, Q7 และ Audi รุ่นอื่นๆ รวมรุ่นไฟฟ้า e-tron GT และ Q8 e-tron รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         more=('Audi ตระกูล S และ RS ก็รับ', 'รุ่นสมรรถนะสูงอย่าง S3 Sportback, RS 3 Sportback, RS 4 Avant, RS 6 Avant, RS 7 Sportback, RS Q3 Sportback, RS Q8 และ RS e-tron GT อยู่ในรายการรุ่นย่อยของเรา เลือกได้ในฟอร์มด้านบน'),
+         q=('Audi ไฟฟ้า e-tron รับไหม', 'รับ ทั้ง e-tron GT และ Q8 e-tron รวมรุ่นปลั๊กอินไฮบริด TFSI e ตามรุ่นในรายการด้านบน')),
+    dict(slug='byd', key='BYD', name='BYD', th='บีวายดี',
+         intro='Atto 3, Dolphin, Seal, Sealion 6 DM-i, Sealion 7, M6 และ BYD รุ่นอื่นๆ ทั้งรถไฟฟ้าและปลั๊กอินไฮบริด DM-i รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('BYD ปลั๊กอินไฮบริด DM-i รับไหม', 'รับ ทั้ง Seal 5 DM-i, Sealion 5 DM-i และ Sealion 6 DM-i รวมรถไฟฟ้าทุกรุ่นในรายการด้านบน')),
+    dict(slug='lexus', key='Lexus', name='Lexus', th='เล็กซัส',
+         intro='ES, NX, RX, UX, LM, LX, IS และ Lexus รุ่นอื่นๆ รวมรุ่นไฮบริดและรถไฟฟ้า RZ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         more=('Lexus ไฮบริดรุ่นที่ลงท้ายด้วย h', 'ES 300h, IS 300h, GS 300h, NX 300h, RX 350h, RX 450h, UX 250h, LS 500h, LM 300h และ LM 350h อยู่ในรายการของเรา ราคาคิดจากรุ่นย่อย ปี ไมล์ และสภาพแบตเตอรี่กับตัวรถจริง'),
+         q=('Lexus LM รับไหม', 'รับ LM ที่จดทะเบียนเป็นรถส่วนบุคคล (ป้ายขาว) ตามปีในรายการด้านบน ไม่รับรถป้ายเหลืองหรือรถเช่า')),
+    dict(slug='volvo', key='Volvo', name='Volvo', th='วอลโว่',
+         intro='XC40, XC60, XC90, S60, S90, EX30 และ Volvo รุ่นอื่นๆ รวมรุ่นปลั๊กอินไฮบริด T8 และรถไฟฟ้า รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('Volvo T8 ปลั๊กอินไฮบริด รับไหม', 'รับ ทั้งรุ่น T8 Plug-in Hybrid และรุ่นไฟฟ้าอย่าง EX30, EX40 และ C40 ตามรุ่นในรายการด้านบน')),
+    dict(slug='mitsubishi', key='Mitsubishi', name='Mitsubishi', th='มิตซูบิชิ',
+         intro='Pajero Sport, Xpander, Xforce, Outlander, Attrage, Mirage และ Mitsubishi รุ่นอื่นๆ รับทั้งรถติดไฟแนนซ์ ทีมไปดูรถถึงบ้านคุณ',
+         q=('Mitsubishi Triton รับไหม', 'ไม่รับ Triton และรถกระบะทุกรุ่น ส่วน Pajero Sport ที่เป็นรถอเนกประสงค์ 7 ที่นั่ง รับตามปีในรายการด้านบน')),
 ]
 BY = {d['slug']: d for d in B}
 BY_KEY = {d['key']: d for d in B}
@@ -91,6 +108,17 @@ def _facts_block(body, d):
     H3 = '<h3 style="margin: 8px 0 0; font-family: \'Kanit\', sans-serif; font-weight: 600; font-size: 20px; line-height: 1.35;">{}</h3>'
     P = '<p style="margin: 0; font-size: 16px; line-height: 1.7; color: #3D3B37; max-width: 760px;">{}</p>'
     add = P.format(f'ในรายการของเรามี {n} ทั้งหมด {ntrim} รุ่นย่อย ตั้งแต่ปี 2016 เลือกรุ่นย่อยได้ในฟอร์มด้านบน ราคาที่ได้คิดจากรุ่นย่อยจริง ไม่ใช่ราคากลางของรุ่น')
+    cars = _cars()[d['key']]   # สรุปเฉพาะยี่ห้อจากข้อมูลรุ่นจริง (กันหน้าซ้ำแม่แบบ, 11 พ.ย. 69)
+    cnt = sorted(((len([t for t in v if t]), m) for m, v in cars.items()), reverse=True)
+    top = [f'{m} ({c} รุ่นย่อย)' for c, m in cnt[:3] if c]
+    newest = sorted(m for m, v in cars.items() if min(y for ys in v.values() for y in ys) >= 2024)
+    yrs = [y for v in cars.values() for ys in v.values() for y in ys]
+    txt = f'{n} ในรายการของเรามีตั้งแต่ปี {max(2016, min(yrs))} ถึงปี {max(yrs)}'
+    if top: txt += f' รุ่นที่มีรุ่นย่อยให้เลือกมากที่สุดคือ {", ".join(top)}'
+    if newest: txt += f' ส่วนรุ่นที่เพิ่งเข้ามาขายตั้งแต่ปี 2024 ได้แก่ {", ".join(newest)}'
+    add += H3.format(f'{n} รุ่นไหนมีรุ่นย่อยเยอะ') + P.format(txt + ' เลือกให้ตรงรุ่นย่อยในฟอร์ม ราคาที่ประเมินจะใกล้ความจริงที่สุด')
+    if d.get('more'):
+        add += H3.format(d['more'][0]) + P.format(d['more'][1])
     if green:
         add += H3.format(f'{n} ไฮบริดและไฟฟ้าที่รับซื้อ') + P.format(', '.join(green))
     if diesel:

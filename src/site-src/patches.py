@@ -302,6 +302,7 @@ def apply(name, body, logic, full=None):
         lk = lambda nm, sl: f'<a href="/{sl}/" style="color: inherit; text-decoration: underline; text-underline-offset: 3px;">{nm}</a>'
         for d in brands.B:
             b_old = f', {d["key"]}, '
+            if d['slug'] in ('audi', 'byd', 'lexus', 'volvo', 'mitsubishi') and body.count(b_old) != 1: continue   # ยี่ห้อที่เพิ่ม 11 พ.ย. 69 อาจไม่อยู่ในรายชื่อย่อหน้านี้
             assert body.count(b_old) == 1, ('brand list', d['key'])
             body = body.replace(b_old, ', ' + lk(d['key'], d['slug']) + ', ')
     if name == 'Docs' and full in (None, 'Docs'):   # SEO ขั้น 2 (6 พ.ย. 69): คนค้น "โอนรถ" ~3,600/เดือน -> ขยายเป็นคู่มือโอนรถมือสอง อ้างอิงกรมการขนส่งทางบก
