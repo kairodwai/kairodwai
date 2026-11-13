@@ -66,7 +66,8 @@
     var code = logicEl ? logicEl.textContent : 'class Component extends DCLogic { renderVals() { return {}; } }';
     Comp = new Function('DCLogic', code + '\n;return Component;')(window.DCLogic);
   } catch (e) { console.error(e); return; }
-  root.textContent = '';
-  P.render(h(Comp, {}), root);
+  // หน้า prerender แล้ว (13 พ.ย. 69): hydrate = เกาะ DOM เดิม ไม่ลบทิ้งแล้ววาดใหม่ → ตัวหนังสือ/รูปจอแรกไม่ถูกวาดซ้ำ (LCP ไม่เลื่อนไปรอ JS)
+  if (root.firstChild) P.hydrate(h(Comp, {}), root);
+  else P.render(h(Comp, {}), root);
   document.documentElement.classList.add('dc-ready');
 })();

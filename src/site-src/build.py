@@ -56,7 +56,8 @@ GTAG = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={AW_ID}
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
 
 # รูปประกอบหน้าเว็บ: jpg ต้นฉบับอยู่ <repo>/img → build ทำ .webp (เบากว่า ~3 เท่า ภาพเท่าเดิม) + ตัวย่อ 800px สำหรับมือถือ แล้วใส่ srcset/lazy ให้ทุก <img>
-IMG_SIZES = {}                                            # hash → ความกว้างต้นฉบับ (เติมตอน make_webp)
+IMG_SIZES = {}
+HERO_PRELOAD = ''                                         # <link preload> ของรูป hero หน้าปัจจุบัน (ตั้งใน img_attrs, ใช้ใน page_html)                                            # hash → ความกว้างต้นฉบับ (เติมตอน make_webp)
 def make_webp():
     try: from PIL import Image
     except ImportError: print('no PIL: skip webp'); return
@@ -88,7 +89,14 @@ def img_attrs(attrs):
                     attrs.append({'n': 'sizes', 'v': '(max-width: 760px) 100vw, 600px'})
     src = next((a.get('v', '') for a in attrs if a['n'] == 'src'), '')
     attrs.append({'n': 'decoding', 'v': 'async'})
-    if 'hero' in cls: attrs.append({'n': 'fetchpriority', 'v': 'high'})   # รูปแรกบนจอ = LCP โหลดก่อน
+    if 'hero' in cls:
+        # รูป hero ซ่อนบนมือถือ (<720px) → lazy = มือถือไม่โหลดเลย (เดิมโหลด 53KB ความสำคัญสูง แย่งแบนด์วิดท์กับฟอนต์/ตัวหนังสือจอแรก)
+        # จอคอม (โชว์รูป) ได้ preload ใน <head> แทน (HERO_PRELOAD, media min-width:720px) → ยังโหลดเร็วเหมือนเดิม
+        global HERO_PRELOAD
+        ss = next((a['v'] for a in attrs if a['n'] == 'srcset'), '')
+        HERO_PRELOAD = ('<link rel="preload" as="image" fetchpriority="high" media="(min-width: 720px)" '
+                        + (f'imagesrcset="{ss}" imagesizes="(max-width: 760px) 100vw, 600px" ' if ss else '') + f'href="{src}">')
+        attrs.append({'n': 'loading', 'v': 'lazy'})
     elif 'logo' not in src: attrs.append({'n': 'loading', 'v': 'lazy'})  # รูปอื่นโหลดเมื่อเลื่อนถึง (โลโก้บนหัวไม่ lazy)
 
 
@@ -245,7 +253,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon.png">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="manifest" href="/manifest.webmanifest">
-{FONT_PRELOAD}
+{FONT_PRELOAD}{HERO_PRELOAD}
 {helmet.strip()}
 <style>{FONT_CSS}{SHEET_CSS}</style>
 {ld}{GTAG}
@@ -341,6 +349,7 @@ def main():
         if base == 'Docs' and '@' in name:
             body = guides.transform(body, name.split('@')[1])
         body, logic = patches.apply(base, body, logic, name)
+        global HERO_PRELOAD; HERO_PRELOAD = ''
         c = Compiler(); c.feed(body); c.close()
         strip_ws(c.root)
         d = os.path.join(OUT, PAGES[name][0].strip('/'))
