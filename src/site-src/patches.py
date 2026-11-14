@@ -160,7 +160,7 @@ def common(body, full=None):
                 + row('พื้นที่ให้บริการ', [L(f'/{d["slug"]}/', d['h1']) for d in provinces.HUBS] + ([L('/#area-h', 'ดูทุกจังหวัด')] if len(provinces.P) > len(provinces.HUBS) else []))
                 + row('รับซื้อตามยี่ห้อ', [L(f'/{d["slug"]}/', d['key']) for d in brands.B]) + '</div>\n')
         body = body.replace('</footer>', foot + '</footer>', 1).replace('padding: 48px 20px 56px;', 'padding: 48px 20px 32px;', 1)
-    body = body.replace('<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', '<a href="Price.dc.html" style="color: #D6D3CC;">ประเมินราคารถมือสองฟรี</a>\n<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', 1)   # ลิงก์ภายในไปหน้าประเมินราคา (ทุกหน้า)
+    body = body.replace('<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', '<a href="Price.dc.html" style="color: #D6D3CC;">ประเมินราคารถ ออนไลน์ฟรี</a>\n<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', 1)   # ลิงก์ภายในไปหน้าประเมินราคา (ทุกหน้า)
     body = body.replace('รูปรถ 4 มุม เลขไมล์ หน้าเล่มทะเบียน ทีมแจ้งช่วงราคาภายใน [กี่ชั่วโมง]', 'ถ่ายรูปรถ 5 มุมผ่านเว็บ ทีมโทรกลับพร้อมราคาภายใน 5 นาที (8:00–20:00)')
     body = re.sub(r'<span[^>]*>ตัวอย่าง · รอรูปจริง</span>', '', body)
     body = body.replace('ส่งรูปทางไลน์ได้ 24 ชม.', 'ส่งข้อมูลผ่านไลน์ได้ 24 ชม.')
@@ -243,7 +243,16 @@ def apply(name, body, logic, full=None):
         short = provinces.BY[(full or 'Province').partition('@')[2] or 'chiang-mai']['short']
         body = first_p(body, full, lambda t: _rep1(t, 'ขายรถใน', 'ขายรถไว รับซื้อรถมือสองถึงบ้านใน', 'province p1').rstrip() + ' ส่งรูป 5 มุมรู้ราคาใน 5 นาที')
     if name == 'Price':
-        body = first_p(body, full, lambda t: _rep1(t, 'กรอกรุ่น ปี และเลขไมล์', 'ขายรถไวประเมินราคารถมือสองให้ฟรีใน 5 นาที: กรอกรุ่น ปี และเลขไมล์', 'price p1'))
+        body = first_p(body, full, lambda t: _rep1(t, 'กรอกรุ่น ปี และเลขไมล์', 'ขายรถไวประเมินราคารถมือสองออนไลน์ให้ฟรีใน 5 นาที: กรอกรุ่น ปี และเลขไมล์', 'price p1'))
+        # SEO 14 พ.ย. 69 (Moss "มีไรต้องแก้ทำเลย"): คำที่คนค้นจริงใน Search Console = ประเมินราคารถ / ประเมินราคารถ ออนไลน์ / เช็คราคาประเมินรถยนต์
+        body = _rep1(body, '<span style="white-space: nowrap;">ประเมินราคา</span><br><span style="white-space: nowrap;">รถมือสองฟรี</span>',
+                     '<span style="white-space: nowrap;">ประเมินราคารถ</span><br><span style="white-space: nowrap;">ออนไลน์ฟรี</span>', 'price h1')
+        _faq_end = '<p style="margin: 0; padding: 0 0 20px; font-size: 16px; line-height: 1.7; color: #3D3B37;">ส่งรูปครบ ทีมแจ้งราคาภายใน 5 นาที ในเวลา 8:00–20:00</p>\n</details>'
+        _a = body.index(_faq_end); _s = body.rindex('<details', 0, _a); _blk = body[_s:_a + len(_faq_end)]
+        _new = (_blk.replace('<span>ประเมินราคาใช้เวลานานไหม</span>', '<span>เช็คราคาประเมินรถยนต์ออนไลน์ กับโปรแกรมคำนวณราคา ต่างกันยังไง</span>')
+                    .replace('ส่งรูปครบ ทีมแจ้งราคาภายใน 5 นาที ในเวลา 8:00–20:00', 'โปรแกรมคำนวณให้ตัวเลขคร่าวๆ จากรุ่นและปี แต่ไม่เห็นสภาพรถ ที่ขายรถไว ทีมรับซื้อดูจากรูปรถคุณจริง ราคาที่แจ้งจึงเป็นราคาที่เราซื้อได้จริง และนัดไปดูรถถึงบ้านได้เลย'))
+        assert _new != _blk and _new.count('โปรแกรมคำนวณ') == 2, 'price faq'
+        body = body[:_a + len(_faq_end)] + '\n' + _new + body[_a + len(_faq_end):]
     if name == 'Finance':
         body = first_p(body, full, lambda t: _rep1(t, 'รถยังผ่อนอยู่ก็ขายได้ ทีมพาไปปิดยอด', 'รถยังผ่อนอยู่ก็ขายให้ขายรถไวได้ ทีมพาไปปิดยอด', 'finance p1'))
     if name == 'Docs' and full in (None, 'Docs'):
