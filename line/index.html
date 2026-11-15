@@ -356,8 +356,11 @@ const tokenReady = (async () => {
   if (!liff.isLoggedIn()) { liff.login({ redirectUri: location.href }); await new Promise(() => {}); }
   const idt = liff.getIDToken();
   if (!idt) throw new Error('noid');
-  const r = await post({ type:'start', idToken: idt });
+  let r = await post({ type:'start2', idToken: idt });
+  if (r && !r.ok && !r.err) r = await post({ type:'start', idToken: idt });   // หลังบ้านรุ่นเก่ายังไม่รู้จัก start2
   if (!r || !r.ok) throw new Error('start ' + (r ? r.err + ' ' + (r.why || '') : 'null'));
+  // 15 พ.ย. 69: กดเมนู "ส่งรูปรถ" โดยยังไม่เคยกรอกข้อมูลรถ → พาไปกรอกฟอร์มในไลน์ก่อน (ทีมได้ข้อมูลรถครบ + นับเป็นลีด) แล้วฟอร์มพากลับมาหน้านี้เอง
+  if (r.form && LIFF_WEB_ID.indexOf('__') < 0) { leaving = true; show('loadView'); location.replace('https://liff.line.me/' + LIFF_WEB_ID + '?via=liff&utm_source=line_menu&utm_medium=richmenu'); await new Promise(() => {}); }
   return (token = r.t);
 })();
 tokenReady.catch(e => { $('badCode').textContent = String((e && e.message) || e).slice(0, 160); show('badView'); });
