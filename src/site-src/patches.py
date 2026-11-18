@@ -160,6 +160,7 @@ def common(body, full=None):
                 + row('พื้นที่ให้บริการ', [L(f'/{d["slug"]}/', d['h1']) for d in provinces.HUBS] + ([L('/#area-h', 'ดูทุกจังหวัด')] if len(provinces.P) > len(provinces.HUBS) else []))
                 + row('รับซื้อตามยี่ห้อ', [L(f'/{d["slug"]}/', d['key']) for d in brands.B]) + '</div>\n')
         body = body.replace('</footer>', foot + '</footer>', 1).replace('padding: 48px 20px 56px;', 'padding: 48px 20px 32px;', 1)
+    body = body.replace('<a href="Portfolio.dc.html" style="color: #D6D3CC;">ผลงานรับซื้อ</a>', '<a href="Main.dc.html" style="color: #D6D3CC;">รับซื้อรถมือสอง ถึงบ้าน</a>\n<a href="Portfolio.dc.html" style="color: #D6D3CC;">ผลงานรับซื้อ</a>', 1)   # SEO 18 พ.ย. 69: ลิงก์ภายในทุกหน้ากลับหน้าแรกด้วยคำ "รับซื้อรถมือสอง"
     body = body.replace('<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', '<a href="Price.dc.html" style="color: #D6D3CC;">ประเมินราคารถ ออนไลน์ฟรี</a>\n<a href="Finance.dc.html" style="color: #D6D3CC;">คู่มือขายรถติดไฟแนนซ์</a>', 1)   # ลิงก์ภายในไปหน้าประเมินราคา (ทุกหน้า)
     body = body.replace('รูปรถ 4 มุม เลขไมล์ หน้าเล่มทะเบียน ทีมแจ้งช่วงราคาภายใน [กี่ชั่วโมง]', 'ถ่ายรูปรถ 5 มุมผ่านเว็บ ทีมโทรกลับพร้อมราคาภายใน 5 นาที (8:00–20:00)')
     body = re.sub(r'<span[^>]*>ตัวอย่าง · รอรูปจริง</span>', '', body)
