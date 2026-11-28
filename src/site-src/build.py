@@ -53,6 +53,17 @@ GTAG = (f'<script async src="https://www.googletagmanager.com/gtag/js?id={AW_ID}
         f"<script>window.dataLayer=window.dataLayer||[];function gtag(){{dataLayer.push(arguments)}}gtag('js',new Date());gtag('config','{AW_ID}',{{allow_enhanced_conversions:true}});window.KR_AW='{AW_PHOTOS_DONE}';window.KR_AW_LEAD='{AW_LEAD}';</script>"
         + META_PX)
 
+# หน้าเนื้อหา (ไม่ใช่ /line/ /go/): โหลด gtag + Meta Pixel หลังคนเริ่มใช้งานหน้า (แตะ/เลื่อน/พิมพ์) หรือครบ 5 วิหลังหน้าโหลด
+# คำสั่ง gtag()/fbq() ที่เรียกก่อนหน้านั้นเข้าคิวไว้ ส่งครบเมื่อสคริปต์โหลด (SEO/ความเร็ว 28 พ.ย. 69: PageSpeed มือถือ 85 เพราะ gtag+fbevents บล็อก 250ms)
+GTAG_LAZY = ("<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());"
+             f"gtag('config','{AW_ID}',{{allow_enhanced_conversions:true}});window.KR_AW='{AW_PHOTOS_DONE}';window.KR_AW_LEAD='{AW_LEAD}';"
+             "!function(f,b){if(f.fbq)return;var n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[]}(window,document);"
+             f"window.KR_PX='{META_PIXEL}';fbq('init','{META_PIXEL}');fbq('track','PageView');"
+             "(function(){var done=0;function go(){if(done)return;done=1;['scroll','touchstart','pointerdown','keydown'].forEach(function(e){removeEventListener(e,go,true)});"
+             f"[\"https://www.googletagmanager.com/gtag/js?id={AW_ID}\",'https://connect.facebook.net/en_US/fbevents.js'].forEach(function(u){{var t=document.createElement('script');t.async=1;t.src=u;document.head.appendChild(t)}})}}"
+             "['scroll','touchstart','pointerdown','keydown'].forEach(function(e){addEventListener(e,go,{capture:true,passive:true})});"
+             "addEventListener('load',function(){setTimeout(go,5000)})})();</script>")
+
 IMG_MAP = json.load(open(os.path.join(HERE, 'img_map.json'))) if os.path.exists(os.path.join(HERE, 'img_map.json')) else {}
 
 # รูปประกอบหน้าเว็บ: jpg ต้นฉบับอยู่ <repo>/img → build ทำ .webp (เบากว่า ~3 เท่า ภาพเท่าเดิม) + ตัวย่อ 800px สำหรับมือถือ แล้วใส่ srcset/lazy ให้ทุก <img>
@@ -256,7 +267,7 @@ def page_html(name, helmet, tree, logic, prerender='', ld=''):
 {FONT_PRELOAD}{HERO_PRELOAD}
 {helmet.strip()}
 <style>{FONT_CSS}{SHEET_CSS}</style>
-{ld}{GTAG}
+{ld}{GTAG_LAZY}
 <script>window.KR_LIFF_ID='{LIFF_WEB_ID}';</script>
 <script src="/assets/preact.min.js" defer></script>
 <script src="/assets/site.js" defer></script>
